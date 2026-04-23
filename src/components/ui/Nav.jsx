@@ -48,12 +48,12 @@ export default function Nav({ tab, setTab }) {
             <div style={{
               fontFamily: FONT_SANS, fontSize: isMobile ? 14 : 17, fontWeight: 700,
               color: T.ink, letterSpacing: "-0.02em", lineHeight: 1,
-            }}>Baobab Capital</div>
+            }}>Omaad Capital</div>
             {!isMobile && (
               <div style={{
                 fontFamily: FONT_MONO, fontSize: 10, color: T.inkMuted,
                 marginTop: 3, letterSpacing: "0.05em",
-              }}>BRVM Intelligence · v2026.1</div>
+              }}>Omaad Intelligence · v2026.1</div>
             )}
           </div>
         </div>

@@ -1,8 +1,8 @@
 {
-  "name": "baobab-capital-brvm",
+  "name": "omaad-capital",
   "private": true,
   "version": "1.0.0",
-  "description": "Baobab Capital — BRVM Investment Intelligence Platform",
+  "description": "Omaad Capital — BRVM Investment Intelligence Platform",
   "type": "module",
   "scripts": {
     "dev": "vite",

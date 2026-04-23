@@ -66,7 +66,7 @@ export default function App() {
         gap: 12,
       }}>
         <div style={{ fontFamily: FONT_SANS, fontSize: 12, color: T.inkMuted }}>
-          <strong style={{ color: T.ink }}>Baobab Capital</strong> · BRVM Intelligence Platform
+          <strong style={{ color: T.ink }}>Omaad Capital</strong> · Omaad Intelligence Platform
         </div>
         <div style={{ fontFamily: FONT_MONO, fontSize: 11, color: T.inkDim }}>
           Sources : BOC BRVM · SikaFinance · FluxBourse · UMOA-Titres · avril 2026

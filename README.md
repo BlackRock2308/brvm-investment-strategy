@@ -1,4 +1,4 @@
-# Baobab Capital — BRVM Intelligence Platform
+# Omaad Capital — Omaad Intelligence Platform
 
 Plateforme d'investissement interactive pour la BRVM (Bourse Régionale des Valeurs Mobilières).  
 Simulateurs DCA, dividendes, allocation de portefeuille et stratégie sur 20 ans.
