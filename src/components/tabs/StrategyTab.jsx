@@ -1,10 +1,10 @@
 import React from "react";
 import { Clock, Compass, Gauge } from "lucide-react";
 import { T, FONT_SANS, FONT_MONO } from "../../theme";
+import useResponsive from "../../hooks/useResponsive";
 
 import PageHeader from "../ui/PageHeader";
 import Card from "../ui/Card";
-import Pill from "../ui/Pill";
 
 const calendar = [
   { m: "M1", month: "mai",   main: "SNTS", units: "1 × 29 000", second: "CIEC", second2: "6 × 3 400", logic: "Initier cœur télécoms + utility" },
@@ -37,62 +37,61 @@ const caps = [
 ];
 
 export default function StrategyTab() {
+  const { isMobile } = useResponsive();
+
   return (
     <div>
       <PageHeader
         eyebrow="Playbook · bloc 2"
         title="Calendrier d'exécution & règles tactiques."
-        description="Plan opérationnel pour DCA 50k FCFA/mois la première année, aligné sur le calendrier des détachements de dividendes BRVM, les règles de priorisation et les plafonds de rééquilibrage."
+        description="Plan opérationnel pour DCA 50k FCFA/mois la première année, aligné sur le calendrier des détachements de dividendes BRVM."
       />
 
       <Card title="Calendrier 12 mois" subtitle="DCA 50k FCFA · scénario conservateur" icon={Clock} style={{ marginBottom: 16 }}>
-        <div style={{ overflowX: "auto" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontFamily: FONT_SANS, fontSize: 12 }}>
+        <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
+          <table style={{ width: "100%", minWidth: 700, borderCollapse: "collapse", fontFamily: FONT_SANS, fontSize: 12 }}>
             <thead>
               <tr>
-                {["Mois", "Principal", "Units × Prix", "Complément.", "Units × Prix", "Logique"].map((h, i) => (
+                {["Mois", "Principal", "Units × Prix", "Compl.", "Units × Prix", "Logique"].map((h, i) => (
                   <th key={i} style={{
-                    padding: "10px 12px", textAlign: "left",
+                    padding: "10px 10px", textAlign: "left",
                     fontFamily: FONT_SANS, fontSize: 11, color: T.inkMuted, fontWeight: 600,
                     letterSpacing: "0.02em", textTransform: "uppercase",
-                    borderBottom: `1px solid ${T.border}`,
+                    borderBottom: `1px solid ${T.border}`, whiteSpace: "nowrap",
                   }}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {calendar.map((r, i) => (
-                <tr key={i} style={{ transition: "background 0.15s" }}
-                  onMouseEnter={e => e.currentTarget.style.background = T.bgSubtle}
-                  onMouseLeave={e => e.currentTarget.style.background = "transparent"}
-                >
-                  <td style={{ padding: "12px 12px", borderBottom: `1px solid ${T.borderSoft}` }}>
+                <tr key={i}>
+                  <td style={{ padding: "10px 10px", borderBottom: `1px solid ${T.borderSoft}` }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                       <div style={{
                         width: 28, height: 28, borderRadius: 8,
                         background: T.bgDark, color: T.inkInv,
                         display: "grid", placeItems: "center",
-                        fontFamily: FONT_MONO, fontSize: 11, fontWeight: 700,
+                        fontFamily: FONT_MONO, fontSize: 11, fontWeight: 700, flexShrink: 0,
                       }}>{r.m}</div>
-                      <span style={{ fontFamily: FONT_SANS, fontSize: 12, color: T.inkMuted, fontWeight: 500 }}>{r.month}</span>
+                      <span style={{ fontFamily: FONT_SANS, fontSize: 12, color: T.inkMuted, fontWeight: 500, whiteSpace: "nowrap" }}>{r.month}</span>
                     </div>
                   </td>
-                  <td style={{ padding: "12px 12px", borderBottom: `1px solid ${T.borderSoft}` }}>
+                  <td style={{ padding: "10px 10px", borderBottom: `1px solid ${T.borderSoft}` }}>
                     <span style={{
                       fontFamily: FONT_MONO, fontSize: 12, color: T.blue, fontWeight: 700,
-                      background: T.blueSoft, padding: "3px 8px", borderRadius: 6,
+                      background: T.blueSoft, padding: "3px 8px", borderRadius: 6, whiteSpace: "nowrap",
                     }}>{r.main}</span>
                   </td>
-                  <td style={{ padding: "12px 12px", fontFamily: FONT_MONO, fontSize: 11, color: T.inkSoft, borderBottom: `1px solid ${T.borderSoft}` }}>{r.units}</td>
-                  <td style={{ padding: "12px 12px", borderBottom: `1px solid ${T.borderSoft}` }}>
+                  <td style={{ padding: "10px 10px", fontFamily: FONT_MONO, fontSize: 11, color: T.inkSoft, borderBottom: `1px solid ${T.borderSoft}`, whiteSpace: "nowrap" }}>{r.units}</td>
+                  <td style={{ padding: "10px 10px", borderBottom: `1px solid ${T.borderSoft}` }}>
                     {r.second === "—" ? (
                       <span style={{ color: T.inkDim }}>—</span>
                     ) : (
-                      <span style={{ fontFamily: FONT_MONO, fontSize: 12, color: T.chart3, fontWeight: 700, background: "#EDE9FE", padding: "3px 8px", borderRadius: 6 }}>{r.second}</span>
+                      <span style={{ fontFamily: FONT_MONO, fontSize: 12, color: T.chart3, fontWeight: 700, background: "#EDE9FE", padding: "3px 8px", borderRadius: 6, whiteSpace: "nowrap" }}>{r.second}</span>
                     )}
                   </td>
-                  <td style={{ padding: "12px 12px", fontFamily: FONT_MONO, fontSize: 11, color: T.inkSoft, borderBottom: `1px solid ${T.borderSoft}` }}>{r.second2}</td>
-                  <td style={{ padding: "12px 12px", color: T.inkMuted, fontStyle: "italic", borderBottom: `1px solid ${T.borderSoft}` }}>{r.logic}</td>
+                  <td style={{ padding: "10px 10px", fontFamily: FONT_MONO, fontSize: 11, color: T.inkSoft, borderBottom: `1px solid ${T.borderSoft}`, whiteSpace: "nowrap" }}>{r.second2}</td>
+                  <td style={{ padding: "10px 10px", color: T.inkMuted, fontStyle: "italic", borderBottom: `1px solid ${T.borderSoft}`, minWidth: 180 }}>{r.logic}</td>
                 </tr>
               ))}
             </tbody>
@@ -100,7 +99,11 @@ export default function StrategyTab() {
         </div>
       </Card>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
+        gap: 16,
+      }}>
         <Card title="Règles de priorisation mensuelle" subtitle="Ordre de décision" icon={Compass}>
           {rules.map(r => (
             <div key={r.n} style={{
@@ -113,10 +116,10 @@ export default function StrategyTab() {
                 background: `linear-gradient(135deg, ${T.blue}, ${T.indigo})`,
                 color: T.inkInv,
                 fontFamily: FONT_MONO, fontSize: 14, fontWeight: 700,
-                display: "grid", placeItems: "center", letterSpacing: "-0.02em",
+                display: "grid", placeItems: "center",
               }}>{r.n}</div>
               <div>
-                <div style={{ fontFamily: FONT_SANS, fontSize: 14, color: T.ink, fontWeight: 600, marginBottom: 4, letterSpacing: "-0.01em" }}>{r.title}</div>
+                <div style={{ fontFamily: FONT_SANS, fontSize: 14, color: T.ink, fontWeight: 600, marginBottom: 4 }}>{r.title}</div>
                 <div style={{ fontFamily: FONT_SANS, fontSize: 12, color: T.inkMuted, lineHeight: 1.55 }}>{r.desc}</div>
               </div>
             </div>
@@ -129,16 +132,17 @@ export default function StrategyTab() {
               display: "flex", justifyContent: "space-between", alignItems: "flex-start",
               padding: "16px 0",
               borderBottom: i < arr.length - 1 ? `1px solid ${T.borderSoft}` : "none",
+              gap: 12,
             }}>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontFamily: FONT_SANS, fontSize: 13, color: T.ink, fontWeight: 600, marginBottom: 3, letterSpacing: "-0.01em" }}>{r.label}</div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontFamily: FONT_SANS, fontSize: 13, color: T.ink, fontWeight: 600, marginBottom: 3 }}>{r.label}</div>
                 <div style={{ fontFamily: FONT_SANS, fontSize: 12, color: T.inkMuted, lineHeight: 1.5 }}>{r.desc}</div>
               </div>
               <div style={{
                 padding: "6px 14px",
                 background: r.color + "18", color: r.color,
                 fontFamily: FONT_SANS, fontSize: 16, fontWeight: 700,
-                borderRadius: 8, letterSpacing: "-0.02em", marginLeft: 14,
+                borderRadius: 8, flexShrink: 0,
               }}>{r.value}</div>
             </div>
           ))}

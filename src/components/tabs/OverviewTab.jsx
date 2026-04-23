@@ -11,6 +11,7 @@ import {
 import { T, FONT_SANS, FONT_MONO } from "../../theme";
 import { STOCKS, SECTOR_COLORS } from "../../data/stocks";
 import { fmtFCFAfull, fmtPct } from "../../utils/format";
+import useResponsive from "../../hooks/useResponsive";
 
 import PageHeader from "../ui/PageHeader";
 import Card from "../ui/Card";
@@ -42,6 +43,8 @@ const contextCards = [
 ];
 
 export default function OverviewTab() {
+  const { isMobile, isTablet, cols } = useResponsive();
+
   return (
     <div>
       <PageHeader
@@ -50,18 +53,28 @@ export default function OverviewTab() {
         description="4 stratégies imbriquées — DCA, dividendes compounding, value investing, glide path défensif — exécutées depuis une SGI diaspora pour un horizon 20 ans."
       />
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, marginBottom: 28 }}>
+      {/* Top metrics */}
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: cols("1fr", "repeat(2, 1fr)", "repeat(4, 1fr)"),
+        gap: isMobile ? 10 : 16, marginBottom: isMobile ? 20 : 28,
+      }}>
         <MetricCard label="BRVM Composite" value="402" unit="pts" delta={25.3} deltaLabel="YTD" icon={Activity} color={T.blue} sparklineData={sparkGold}/>
         <MetricCard label="Cible 10 ans" value="10,8M" unit="FCFA" delta={79.4} deltaLabel="vs capital" icon={Target} color={T.chart3} sparklineData={[{v:600},{v:1500},{v:2800},{v:4500},{v:6700},{v:8500},{v:10800}]}/>
         <MetricCard label="Cible 20 ans" value="90M" unit="FCFA" delta={142} deltaLabel="vs capital" icon={TrendingUp} color={T.green} sparklineData={[{v:600},{v:3000},{v:7200},{v:14500},{v:26000},{v:45000},{v:90000}]}/>
         <MetricCard label="Revenu passif 49 ans" value="600k" unit="FCFA/mo" delta={12.3} deltaLabel="vs SMIC" icon={Wallet} color={T.amber} sparklineData={[{v:50},{v:120},{v:210},{v:340},{v:470},{v:600}]}/>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1.6fr 1fr", gap: 16, marginBottom: 28 }}>
+      {/* Market chart + top holdings */}
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: isMobile ? "1fr" : "1.6fr 1fr",
+        gap: 16, marginBottom: isMobile ? 20 : 28,
+      }}>
         <Card title="Indice BRVM Composite" subtitle="Performance 5 ans · +99,15% cumulé" icon={BarChart3}
           action={<Pill color={T.green} bg={T.greenSoft}>+25,3% 2025</Pill>}
         >
-          <ResponsiveContainer width="100%" height={280}>
+          <ResponsiveContainer width="100%" height={isMobile ? 200 : 280}>
             <AreaChart data={marketData} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
               <defs>
                 <linearGradient id="gBlue" x1="0" y1="0" x2="0" y2="1">
@@ -114,11 +127,16 @@ export default function OverviewTab() {
         </Card>
       </div>
 
+      {/* Strategy pillars */}
       <Card title="Les 4 piliers méthodologiques" subtitle="Écoles d'investissement combinées" icon={Layers}>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 14 }}>
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: cols("1fr", "repeat(2, 1fr)", "repeat(4, 1fr)"),
+          gap: 14,
+        }}>
           {pillars.map((p, i) => (
             <div key={i} style={{
-              padding: 20, background: T.bgSubtle,
+              padding: isMobile ? 16 : 20, background: T.bgSubtle,
               border: `1px solid ${T.borderSoft}`, borderRadius: 12,
             }}>
               <div style={{
@@ -132,7 +150,7 @@ export default function OverviewTab() {
                 fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", marginBottom: 4,
               }}>{p.subtitle}</div>
               <div style={{
-                fontFamily: FONT_SANS, fontSize: 16, fontWeight: 600,
+                fontFamily: FONT_SANS, fontSize: isMobile ? 14 : 16, fontWeight: 600,
                 color: T.ink, letterSpacing: "-0.01em", marginBottom: 8,
               }}>{p.title}</div>
               <div style={{
@@ -143,9 +161,14 @@ export default function OverviewTab() {
         </div>
       </Card>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16, marginTop: 16 }}>
+      {/* Quick context */}
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: cols("1fr", "1fr", "repeat(3, 1fr)"),
+        gap: 16, marginTop: 16,
+      }}>
         {contextCards.map((c, i) => (
-          <Card key={i} padding={18}>
+          <Card key={i} padding={isMobile ? 14 : 18}>
             <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
               <div style={{
                 width: 32, height: 32, borderRadius: 8,

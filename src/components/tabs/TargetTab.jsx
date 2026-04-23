@@ -7,6 +7,7 @@ import { Target, Clock, TrendingUp, Layers, Info } from "lucide-react";
 import { T, FONT_SANS, FONT_MONO } from "../../theme";
 import { fmtFCFA, fmtFCFAfull, fmtEUR } from "../../utils/format";
 import { projectDCA, projectEscalated, requiredMonthly } from "../../utils/projections";
+import useResponsive from "../../hooks/useResponsive";
 
 import PageHeader from "../ui/PageHeader";
 import Card from "../ui/Card";
@@ -18,6 +19,7 @@ export default function TargetTab() {
   const [target, setTarget] = useState(75_000_000);
   const [targetYears, setTargetYears] = useState(20);
   const [targetRate, setTargetRate] = useState(10);
+  const { isMobile, cols } = useResponsive();
 
   const required = useMemo(() =>
     requiredMonthly({ target, years: targetYears, annualRate: targetRate }),
@@ -47,16 +49,21 @@ export default function TargetTab() {
       <PageHeader
         eyebrow="Simulateur · bloc 6"
         title="Cible patrimoniale 50-100M FCFA."
-        description="Deux leviers : (1) calculateur inverse — combien épargner pour atteindre X FCFA. (2) DCA escalé par phases de carrière — la mécanique qui surperforme mécaniquement un DCA constant à même total investi."
+        description="Calculateur inverse + DCA escalé par phases de carrière."
       />
 
+      {/* Reverse calculator */}
       <Card title="Calculateur inverse" subtitle="De la cible au DCA requis" icon={Target} style={{ marginBottom: 16 }}>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1.3fr", gap: 20, alignItems: "end" }}>
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: cols("1fr", "repeat(2, 1fr)", "1fr 1fr 1fr 1.3fr"),
+          gap: isMobile ? 12 : 20, alignItems: "end",
+        }}>
           <Slider label="Capital cible" value={target} setValue={setTarget} min={25_000_000} max={200_000_000} step={5_000_000} suffix=" F" accent={T.chart3}/>
           <Slider label="Horizon" value={targetYears} setValue={setTargetYears} min={10} max={30} step={1} suffix=" ans" accent={T.chart3}/>
           <Slider label="Rendement" value={targetRate} setValue={setTargetRate} min={5} max={14} step={0.5} suffix=" %" accent={T.chart3}/>
           <div style={{
-            padding: 20, background: T.bgDark, borderRadius: 12,
+            padding: isMobile ? 16 : 20, background: T.bgDark, borderRadius: 12,
             color: T.inkInv, position: "relative", overflow: "hidden",
           }}>
             <div style={{
@@ -67,7 +74,7 @@ export default function TargetTab() {
             }}/>
             <div style={{ position: "relative", zIndex: 1 }}>
               <div style={{ fontFamily: FONT_MONO, fontSize: 10, color: "#A5B4FC", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", marginBottom: 8 }}>DCA mensuel requis</div>
-              <div style={{ fontFamily: FONT_SANS, fontSize: 32, fontWeight: 700, letterSpacing: "-0.025em", lineHeight: 1 }}>
+              <div style={{ fontFamily: FONT_SANS, fontSize: isMobile ? 22 : 32, fontWeight: 700, letterSpacing: "-0.025em", lineHeight: 1 }}>
                 {fmtFCFAfull(Math.round(required))} F
               </div>
               <div style={{ fontFamily: FONT_MONO, fontSize: 11, color: "#A5B4FC", marginTop: 6 }}>
@@ -78,7 +85,12 @@ export default function TargetTab() {
         </div>
       </Card>
 
-      <div style={{ display: "grid", gridTemplateColumns: "360px 1fr", gap: 16, marginBottom: 16 }}>
+      {/* Escalated comparison */}
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: isMobile ? "1fr" : "360px 1fr",
+        gap: 16, marginBottom: 16,
+      }}>
         <Card title="DCA escalé" subtitle="4 phases de carrière, 29→49 ans" icon={Clock}>
           {phases.map((p, i) => (
             <div key={i} style={{
@@ -88,7 +100,7 @@ export default function TargetTab() {
             }}>
               <div>
                 <div style={{ fontFamily: FONT_SANS, fontSize: 13, color: T.ink, fontWeight: 600 }}>{p.label}</div>
-                <div style={{ fontFamily: FONT_MONO, fontSize: 10, color: T.inkDim, marginTop: 2, letterSpacing: "0.02em" }}>{p.duration} ans · compounding actif</div>
+                <div style={{ fontFamily: FONT_MONO, fontSize: 10, color: T.inkDim, marginTop: 2 }}>{p.duration} ans</div>
               </div>
               <div style={{ textAlign: "right" }}>
                 <div style={{ fontFamily: FONT_MONO, fontSize: 14, color: T.blue, fontWeight: 700 }}>{fmtFCFAfull(p.monthly)}</div>
@@ -98,7 +110,7 @@ export default function TargetTab() {
           ))}
 
           <div style={{
-            marginTop: 18, padding: 18, background: T.bgDark,
+            marginTop: 18, padding: isMobile ? 14 : 18, background: T.bgDark,
             borderRadius: 12, color: T.inkInv, position: "relative", overflow: "hidden",
           }}>
             <div style={{
@@ -109,7 +121,7 @@ export default function TargetTab() {
             }}/>
             <div style={{ position: "relative" }}>
               <div style={{ fontFamily: FONT_MONO, fontSize: 10, color: "#86EFAC", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", marginBottom: 8 }}>À 49 ans, capital total</div>
-              <div style={{ fontFamily: FONT_SANS, fontSize: 36, fontWeight: 700, letterSpacing: "-0.03em", lineHeight: 1, color: T.neon }}>
+              <div style={{ fontFamily: FONT_SANS, fontSize: isMobile ? 26 : 36, fontWeight: 700, letterSpacing: "-0.03em", lineHeight: 1, color: T.neon }}>
                 {fmtFCFA(final?.value || 0)}
               </div>
               <div style={{ fontFamily: FONT_MONO, fontSize: 11, color: "#86EFAC", marginTop: 4 }}>FCFA · ≈ {fmtEUR(final?.value || 0)} €</div>
@@ -121,8 +133,8 @@ export default function TargetTab() {
           </div>
         </Card>
 
-        <Card title="Trajectoire 20 ans" subtitle="Escalé vs Constant à 100k — la différence" icon={TrendingUp}>
-          <ResponsiveContainer width="100%" height={400}>
+        <Card title="Trajectoire 20 ans" subtitle="Escalé vs Constant à 100k" icon={TrendingUp}>
+          <ResponsiveContainer width="100%" height={isMobile ? 280 : 400}>
             <ComposedChart data={combined} margin={{ top: 20, right: 10, left: -10, bottom: 0 }}>
               <defs>
                 <linearGradient id="escG" x1="0" y1="0" x2="0" y2="1">
@@ -134,14 +146,14 @@ export default function TargetTab() {
               <XAxis dataKey="year" stroke={T.inkDim} tick={{ fontSize: 11, fontFamily: FONT_MONO, fill: T.inkMuted }} axisLine={false} tickLine={false}/>
               <YAxis stroke={T.inkDim} tick={{ fontSize: 11, fontFamily: FONT_MONO, fill: T.inkMuted }} tickFormatter={fmtFCFA} axisLine={false} tickLine={false}/>
               <Tooltip content={<ChartTooltip />}/>
-              <Legend wrapperStyle={{ fontFamily: FONT_SANS, fontSize: 12, paddingTop: 10 }}/>
-              <Area type="monotone" dataKey="escalated" stroke={T.green} strokeWidth={2.5} fill="url(#escG)" name="DCA escalé (objectif)"/>
+              <Legend wrapperStyle={{ fontFamily: FONT_SANS, fontSize: 11, paddingTop: 10 }}/>
+              <Area type="monotone" dataKey="escalated" stroke={T.green} strokeWidth={2.5} fill="url(#escG)" name="DCA escalé"/>
               <Line type="monotone" dataKey="flat" stroke={T.blue} strokeWidth={2} dot={false} name="DCA constant 100k"/>
               <Line type="monotone" dataKey="escalatedInvested" stroke={T.inkDim} strokeWidth={1.2} strokeDasharray="3 3" dot={false} name="Capital investi"/>
             </ComposedChart>
           </ResponsiveContainer>
-          <div style={{ marginTop: 8, padding: "10px 14px", background: T.blueSoft, borderRadius: 8, display: "flex", alignItems: "center", gap: 8 }}>
-            <Info size={14} color={T.blue}/>
+          <div style={{ marginTop: 8, padding: "10px 14px", background: T.blueSoft, borderRadius: 8, display: "flex", alignItems: "flex-start", gap: 8 }}>
+            <Info size={14} color={T.blue} style={{ flexShrink: 0, marginTop: 2 }}/>
             <div style={{ fontFamily: FONT_SANS, fontSize: 12, color: T.inkSoft }}>
               À 20 ans, le DCA escalé atteint <strong style={{ color: T.green }}>{fmtFCFA(final?.value || 0)}</strong> vs <strong style={{ color: T.blue }}>{fmtFCFA(flatFinal?.value || 0)}</strong> pour le DCA constant.
             </div>
@@ -149,50 +161,45 @@ export default function TargetTab() {
         </Card>
       </div>
 
+      {/* Feasibility matrix */}
       <Card title="Matrice de faisabilité" subtitle="DCA constant requis par combinaison" icon={Layers}>
-        <div style={{ overflowX: "auto" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontFamily: FONT_SANS, fontSize: 13 }}>
+        <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
+          <table style={{ width: "100%", minWidth: 600, borderCollapse: "collapse", fontFamily: FONT_SANS, fontSize: isMobile ? 12 : 13 }}>
             <thead>
               <tr>
-                {["Horizon × Rendement", "Pour 50M", "Pour 75M", "Pour 100M", "Verdict"].map(h => (
+                {["Horizon × Rdt", "Pour 50M", "Pour 75M", "Pour 100M", "Verdict"].map(h => (
                   <th key={h} style={{
-                    textAlign: h === "Verdict" ? "left" : (h === "Horizon × Rendement" ? "left" : "right"),
-                    padding: "10px 14px",
+                    textAlign: h === "Verdict" ? "left" : (h === "Horizon × Rdt" ? "left" : "right"),
+                    padding: isMobile ? "8px 10px" : "10px 14px",
                     fontFamily: FONT_SANS, fontSize: 11, color: T.inkMuted,
                     fontWeight: 600, letterSpacing: "0.02em", textTransform: "uppercase",
-                    borderBottom: `1px solid ${T.border}`,
+                    borderBottom: `1px solid ${T.border}`, whiteSpace: "nowrap",
                   }}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {[
-                { h: 15, r: 8,  v: "50M accessible · 100M exigeant", c: T.amber },
+                { h: 15, r: 8,  v: "50M accessible", c: T.amber },
                 { h: 15, r: 10, v: "Cœur réaliste", c: T.blue },
-                { h: 15, r: 12, v: "Confortable dès 100k/mois", c: T.green },
-                { h: 20, r: 8,  v: "50M avec DCA modéré", c: T.blue },
-                { h: 20, r: 10, v: "Zone idéale DCA escalé", c: T.green, highlight: true },
-                { h: 20, r: 12, v: "100M dès 100k constant", c: T.green },
+                { h: 15, r: 12, v: "Confortable", c: T.green },
+                { h: 20, r: 8,  v: "50M modéré", c: T.blue },
+                { h: 20, r: 10, v: "Zone idéale", c: T.green, highlight: true },
+                { h: 20, r: 12, v: "100M dès 100k", c: T.green },
               ].map((row, i) => {
                 const m50  = Math.round(requiredMonthly({ target: 50_000_000,  years: row.h, annualRate: row.r }));
                 const m75  = Math.round(requiredMonthly({ target: 75_000_000,  years: row.h, annualRate: row.r }));
                 const m100 = Math.round(requiredMonthly({ target: 100_000_000, years: row.h, annualRate: row.r }));
                 return (
-                  <tr key={i} style={{
-                    background: row.highlight ? T.greenSoft : "transparent",
-                    transition: "background 0.15s",
-                  }}
-                  onMouseEnter={e => { if (!row.highlight) e.currentTarget.style.background = T.bgSubtle; }}
-                  onMouseLeave={e => { if (!row.highlight) e.currentTarget.style.background = "transparent"; }}
-                  >
-                    <td style={{ padding: "14px 14px", color: T.ink, fontWeight: 600, borderBottom: `1px solid ${T.borderSoft}` }}>
+                  <tr key={i} style={{ background: row.highlight ? T.greenSoft : "transparent" }}>
+                    <td style={{ padding: "12px 10px", color: T.ink, fontWeight: 600, borderBottom: `1px solid ${T.borderSoft}`, whiteSpace: "nowrap" }}>
                       <Pill color={T.inkSoft} bg={T.bgSoft}>{row.h} ans</Pill>
-                      <span style={{ marginLeft: 8, fontFamily: FONT_MONO, color: T.inkMuted }}>{row.r}%</span>
+                      <span style={{ marginLeft: 6, fontFamily: FONT_MONO, color: T.inkMuted }}>{row.r}%</span>
                     </td>
-                    <td style={{ padding: "14px 14px", textAlign: "right", fontFamily: FONT_MONO, color: T.inkSoft, borderBottom: `1px solid ${T.borderSoft}` }}>{fmtFCFAfull(m50)}</td>
-                    <td style={{ padding: "14px 14px", textAlign: "right", fontFamily: FONT_MONO, color: T.inkSoft, borderBottom: `1px solid ${T.borderSoft}` }}>{fmtFCFAfull(m75)}</td>
-                    <td style={{ padding: "14px 14px", textAlign: "right", fontFamily: FONT_MONO, color: T.inkSoft, borderBottom: `1px solid ${T.borderSoft}` }}>{fmtFCFAfull(m100)}</td>
-                    <td style={{ padding: "14px 14px", borderBottom: `1px solid ${T.borderSoft}` }}>
+                    <td style={{ padding: "12px 10px", textAlign: "right", fontFamily: FONT_MONO, color: T.inkSoft, borderBottom: `1px solid ${T.borderSoft}` }}>{fmtFCFAfull(m50)}</td>
+                    <td style={{ padding: "12px 10px", textAlign: "right", fontFamily: FONT_MONO, color: T.inkSoft, borderBottom: `1px solid ${T.borderSoft}` }}>{fmtFCFAfull(m75)}</td>
+                    <td style={{ padding: "12px 10px", textAlign: "right", fontFamily: FONT_MONO, color: T.inkSoft, borderBottom: `1px solid ${T.borderSoft}` }}>{fmtFCFAfull(m100)}</td>
+                    <td style={{ padding: "12px 10px", borderBottom: `1px solid ${T.borderSoft}` }}>
                       <Pill color={row.c} bg={row.c + "18"}>{row.v}</Pill>
                     </td>
                   </tr>

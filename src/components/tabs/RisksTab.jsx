@@ -5,6 +5,7 @@ import {
 } from "recharts";
 import { ShieldAlert, Gauge, BookOpen, CheckCircle2 } from "lucide-react";
 import { T, FONT_SANS, FONT_MONO } from "../../theme";
+import useResponsive from "../../hooks/useResponsive";
 
 import PageHeader from "../ui/PageHeader";
 import Card from "../ui/Card";
@@ -38,22 +39,24 @@ const glidePath = [
 ];
 
 export default function RisksTab() {
+  const { isMobile, cols } = useResponsive();
+
   return (
     <div>
       <PageHeader
         eyebrow="Gouvernance · bloc 5"
         title="Risques & Investment Policy Statement."
-        description="L'IPS codifie votre discipline sur 20 ans. C'est ce qui vous protège contre vos propres émotions quand le marché chute de 30% — mathématiquement, le facteur qui fait la différence entre atteindre 50M et 100M."
+        description="L'IPS codifie votre discipline sur 20 ans. C'est ce qui fait la différence entre atteindre 50M et 100M."
       />
 
-      <Card title="Glide path 20 ans" subtitle="Évolution de l'allocation par phase de carrière" icon={Gauge} style={{ marginBottom: 16 }}>
-        <ResponsiveContainer width="100%" height={280}>
+      <Card title="Glide path 20 ans" subtitle="Allocation par phase de carrière" icon={Gauge} style={{ marginBottom: 16 }}>
+        <ResponsiveContainer width="100%" height={isMobile ? 220 : 280}>
           <BarChart data={glidePath} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
             <CartesianGrid stroke={T.borderSoft} vertical={false} strokeDasharray="3 3"/>
-            <XAxis dataKey="phase" stroke={T.inkDim} tick={{ fontSize: 12, fontFamily: FONT_SANS, fill: T.inkSoft, fontWeight: 500 }} axisLine={false} tickLine={false}/>
+            <XAxis dataKey="phase" stroke={T.inkDim} tick={{ fontSize: isMobile ? 10 : 12, fontFamily: FONT_SANS, fill: T.inkSoft, fontWeight: 500 }} axisLine={false} tickLine={false}/>
             <YAxis stroke={T.inkDim} tick={{ fontSize: 11, fontFamily: FONT_MONO, fill: T.inkMuted }} axisLine={false} tickLine={false}/>
             <Tooltip content={<ChartTooltip />}/>
-            <Legend wrapperStyle={{ fontFamily: FONT_SANS, fontSize: 12, paddingTop: 10 }}/>
+            <Legend wrapperStyle={{ fontFamily: FONT_SANS, fontSize: 11, paddingTop: 10 }}/>
             <Bar dataKey="actions"     stackId="a" fill={T.blue}  name="Actions BRVM"/>
             <Bar dataKey="obligations" stackId="a" fill={T.chart3} name="Obligations UMOA"/>
             <Bar dataKey="cash"        stackId="a" fill={T.inkDim} name="Cash tactique" radius={[6, 6, 0, 0]}/>
@@ -61,16 +64,20 @@ export default function RisksTab() {
         </ResponsiveContainer>
       </Card>
 
-      <Card title="Cartographie des risques 15-20 ans" subtitle="Identification & mitigation" icon={ShieldAlert} style={{ marginBottom: 16 }}>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14 }}>
+      <Card title="Cartographie des risques" subtitle="Identification & mitigation" icon={ShieldAlert} style={{ marginBottom: 16 }}>
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: cols("1fr", "repeat(2, 1fr)", "repeat(3, 1fr)"),
+          gap: 14,
+        }}>
           {risks.map((r, i) => (
             <div key={i} style={{
-              padding: 18, background: T.bgSubtle,
+              padding: isMobile ? 14 : 18, background: T.bgSubtle,
               border: `1px solid ${T.borderSoft}`, borderRadius: 12,
               borderTop: `3px solid ${r.sevColor}`,
             }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-                <div style={{ fontFamily: FONT_SANS, fontSize: 15, color: T.ink, fontWeight: 600, letterSpacing: "-0.01em" }}>{r.title}</div>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10, gap: 8 }}>
+                <div style={{ fontFamily: FONT_SANS, fontSize: isMobile ? 13 : 15, color: T.ink, fontWeight: 600 }}>{r.title}</div>
                 <Pill color={r.sevColor} bg={r.sevColor + "18"}>{r.severity}</Pill>
               </div>
               <div style={{ fontFamily: FONT_SANS, fontSize: 12, color: T.inkMuted, lineHeight: 1.5, marginBottom: 12 }}>{r.desc}</div>
@@ -87,11 +94,15 @@ export default function RisksTab() {
       </Card>
 
       <Card title="IPS — Les 7 règles à graver" subtitle="Document d'ancrage 20 ans" icon={BookOpen}>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 14 }}>
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: cols("1fr", "1fr", "repeat(2, 1fr)"),
+          gap: 14,
+        }}>
           {ipsRules.map(r => (
             <div key={r.n} style={{
               display: "flex", gap: 14, alignItems: "flex-start",
-              padding: 18, background: T.bgSubtle,
+              padding: isMobile ? 14 : 18, background: T.bgSubtle,
               border: `1px solid ${T.borderSoft}`, borderRadius: 12,
               transition: "all 0.15s", cursor: "default",
             }}
@@ -99,13 +110,13 @@ export default function RisksTab() {
             onMouseLeave={e => { e.currentTarget.style.borderColor = T.borderSoft; e.currentTarget.style.background = T.bgSubtle; }}
             >
               <div style={{
-                width: 44, height: 44, flexShrink: 0, borderRadius: 10,
+                width: 40, height: 40, flexShrink: 0, borderRadius: 10,
                 background: r.color + "18", color: r.color,
-                fontFamily: FONT_MONO, fontSize: 15, fontWeight: 700,
-                display: "grid", placeItems: "center", letterSpacing: "-0.02em",
+                fontFamily: FONT_MONO, fontSize: 14, fontWeight: 700,
+                display: "grid", placeItems: "center",
               }}>{r.n}</div>
-              <div>
-                <div style={{ fontFamily: FONT_SANS, fontSize: 14, color: T.ink, fontWeight: 600, marginBottom: 4, letterSpacing: "-0.01em" }}>{r.title}</div>
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontFamily: FONT_SANS, fontSize: isMobile ? 13 : 14, color: T.ink, fontWeight: 600, marginBottom: 4 }}>{r.title}</div>
                 <div style={{ fontFamily: FONT_SANS, fontSize: 12, color: T.inkMuted, lineHeight: 1.55 }}>{r.desc}</div>
               </div>
             </div>
@@ -113,7 +124,7 @@ export default function RisksTab() {
         </div>
 
         <div style={{
-          marginTop: 24, padding: 28,
+          marginTop: 24, padding: isMobile ? 20 : 28,
           background: T.bgDark, borderRadius: 12,
           color: T.inkInv, position: "relative", overflow: "hidden",
         }}>
@@ -132,7 +143,9 @@ export default function RisksTab() {
           <div style={{ position: "relative", textAlign: "center" }}>
             <div style={{ fontFamily: FONT_MONO, fontSize: 10, color: "#93C5FD", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 14 }}>Principe fondateur</div>
             <div style={{
-              fontFamily: FONT_SANS, fontSize: 24, fontWeight: 500,
+              fontFamily: FONT_SANS,
+              fontSize: isMobile ? 18 : 24,
+              fontWeight: 500,
               lineHeight: 1.4, letterSpacing: "-0.02em",
               maxWidth: 760, margin: "0 auto", fontStyle: "italic",
             }}>

@@ -10,6 +10,7 @@ import {
 import { T, FONT_SANS, FONT_MONO } from "../../theme";
 import { STOCKS, SECTOR_COLORS } from "../../data/stocks";
 import { fmtFCFAfull, fmtPct } from "../../utils/format";
+import useResponsive from "../../hooks/useResponsive";
 
 import PageHeader from "../ui/PageHeader";
 import Card from "../ui/Card";
@@ -23,6 +24,7 @@ export default function PortfolioTab() {
   );
   const totalWeight = Object.values(weights).reduce((a, b) => a + b, 0);
   const updateWeight = (t, v) => setWeights(p => ({ ...p, [t]: v }));
+  const { isMobile, cols } = useResponsive();
 
   const stats = useMemo(() => {
     let yW = 0, pW = 0, rW = 0, tot = 0;
@@ -50,10 +52,14 @@ export default function PortfolioTab() {
       <PageHeader
         eyebrow="Simulateur · bloc 4"
         title="Constructeur de portefeuille interactif."
-        description="Ajustez les pondérations avec les curseurs. Les métriques — yield pondéré, P/E moyen, risque global, répartition sectorielle — se recalculent en temps réel. Cible : 100% total."
+        description="Ajustez les pondérations — les métriques se recalculent en temps réel. Cible : 100%."
       />
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 14, marginBottom: 16 }}>
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: cols("repeat(2, 1fr)", "repeat(2, 1fr)", "repeat(4, 1fr)"),
+        gap: isMobile ? 10 : 14, marginBottom: 16,
+      }}>
         <MetricCard label="Pondération totale" value={totalWeight} unit="%"
           deltaLabel={totalWeight === 100 ? "✓ équilibré" : totalWeight < 100 ? `${100 - totalWeight}% à allouer` : `${totalWeight - 100}% en excès`}
           icon={PieIcon}
@@ -66,7 +72,11 @@ export default function PortfolioTab() {
         />
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1.3fr 1fr", gap: 16, marginBottom: 16 }}>
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: isMobile ? "1fr" : "1.3fr 1fr",
+        gap: 16, marginBottom: 16,
+      }}>
         <Card title="Pondérations par titre" subtitle="Glissez pour ajuster" icon={Briefcase}
           action={<button onClick={reset} style={{
             padding: "6px 12px", background: T.bgSoft,
@@ -77,24 +87,26 @@ export default function PortfolioTab() {
           {STOCKS.map(s => (
             <div key={s.ticker} style={{ padding: "14px 0", borderBottom: `1px solid ${T.borderSoft}` }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0, flex: 1 }}>
                   <div style={{
-                    width: 30, height: 30, borderRadius: 8,
+                    width: 30, height: 30, borderRadius: 8, flexShrink: 0,
                     background: SECTOR_COLORS[s.sector] + "18",
                     display: "grid", placeItems: "center", fontSize: 14,
                   }}>{s.flag}</div>
-                  <div>
+                  <div style={{ minWidth: 0 }}>
                     <div>
                       <span style={{ fontFamily: FONT_MONO, fontSize: 12, color: T.blue, fontWeight: 700, letterSpacing: "0.02em" }}>{s.ticker}</span>
-                      <span style={{ fontFamily: FONT_SANS, fontSize: 13, color: T.ink, marginLeft: 8, fontWeight: 500 }}>{s.name}</span>
+                      {!isMobile && <span style={{ fontFamily: FONT_SANS, fontSize: 13, color: T.ink, marginLeft: 8, fontWeight: 500 }}>{s.name}</span>}
                     </div>
-                    <div style={{ fontFamily: FONT_MONO, fontSize: 10, color: T.inkDim, marginTop: 1 }}>{s.sector} · {s.country} · {s.yield}%</div>
+                    <div style={{ fontFamily: FONT_MONO, fontSize: 10, color: T.inkDim, marginTop: 1 }}>{s.sector} · {s.yield}%</div>
                   </div>
                 </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <Pill color={s.change >= 0 ? T.green : T.red} bg={s.change >= 0 ? T.greenSoft : T.redSoft}>
-                    {fmtPct(s.change)}
-                  </Pill>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+                  {!isMobile && (
+                    <Pill color={s.change >= 0 ? T.green : T.red} bg={s.change >= 0 ? T.greenSoft : T.redSoft}>
+                      {fmtPct(s.change)}
+                    </Pill>
+                  )}
                   <div style={{ fontFamily: FONT_MONO, fontSize: 14, color: T.ink, fontWeight: 700, minWidth: 40, textAlign: "right" }}>{weights[s.ticker]}%</div>
                 </div>
               </div>
@@ -121,11 +133,11 @@ export default function PortfolioTab() {
 
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           <Card title="Répartition par titre" icon={PieIcon}>
-            <ResponsiveContainer width="100%" height={220}>
+            <ResponsiveContainer width="100%" height={isMobile ? 200 : 220}>
               <PieChart>
                 <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%"
-                  innerRadius={55} outerRadius={90} paddingAngle={3}
-                  label={({ name, value }) => `${name} ${value}%`}
+                  innerRadius={isMobile ? 40 : 55} outerRadius={isMobile ? 70 : 90} paddingAngle={3}
+                  label={isMobile ? false : ({ name, value }) => `${name} ${value}%`}
                   labelLine={false}
                   style={{ fontFamily: FONT_MONO, fontSize: 10 }}
                 >
@@ -143,7 +155,7 @@ export default function PortfolioTab() {
               <BarChart data={stats.sectors} layout="vertical" margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
                 <CartesianGrid stroke={T.borderSoft} horizontal={false} strokeDasharray="3 3"/>
                 <XAxis type="number" stroke={T.inkDim} tick={{ fontSize: 10, fontFamily: FONT_MONO, fill: T.inkMuted }} axisLine={false} tickLine={false}/>
-                <YAxis type="category" dataKey="name" stroke={T.inkDim} tick={{ fontSize: 11, fontFamily: FONT_SANS, fill: T.inkSoft, fontWeight: 500 }} width={95} axisLine={false} tickLine={false}/>
+                <YAxis type="category" dataKey="name" stroke={T.inkDim} tick={{ fontSize: 11, fontFamily: FONT_SANS, fill: T.inkSoft, fontWeight: 500 }} width={isMobile ? 70 : 95} axisLine={false} tickLine={false}/>
                 <Tooltip content={<ChartTooltip />}/>
                 <Bar dataKey="value" radius={[0, 6, 6, 0]}>
                   {stats.sectors.map((e, i) => (
@@ -156,43 +168,40 @@ export default function PortfolioTab() {
         </div>
       </div>
 
-      <Card title="Univers BRVM" subtitle="Screening complet · 10 titres sélectionnés" icon={Layers}>
-        <div style={{ overflowX: "auto" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontFamily: FONT_SANS, fontSize: 12 }}>
+      <Card title="Univers BRVM" subtitle="Screening complet · 10 titres" icon={Layers}>
+        <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
+          <table style={{ width: "100%", minWidth: 800, borderCollapse: "collapse", fontFamily: FONT_SANS, fontSize: 12 }}>
             <thead>
               <tr>
                 {["Ticker", "Société", "Pays", "Secteur", "Cours", "P/E", "Yield", "Change", "Risque", "Moat", "FCP"].map(h => (
                   <th key={h} style={{
-                    padding: "10px 12px",
+                    padding: "10px 10px",
                     textAlign: h === "Société" || h === "Pays" || h === "Secteur" ? "left" : "right",
                     fontFamily: FONT_SANS, fontSize: 11, color: T.inkMuted,
                     fontWeight: 600, letterSpacing: "0.02em", textTransform: "uppercase",
-                    borderBottom: `1px solid ${T.border}`,
+                    borderBottom: `1px solid ${T.border}`, whiteSpace: "nowrap",
                   }}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {STOCKS.map(s => (
-                <tr key={s.ticker} style={{ transition: "background 0.15s" }}
-                  onMouseEnter={e => e.currentTarget.style.background = T.bgSubtle}
-                  onMouseLeave={e => e.currentTarget.style.background = "transparent"}
-                >
-                  <td style={{ padding: "12px 12px", color: T.blue, fontFamily: FONT_MONO, fontWeight: 700, letterSpacing: "0.02em", borderBottom: `1px solid ${T.borderSoft}` }}>{s.ticker}</td>
-                  <td style={{ padding: "12px 12px", color: T.ink, fontWeight: 500, borderBottom: `1px solid ${T.borderSoft}` }}>{s.name}</td>
-                  <td style={{ padding: "12px 12px", color: T.inkSoft, borderBottom: `1px solid ${T.borderSoft}` }}>{s.flag} {s.country}</td>
-                  <td style={{ padding: "12px 12px", borderBottom: `1px solid ${T.borderSoft}` }}>
+                <tr key={s.ticker}>
+                  <td style={{ padding: "10px 10px", color: T.blue, fontFamily: FONT_MONO, fontWeight: 700, borderBottom: `1px solid ${T.borderSoft}` }}>{s.ticker}</td>
+                  <td style={{ padding: "10px 10px", color: T.ink, fontWeight: 500, borderBottom: `1px solid ${T.borderSoft}`, whiteSpace: "nowrap" }}>{s.name}</td>
+                  <td style={{ padding: "10px 10px", color: T.inkSoft, borderBottom: `1px solid ${T.borderSoft}`, whiteSpace: "nowrap" }}>{s.flag} {s.country}</td>
+                  <td style={{ padding: "10px 10px", borderBottom: `1px solid ${T.borderSoft}` }}>
                     <Pill color={SECTOR_COLORS[s.sector]} bg={SECTOR_COLORS[s.sector] + "18"}>{s.sector}</Pill>
                   </td>
-                  <td style={{ padding: "12px 12px", textAlign: "right", fontFamily: FONT_MONO, color: T.inkSoft, borderBottom: `1px solid ${T.borderSoft}` }}>{fmtFCFAfull(s.price)}</td>
-                  <td style={{ padding: "12px 12px", textAlign: "right", fontFamily: FONT_MONO, color: T.inkSoft, borderBottom: `1px solid ${T.borderSoft}` }}>{s.pe}</td>
-                  <td style={{ padding: "12px 12px", textAlign: "right", fontFamily: FONT_MONO, color: T.green, fontWeight: 700, borderBottom: `1px solid ${T.borderSoft}` }}>{s.yield}%</td>
-                  <td style={{ padding: "12px 12px", textAlign: "right", borderBottom: `1px solid ${T.borderSoft}` }}>
+                  <td style={{ padding: "10px 10px", textAlign: "right", fontFamily: FONT_MONO, color: T.inkSoft, borderBottom: `1px solid ${T.borderSoft}` }}>{fmtFCFAfull(s.price)}</td>
+                  <td style={{ padding: "10px 10px", textAlign: "right", fontFamily: FONT_MONO, color: T.inkSoft, borderBottom: `1px solid ${T.borderSoft}` }}>{s.pe}</td>
+                  <td style={{ padding: "10px 10px", textAlign: "right", fontFamily: FONT_MONO, color: T.green, fontWeight: 700, borderBottom: `1px solid ${T.borderSoft}` }}>{s.yield}%</td>
+                  <td style={{ padding: "10px 10px", textAlign: "right", borderBottom: `1px solid ${T.borderSoft}` }}>
                     <Pill color={s.change >= 0 ? T.green : T.red} bg={s.change >= 0 ? T.greenSoft : T.redSoft}>{fmtPct(s.change)}</Pill>
                   </td>
-                  <td style={{ padding: "12px 12px", textAlign: "right", fontFamily: FONT_MONO, color: s.risk > 5 ? T.red : s.risk > 3 ? T.amber : T.green, fontWeight: 600, borderBottom: `1px solid ${T.borderSoft}` }}>{s.risk}/10</td>
-                  <td style={{ padding: "12px 12px", textAlign: "right", color: s.moat === "Fort" ? T.green : T.inkSoft, fontWeight: 500, borderBottom: `1px solid ${T.borderSoft}` }}>{s.moat}</td>
-                  <td style={{ padding: "12px 12px", textAlign: "right", borderBottom: `1px solid ${T.borderSoft}` }}>
+                  <td style={{ padding: "10px 10px", textAlign: "right", fontFamily: FONT_MONO, color: s.risk > 5 ? T.red : s.risk > 3 ? T.amber : T.green, fontWeight: 600, borderBottom: `1px solid ${T.borderSoft}` }}>{s.risk}/10</td>
+                  <td style={{ padding: "10px 10px", textAlign: "right", color: s.moat === "Fort" ? T.green : T.inkSoft, fontWeight: 500, borderBottom: `1px solid ${T.borderSoft}` }}>{s.moat}</td>
+                  <td style={{ padding: "10px 10px", textAlign: "right", borderBottom: `1px solid ${T.borderSoft}` }}>
                     <Pill color={s.fcpOverlap === "Non" ? T.green : s.fcpOverlap === "Complém." ? T.blue : T.amber}
                       bg={s.fcpOverlap === "Non" ? T.greenSoft : s.fcpOverlap === "Complém." ? T.blueSoft : T.amberSoft}>
                       {s.fcpOverlap}
