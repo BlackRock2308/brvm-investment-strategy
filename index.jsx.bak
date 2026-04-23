@@ -1,0 +1,1699 @@
+import React, { useState, useMemo, useEffect } from "react";
+import {
+  LineChart, Line, AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
+  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
+  ComposedChart, RadialBarChart, RadialBar
+} from "recharts";
+import {
+  TrendingUp, Target, Coins, Calculator, Briefcase, ShieldAlert,
+  Sparkles, LineChart as LineIcon, PieChart as PieIcon, Activity,
+  ArrowUpRight, ArrowDownRight, Zap, Globe2, CheckCircle2,
+  AlertCircle, BookOpen, Layers, BarChart3, Gauge, Compass,
+  ChevronRight, Clock, Wallet, Building2, Info
+} from "lucide-react";
+
+// ============================================================
+// DESIGN TOKENS — FINTECH MODERN (light, electric)
+// ============================================================
+const T = {
+  // Base surfaces
+  bg:        "#FAFAFB",  // near-white base
+  bgSoft:    "#F4F5F7",  // section background
+  bgCard:    "#FFFFFF",  // card white
+  bgSubtle:  "#F8FAFC",  // subtle contrast
+  bgDark:    "#0B1220",  // dark hero blocks
+
+  // Text
+  ink:       "#0B1220",  // near-black headings
+  inkSoft:   "#1F2937",  // body
+  inkMuted:  "#6B7280",  // muted
+  inkDim:    "#9CA3AF",  // dim caption
+  inkInv:    "#FFFFFF",  // on dark
+
+  // Brand
+  blue:      "#2563EB",  // electric blue primary
+  blueDark:  "#1D4ED8",  // hover
+  blueSoft:  "#DBEAFE",  // soft background
+  indigo:    "#4F46E5",  // indigo accent
+
+  // Status
+  green:     "#10B981",  // emerald
+  greenSoft: "#D1FAE5",
+  neon:      "#84CC16",  // lime neon
+  amber:     "#F59E0B",  // warning
+  amberSoft: "#FEF3C7",
+  red:       "#EF4444",  // danger
+  redSoft:   "#FEE2E2",
+
+  // Chart palette
+  chart1:    "#2563EB",
+  chart2:    "#10B981",
+  chart3:    "#8B5CF6",
+  chart4:    "#F59E0B",
+  chart5:    "#EC4899",
+  chart6:    "#06B6D4",
+
+  // Borders
+  border:    "#E5E7EB",
+  borderSoft:"#F3F4F6",
+};
+
+const FONT_SANS = "'Geist', 'Plus Jakarta Sans', -apple-system, sans-serif";
+const FONT_MONO = "'Geist Mono', 'JetBrains Mono', monospace";
+
+// ============================================================
+// DATA
+// ============================================================
+const STOCKS = [
+  { ticker: "SNTS",  name: "Sonatel",       sector: "Télécoms",      country: "Sénégal",     flag: "🇸🇳", price: 29000, pe: 7.0,  yield: 5.7, risk: 4, conviction: 18, moat: "Fort",   fcpOverlap: "Complém.", change: 11.03 },
+  { ticker: "ORAC",  name: "Orange CI",     sector: "Télécoms",      country: "Côte d'Iv.",  flag: "🇨🇮", price: 15000, pe: 9.5,  yield: 4.0, risk: 4, conviction: 14, moat: "Fort",   fcpOverlap: "Complém.", change: 7.5  },
+  { ticker: "CIEC",  name: "CIE",           sector: "Utilities",     country: "Côte d'Iv.",  flag: "🇨🇮", price: 3400,  pe: 11.0, yield: 7.0, risk: 3, conviction: 12, moat: "Fort",   fcpOverlap: "Complém.", change: 4.2  },
+  { ticker: "SDCC",  name: "SODECI",        sector: "Utilities",     country: "Côte d'Iv.",  flag: "🇨🇮", price: 7400,  pe: 10.0, yield: 6.5, risk: 3, conviction: 8,  moat: "Fort",   fcpOverlap: "Complém.", change: 2.8  },
+  { ticker: "BOAB",  name: "BOA Bénin",     sector: "Banque",        country: "Bénin",       flag: "🇧🇯", price: 5965,  pe: 5.0,  yield: 9.4, risk: 4, conviction: 9,  moat: "Modéré", fcpOverlap: "Partiel",  change: 61.9 },
+  { ticker: "BOAS",  name: "BOA Sénégal",   sector: "Banque",        country: "Sénégal",     flag: "🇸🇳", price: 6850,  pe: 5.5,  yield: 9.5, risk: 5, conviction: 8,  moat: "Modéré", fcpOverlap: "Partiel",  change: 12.4 },
+  { ticker: "SGBC",  name: "SGBCI",         sector: "Banque",        country: "Côte d'Iv.",  flag: "🇨🇮", price: 31000, pe: 9.0,  yield: 7.0, risk: 4, conviction: 7,  moat: "Modéré", fcpOverlap: "Partiel",  change: 55.7 },
+  { ticker: "ETIT",  name: "Ecobank ETI",   sector: "Banque pan-AF", country: "Togo",        flag: "🇹🇬", price: 34,    pe: 6.5,  yield: 0.5, risk: 6, conviction: 6,  moat: "Modéré", fcpOverlap: "Partiel",  change: 128.6},
+  { ticker: "PALC",  name: "PALMCI",        sector: "Agro",          country: "Côte d'Iv.",  flag: "🇨🇮", price: 8150,  pe: 7.5,  yield: 5.0, risk: 6, conviction: 4,  moat: "Modéré", fcpOverlap: "Non",      change: -3.2 },
+  { ticker: "SPHC",  name: "SAPH",          sector: "Agro",          country: "Côte d'Iv.",  flag: "🇨🇮", price: 7300,  pe: 8.0,  yield: 6.0, risk: 6, conviction: 3,  moat: "Modéré", fcpOverlap: "Non",      change: 4.7  },
+];
+
+const SECTOR_COLORS = {
+  "Télécoms":        T.blue,
+  "Utilities":       T.chart6,
+  "Banque":          T.chart3,
+  "Banque pan-AF":   T.chart5,
+  "Agro":            T.green,
+};
+
+// ============================================================
+// HELPERS
+// ============================================================
+const fmtFCFA = (n) => {
+  if (Math.abs(n) >= 1e9) return (n / 1e9).toFixed(2) + "Md";
+  if (Math.abs(n) >= 1e6) return (n / 1e6).toFixed(2) + "M";
+  if (Math.abs(n) >= 1e3) return (n / 1e3).toFixed(0) + "k";
+  return Math.round(n).toString();
+};
+const fmtFCFAfull = (n) => new Intl.NumberFormat("fr-FR").format(Math.round(n));
+const fmtEUR = (n) => (n / 655.957).toFixed(0);
+const fmtPct = (n) => (n >= 0 ? "+" : "") + n.toFixed(1) + "%";
+
+function projectDCA({ monthly, years, annualRate }) {
+  const monthlyRate = Math.pow(1 + annualRate / 100, 1/12) - 1;
+  const data = [];
+  let value = 0, invested = 0;
+  for (let m = 0; m <= years * 12; m++) {
+    if (m > 0) {
+      value = value * (1 + monthlyRate) + monthly;
+      invested += monthly;
+    }
+    if (m % 12 === 0) {
+      data.push({
+        year: m / 12, invested,
+        value: Math.round(value),
+        gain: Math.round(value - invested),
+      });
+    }
+  }
+  return data;
+}
+
+function projectEscalated({ phases, annualRate }) {
+  const monthlyRate = Math.pow(1 + annualRate / 100, 1/12) - 1;
+  const data = [{ year: 0, invested: 0, value: 0, gain: 0, phase: "Départ" }];
+  let value = 0, invested = 0, year = 0;
+  for (const ph of phases) {
+    for (let y = 0; y < ph.duration; y++) {
+      for (let m = 0; m < 12; m++) {
+        value = value * (1 + monthlyRate) + ph.monthly;
+        invested += ph.monthly;
+      }
+      year++;
+      data.push({
+        year, invested: Math.round(invested),
+        value: Math.round(value),
+        gain: Math.round(value - invested),
+        phase: ph.label,
+      });
+    }
+  }
+  return data;
+}
+
+function requiredMonthly({ target, years, annualRate }) {
+  const monthlyRate = Math.pow(1 + annualRate / 100, 1/12) - 1;
+  const n = years * 12;
+  if (monthlyRate === 0) return target / n;
+  return target * monthlyRate / (Math.pow(1 + monthlyRate, n) - 1);
+}
+
+function projectDRIP({ initial, monthly, years, yieldPct, growthDiv, dripYears, taxRate }) {
+  const data = [];
+  let value = initial, invested = initial;
+  let curYield = yieldPct / 100;
+  const divGrowth = growthDiv / 100;
+  const monthlyPriceGrowth = Math.pow(1.05, 1/12) - 1;
+  for (let y = 0; y <= years; y++) {
+    const divAnnual = value * curYield;
+    const divNet = divAnnual * (1 - taxRate / 100);
+    data.push({
+      year: y,
+      value: Math.round(value),
+      invested: Math.round(invested),
+      dividendsAnnual: Math.round(divAnnual),
+      dividendsNet: Math.round(divNet),
+      dividendsMonthly: Math.round(divNet / 12),
+    });
+    if (y < years) {
+      for (let m = 0; m < 12; m++) {
+        value = value * (1 + monthlyPriceGrowth) + monthly;
+        invested += monthly;
+      }
+      if (y < dripYears) value += divAnnual;
+      curYield = curYield * (1 + divGrowth);
+    }
+  }
+  return data;
+}
+
+// ============================================================
+// PRIMITIVES
+// ============================================================
+
+function Nav({ tab, setTab }) {
+  const tabs = [
+    { id: "overview",  label: "Aperçu",       icon: Gauge },
+    { id: "dca",       label: "DCA",          icon: TrendingUp },
+    { id: "target",    label: "Cible 50-100M",icon: Target },
+    { id: "dividends", label: "Dividendes",   icon: Coins },
+    { id: "portfolio", label: "Allocation",   icon: Briefcase },
+    { id: "strategy",  label: "Playbook",     icon: BookOpen },
+    { id: "risks",     label: "Risques",      icon: ShieldAlert },
+  ];
+  return (
+    <nav style={{
+      position: "sticky", top: 0, zIndex: 50,
+      background: "rgba(250, 250, 251, 0.85)",
+      backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)",
+      borderBottom: `1px solid ${T.border}`,
+    }}>
+      <div style={{
+        maxWidth: 1440, margin: "0 auto",
+        padding: "14px 28px",
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        gap: 24, flexWrap: "wrap",
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <div style={{
+            width: 36, height: 36, borderRadius: 10,
+            background: `linear-gradient(135deg, ${T.blue} 0%, ${T.indigo} 100%)`,
+            display: "grid", placeItems: "center",
+            boxShadow: `0 4px 12px rgba(37, 99, 235, 0.25)`,
+          }}>
+            <Sparkles size={18} color="white" strokeWidth={2.2} />
+          </div>
+          <div>
+            <div style={{
+              fontFamily: FONT_SANS, fontSize: 17, fontWeight: 700,
+              color: T.ink, letterSpacing: "-0.02em", lineHeight: 1,
+            }}>Baobab Capital</div>
+            <div style={{
+              fontFamily: FONT_MONO, fontSize: 10, color: T.inkMuted,
+              marginTop: 3, letterSpacing: "0.05em",
+            }}>BRVM Intelligence · v2026.1</div>
+          </div>
+        </div>
+        <div style={{ display: "flex", gap: 2, background: T.bgSoft, padding: 4, borderRadius: 10, border: `1px solid ${T.border}` }}>
+          {tabs.map(t => {
+            const Icon = t.icon;
+            const active = tab === t.id;
+            return (
+              <button
+                key={t.id}
+                onClick={() => setTab(t.id)}
+                style={{
+                  display: "flex", alignItems: "center", gap: 7,
+                  padding: "8px 14px",
+                  border: "none",
+                  borderRadius: 8,
+                  background: active ? T.bgCard : "transparent",
+                  color: active ? T.ink : T.inkMuted,
+                  fontFamily: FONT_SANS, fontSize: 13, fontWeight: active ? 600 : 500,
+                  cursor: "pointer",
+                  transition: "all 0.15s",
+                  boxShadow: active ? "0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03)" : "none",
+                  letterSpacing: "-0.01em",
+                }}
+                onMouseEnter={e => { if (!active) e.currentTarget.style.color = T.ink; }}
+                onMouseLeave={e => { if (!active) e.currentTarget.style.color = T.inkMuted; }}
+              >
+                <Icon size={14} strokeWidth={2.2} />
+                {t.label}
+              </button>
+            );
+          })}
+        </div>
+        <div style={{
+          display: "flex", alignItems: "center", gap: 8,
+          padding: "6px 12px",
+          background: T.greenSoft,
+          borderRadius: 999,
+          fontFamily: FONT_SANS, fontSize: 12, color: T.green, fontWeight: 600,
+        }}>
+          <div style={{ width: 7, height: 7, borderRadius: "50%", background: T.green, boxShadow: `0 0 0 3px ${T.greenSoft}` }} />
+          BRVM ouverte
+        </div>
+      </div>
+    </nav>
+  );
+}
+
+function Card({ children, title, subtitle, icon: Icon, action, style, padding = 24 }) {
+  return (
+    <div style={{
+      background: T.bgCard,
+      border: `1px solid ${T.border}`,
+      borderRadius: 14,
+      padding,
+      boxShadow: "0 1px 2px rgba(0,0,0,0.02)",
+      ...style,
+    }}>
+      {(title || Icon || action) && (
+        <div style={{
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          marginBottom: 20, gap: 16,
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, flex: 1, minWidth: 0 }}>
+            {Icon && (
+              <div style={{
+                width: 32, height: 32,
+                borderRadius: 8,
+                background: T.blueSoft,
+                display: "grid", placeItems: "center", flexShrink: 0,
+              }}>
+                <Icon size={16} color={T.blue} strokeWidth={2.2} />
+              </div>
+            )}
+            <div style={{ minWidth: 0 }}>
+              {title && <div style={{
+                fontFamily: FONT_SANS, fontSize: 15, fontWeight: 600,
+                color: T.ink, letterSpacing: "-0.01em", lineHeight: 1.2,
+              }}>{title}</div>}
+              {subtitle && <div style={{
+                fontFamily: FONT_SANS, fontSize: 12, color: T.inkMuted,
+                marginTop: 2, letterSpacing: "-0.005em",
+              }}>{subtitle}</div>}
+            </div>
+          </div>
+          {action}
+        </div>
+      )}
+      {children}
+    </div>
+  );
+}
+
+function MetricCard({ label, value, unit, delta, deltaLabel, icon: Icon, color = T.blue, sparklineData }) {
+  const positive = delta !== undefined ? delta >= 0 : null;
+  return (
+    <div style={{
+      background: T.bgCard,
+      border: `1px solid ${T.border}`,
+      borderRadius: 12,
+      padding: 20,
+      position: "relative", overflow: "hidden",
+    }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+        <div style={{
+          fontFamily: FONT_SANS, fontSize: 11, color: T.inkMuted,
+          fontWeight: 500, letterSpacing: "0.02em", textTransform: "uppercase",
+        }}>{label}</div>
+        {Icon && <Icon size={14} color={T.inkDim} strokeWidth={2} />}
+      </div>
+      <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginBottom: 6 }}>
+        <div style={{
+          fontFamily: FONT_SANS, fontSize: 28, fontWeight: 700,
+          color: T.ink, letterSpacing: "-0.03em", lineHeight: 1,
+        }}>{value}</div>
+        {unit && <div style={{
+          fontFamily: FONT_SANS, fontSize: 13, color: T.inkMuted, fontWeight: 500,
+        }}>{unit}</div>}
+      </div>
+      {delta !== undefined && (
+        <div style={{
+          display: "inline-flex", alignItems: "center", gap: 4,
+          padding: "2px 8px",
+          borderRadius: 999,
+          background: positive ? T.greenSoft : T.redSoft,
+          color: positive ? T.green : T.red,
+          fontFamily: FONT_MONO, fontSize: 11, fontWeight: 600,
+        }}>
+          {positive ? <ArrowUpRight size={12} strokeWidth={2.5} /> : <ArrowDownRight size={12} strokeWidth={2.5} />}
+          {fmtPct(delta)}
+          {deltaLabel && <span style={{ color: T.inkMuted, fontWeight: 400, marginLeft: 2 }}>{deltaLabel}</span>}
+        </div>
+      )}
+      {sparklineData && (
+        <div style={{ marginTop: 12, height: 40, margin: "12px -4px -4px" }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={sparklineData}>
+              <defs>
+                <linearGradient id={`spark-${label}`} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%"  stopColor={color} stopOpacity={0.4}/>
+                  <stop offset="100%" stopColor={color} stopOpacity={0}/>
+                </linearGradient>
+              </defs>
+              <Area type="monotone" dataKey="v" stroke={color} strokeWidth={1.5} fill={`url(#spark-${label})`} />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Slider({ label, value, setValue, min, max, step = 1, suffix, accent = T.blue, format }) {
+  const pct = ((value - min) / (max - min)) * 100;
+  return (
+    <div style={{ marginBottom: 20 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 8 }}>
+        <div style={{
+          fontFamily: FONT_SANS, fontSize: 13, color: T.inkSoft, fontWeight: 500,
+        }}>{label}</div>
+        <div style={{
+          fontFamily: FONT_MONO, fontSize: 14, fontWeight: 600, color: accent,
+        }}>
+          {format ? format(value) : (typeof value === 'number' && value >= 1000 ? fmtFCFAfull(value) : value)}{suffix}
+        </div>
+      </div>
+      <div style={{ position: "relative", height: 6 }}>
+        <div style={{
+          position: "absolute", inset: 0,
+          background: T.bgSoft,
+          borderRadius: 999,
+        }} />
+        <div style={{
+          position: "absolute", left: 0, top: 0, bottom: 0,
+          width: `${pct}%`,
+          background: `linear-gradient(90deg, ${accent}, ${accent})`,
+          borderRadius: 999,
+        }} />
+        <input
+          type="range"
+          min={min} max={max} step={step}
+          value={value}
+          onChange={e => setValue(Number(e.target.value))}
+          style={{
+            position: "absolute", inset: 0,
+            width: "100%", height: "100%",
+            opacity: 0, cursor: "pointer",
+          }}
+        />
+        <div style={{
+          position: "absolute", left: `${pct}%`, top: "50%",
+          transform: "translate(-50%, -50%)",
+          width: 18, height: 18,
+          background: "white",
+          border: `2px solid ${accent}`,
+          borderRadius: "50%",
+          boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
+          pointerEvents: "none",
+        }} />
+      </div>
+      <div style={{
+        display: "flex", justifyContent: "space-between", marginTop: 6,
+        fontFamily: FONT_MONO, fontSize: 10, color: T.inkDim,
+      }}>
+        <span>{format ? format(min) : (typeof min === 'number' && min >= 1000 ? fmtFCFAfull(min) : min)}{suffix}</span>
+        <span>{format ? format(max) : (typeof max === 'number' && max >= 1000 ? fmtFCFAfull(max) : max)}{suffix}</span>
+      </div>
+    </div>
+  );
+}
+
+function PageHeader({ eyebrow, title, description }) {
+  return (
+    <div style={{ marginBottom: 28 }}>
+      <div style={{
+        display: "inline-flex", alignItems: "center", gap: 6,
+        padding: "4px 10px",
+        background: T.blueSoft,
+        borderRadius: 999,
+        fontFamily: FONT_MONO, fontSize: 10, color: T.blue,
+        fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase",
+        marginBottom: 14,
+      }}>
+        <div style={{ width: 5, height: 5, borderRadius: "50%", background: T.blue }} />
+        {eyebrow}
+      </div>
+      <div style={{
+        fontFamily: FONT_SANS, fontSize: 36, fontWeight: 700,
+        color: T.ink, letterSpacing: "-0.03em", lineHeight: 1.1, maxWidth: 800,
+      }}>{title}</div>
+      {description && (
+        <div style={{
+          fontFamily: FONT_SANS, fontSize: 15, color: T.inkMuted,
+          marginTop: 12, maxWidth: 720, lineHeight: 1.55, letterSpacing: "-0.005em",
+        }}>{description}</div>
+      )}
+    </div>
+  );
+}
+
+const ChartTooltip = ({ active, payload, label }) => {
+  if (!active || !payload?.length) return null;
+  return (
+    <div style={{
+      background: T.bgCard,
+      border: `1px solid ${T.border}`,
+      borderRadius: 10,
+      padding: "10px 14px",
+      boxShadow: "0 4px 16px rgba(0,0,0,0.08)",
+      fontFamily: FONT_SANS, fontSize: 12,
+    }}>
+      <div style={{ color: T.ink, fontWeight: 600, marginBottom: 6, fontSize: 12 }}>
+        {typeof label === 'number' ? `Année ${label}` : label}
+      </div>
+      {payload.map((p, i) => (
+        <div key={i} style={{
+          display: "flex", alignItems: "center", gap: 8,
+          marginBottom: 2, color: T.inkMuted, fontSize: 11,
+        }}>
+          <div style={{ width: 8, height: 8, borderRadius: 2, background: p.color, flexShrink: 0 }} />
+          <span>{p.name}:</span>
+          <span style={{ color: T.ink, fontWeight: 600, fontFamily: FONT_MONO, marginLeft: "auto" }}>
+            {typeof p.value === 'number' ? fmtFCFAfull(p.value) + ' FCFA' : p.value}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+function Pill({ children, color = T.inkMuted, bg }) {
+  return (
+    <span style={{
+      display: "inline-flex", alignItems: "center", gap: 4,
+      padding: "2px 8px",
+      background: bg || T.bgSoft,
+      color,
+      borderRadius: 999,
+      fontFamily: FONT_MONO, fontSize: 11, fontWeight: 600,
+    }}>{children}</span>
+  );
+}
+
+// ============================================================
+// TABS
+// ============================================================
+
+// ------- OVERVIEW -------
+function OverviewTab() {
+  const marketData = [
+    { year: "21", index: 171 },
+    { year: "22", index: 205 },
+    { year: "23", index: 220 },
+    { year: "24", index: 255 },
+    { year: "25", index: 320 },
+    { year: "26e", index: 402 },
+  ];
+  const sparkGold = marketData.map(d => ({ v: d.index }));
+  const pillars = [
+    { icon: LineIcon, title: "Stock Screening", subtitle: "Goldman Sachs", desc: "10 titres filtrés : qualité, liquidité, moat UEMOA, compatibilité FCP.", color: T.blue, bg: T.blueSoft },
+    { icon: Calculator, title: "DCA discipliné", subtitle: "BlackRock · Buffett", desc: "Contributions mensuelles lissées, ordres à cours limité, rééquilibrage semestriel.", color: T.chart3, bg: "#EDE9FE" },
+    { icon: Coins, title: "Dividend Compounding", subtitle: "Harvard Endowment", desc: "DRIP actif 7-12 ans, bascule revenus passifs phase 4.", color: T.green, bg: T.greenSoft },
+    { icon: Target, title: "Value long terme", subtitle: "Rothschild · Buffett", desc: "Convictions à décote, thèse macro UEMOA 2030, horizon 15-20 ans.", color: T.amber, bg: T.amberSoft },
+  ];
+
+  return (
+    <div>
+      <PageHeader
+        eyebrow="Tableau de bord · avril 2026"
+        title="Votre patrimoine BRVM, piloté avec précision."
+        description="4 stratégies imbriquées — DCA, dividendes compounding, value investing, glide path défensif — exécutées depuis une SGI diaspora pour un horizon 20 ans."
+      />
+
+      {/* Top metrics row */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, marginBottom: 28 }}>
+        <MetricCard label="BRVM Composite" value="402" unit="pts" delta={25.3} deltaLabel="YTD" icon={Activity} color={T.blue} sparklineData={sparkGold}/>
+        <MetricCard label="Cible 10 ans" value="10,8M" unit="FCFA" delta={79.4} deltaLabel="vs capital" icon={Target} color={T.chart3} sparklineData={[{v:600},{v:1500},{v:2800},{v:4500},{v:6700},{v:8500},{v:10800}]}/>
+        <MetricCard label="Cible 20 ans" value="90M" unit="FCFA" delta={142} deltaLabel="vs capital" icon={TrendingUp} color={T.green} sparklineData={[{v:600},{v:3000},{v:7200},{v:14500},{v:26000},{v:45000},{v:90000}]}/>
+        <MetricCard label="Revenu passif 49 ans" value="600k" unit="FCFA/mo" delta={12.3} deltaLabel="vs SMIC" icon={Wallet} color={T.amber} sparklineData={[{v:50},{v:120},{v:210},{v:340},{v:470},{v:600}]}/>
+      </div>
+
+      {/* Market chart + top holdings */}
+      <div style={{ display: "grid", gridTemplateColumns: "1.6fr 1fr", gap: 16, marginBottom: 28 }}>
+        <Card title="Indice BRVM Composite" subtitle="Performance 5 ans · +99,15% cumulé" icon={BarChart3}
+          action={<Pill color={T.green} bg={T.greenSoft}>+25,3% 2025</Pill>}
+        >
+          <ResponsiveContainer width="100%" height={280}>
+            <AreaChart data={marketData} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
+              <defs>
+                <linearGradient id="gBlue" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%"   stopColor={T.blue} stopOpacity={0.18}/>
+                  <stop offset="100%" stopColor={T.blue} stopOpacity={0}/>
+                </linearGradient>
+              </defs>
+              <CartesianGrid stroke={T.borderSoft} vertical={false} strokeDasharray="3 3"/>
+              <XAxis dataKey="year" stroke={T.inkDim} tick={{ fontSize: 11, fontFamily: FONT_MONO, fill: T.inkMuted }} axisLine={false} tickLine={false}/>
+              <YAxis stroke={T.inkDim} tick={{ fontSize: 11, fontFamily: FONT_MONO, fill: T.inkMuted }} axisLine={false} tickLine={false}/>
+              <Tooltip content={<ChartTooltip />} />
+              <Area type="monotone" dataKey="index" stroke={T.blue} strokeWidth={2.5} fill="url(#gBlue)" name="BRVM-C"/>
+            </AreaChart>
+          </ResponsiveContainer>
+        </Card>
+
+        <Card title="Top holdings" subtitle="Pondérations cibles portefeuille" icon={Briefcase}>
+          <div>
+            {STOCKS.slice(0, 5).map((s, i) => (
+              <div key={s.ticker} style={{
+                display: "grid",
+                gridTemplateColumns: "auto 1fr auto",
+                gap: 12, alignItems: "center",
+                padding: "12px 0",
+                borderBottom: i < 4 ? `1px solid ${T.borderSoft}` : "none",
+              }}>
+                <div style={{
+                  width: 36, height: 36, borderRadius: 10,
+                  background: SECTOR_COLORS[s.sector] + "18",
+                  display: "grid", placeItems: "center",
+                  fontSize: 16,
+                }}>{s.flag}</div>
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontFamily: FONT_SANS, fontSize: 13, fontWeight: 600, color: T.ink, letterSpacing: "-0.01em" }}>
+                    {s.ticker}
+                    <span style={{ fontWeight: 400, color: T.inkMuted, marginLeft: 6 }}>{s.name}</span>
+                  </div>
+                  <div style={{ fontFamily: FONT_MONO, fontSize: 10, color: T.inkDim, marginTop: 2 }}>
+                    {s.sector} · {fmtFCFAfull(s.price)} F
+                  </div>
+                </div>
+                <div style={{ textAlign: "right" }}>
+                  <div style={{ fontFamily: FONT_MONO, fontSize: 13, color: T.ink, fontWeight: 600 }}>{s.conviction}%</div>
+                  <Pill color={s.change >= 0 ? T.green : T.red} bg={s.change >= 0 ? T.greenSoft : T.redSoft}>
+                    {fmtPct(s.change)}
+                  </Pill>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+      </div>
+
+      {/* Strategy pillars */}
+      <Card title="Les 4 piliers méthodologiques" subtitle="Écoles d'investissement combinées" icon={Layers}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 14 }}>
+          {pillars.map((p, i) => (
+            <div key={i} style={{
+              padding: 20,
+              background: T.bgSubtle,
+              border: `1px solid ${T.borderSoft}`,
+              borderRadius: 12,
+            }}>
+              <div style={{
+                width: 40, height: 40, borderRadius: 10,
+                background: p.bg,
+                display: "grid", placeItems: "center",
+                marginBottom: 16,
+              }}>
+                <p.icon size={18} color={p.color} strokeWidth={2.2}/>
+              </div>
+              <div style={{
+                fontFamily: FONT_MONO, fontSize: 10, color: p.color,
+                fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase",
+                marginBottom: 4,
+              }}>{p.subtitle}</div>
+              <div style={{
+                fontFamily: FONT_SANS, fontSize: 16, fontWeight: 600,
+                color: T.ink, letterSpacing: "-0.01em", marginBottom: 8,
+              }}>{p.title}</div>
+              <div style={{
+                fontFamily: FONT_SANS, fontSize: 12, color: T.inkMuted,
+                lineHeight: 1.55,
+              }}>{p.desc}</div>
+            </div>
+          ))}
+        </div>
+      </Card>
+
+      {/* Quick context row */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16, marginTop: 16 }}>
+        {[
+          { icon: Globe2, title: "Marché concentré, signatures solides", desc: "47 actions cotées, ~970M FCFA volume journalier, 5 blue chips concentrent la liquidité.", color: T.blue, bg: T.blueSoft },
+          { icon: Zap, title: "Règlement T+2 depuis déc. 2025", desc: "Liquidité et rotation accélérées vs ancien T+3. Provisionner le compte dès l'ordre.", color: T.chart3, bg: "#EDE9FE" },
+          { icon: Building2, title: "IPO Bridge Bank 2026", desc: "Banque PME ivoirienne soutenue par IFC et BAD. À suivre pour participation à l'OPV.", color: T.green, bg: T.greenSoft },
+        ].map((c, i) => (
+          <Card key={i} padding={18}>
+            <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
+              <div style={{
+                width: 32, height: 32, borderRadius: 8,
+                background: c.bg, display: "grid", placeItems: "center", flexShrink: 0,
+              }}>
+                <c.icon size={16} color={c.color} strokeWidth={2.2}/>
+              </div>
+              <div>
+                <div style={{ fontFamily: FONT_SANS, fontSize: 13, fontWeight: 600, color: T.ink, marginBottom: 4, letterSpacing: "-0.01em" }}>{c.title}</div>
+                <div style={{ fontFamily: FONT_SANS, fontSize: 12, color: T.inkMuted, lineHeight: 1.5 }}>{c.desc}</div>
+              </div>
+            </div>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ------- DCA -------
+function DCATab() {
+  const [monthly, setMonthly] = useState(75000);
+  const [years, setYears] = useState(10);
+  const [rate, setRate] = useState(10);
+
+  const data = useMemo(() => projectDCA({ monthly, years, annualRate: rate }), [monthly, years, rate]);
+  const final = data[data.length - 1];
+
+  const scenarios = useMemo(() => {
+    const c = projectDCA({ monthly, years, annualRate: 8 });
+    const m = projectDCA({ monthly, years, annualRate: 10 });
+    const o = projectDCA({ monthly, years, annualRate: 12 });
+    return c.map((d, i) => ({
+      year: d.year,
+      conservative: c[i].value,
+      central: m[i].value,
+      optimistic: o[i].value,
+      invested: d.invested,
+    }));
+  }, [monthly, years]);
+
+  return (
+    <div>
+      <PageHeader
+        eyebrow="Simulateur · bloc 2"
+        title="DCA sur 10 ans, projection en temps réel."
+        description="Ajustez les trois variables du compounding. Les scénarios conservateur / central / optimiste se recalculent instantanément — voyez immédiatement l'impact du rendement sur votre patrimoine final."
+      />
+
+      <div style={{ display: "grid", gridTemplateColumns: "360px 1fr", gap: 16, marginBottom: 16 }}>
+        <Card title="Paramètres" icon={Calculator}>
+          <Slider label="DCA mensuel" value={monthly} setValue={setMonthly} min={25000} max={250000} step={5000} suffix=" F" accent={T.blue}/>
+          <Slider label="Durée" value={years} setValue={setYears} min={3} max={25} step={1} suffix=" ans" accent={T.chart3}/>
+          <Slider label="Rendement annualisé" value={rate} setValue={setRate} min={4} max={15} step={0.5} suffix=" %" accent={T.green}/>
+
+          <div style={{
+            marginTop: 24, padding: 18,
+            background: `linear-gradient(135deg, ${T.blue}08, ${T.chart3}08)`,
+            border: `1px solid ${T.blue}30`,
+            borderRadius: 12,
+          }}>
+            <div style={{ fontFamily: FONT_MONO, fontSize: 10, color: T.blue, fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", marginBottom: 12 }}>Projection finale</div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+              <div>
+                <div style={{ fontFamily: FONT_SANS, fontSize: 11, color: T.inkMuted, marginBottom: 2 }}>Capital investi</div>
+                <div style={{ fontFamily: FONT_SANS, fontSize: 16, color: T.inkSoft, fontWeight: 600 }}>{fmtFCFAfull(final.invested)}</div>
+              </div>
+              <div>
+                <div style={{ fontFamily: FONT_SANS, fontSize: 11, color: T.inkMuted, marginBottom: 2 }}>Valeur finale</div>
+                <div style={{ fontFamily: FONT_SANS, fontSize: 22, color: T.blue, fontWeight: 700, letterSpacing: "-0.02em", lineHeight: 1 }}>{fmtFCFA(final.value)}</div>
+                <div style={{ fontFamily: FONT_MONO, fontSize: 10, color: T.inkMuted, marginTop: 2 }}>≈ {fmtEUR(final.value)} €</div>
+              </div>
+            </div>
+            <div style={{
+              marginTop: 14, padding: "10px 12px",
+              background: T.greenSoft,
+              borderRadius: 8,
+            }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span style={{ fontFamily: FONT_SANS, fontSize: 11, color: T.inkSoft, fontWeight: 500 }}>Plus-value</span>
+                <span style={{ fontFamily: FONT_MONO, fontSize: 13, color: T.green, fontWeight: 700 }}>+{fmtFCFAfull(final.gain)} F</span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 4 }}>
+                <span style={{ fontFamily: FONT_SANS, fontSize: 11, color: T.inkSoft, fontWeight: 500 }}>Multiplicateur</span>
+                <span style={{ fontFamily: FONT_MONO, fontSize: 13, color: T.green, fontWeight: 700 }}>{(final.value / final.invested).toFixed(2)}×</span>
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        <Card title="Projection du capital" subtitle="Effet de capitalisation composée" icon={TrendingUp}>
+          <ResponsiveContainer width="100%" height={360}>
+            <AreaChart data={data} margin={{ top: 20, right: 10, left: -10, bottom: 0 }}>
+              <defs>
+                <linearGradient id="aVal" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={T.blue} stopOpacity={0.25}/>
+                  <stop offset="100%" stopColor={T.blue} stopOpacity={0}/>
+                </linearGradient>
+                <linearGradient id="aInv" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={T.chart3} stopOpacity={0.15}/>
+                  <stop offset="100%" stopColor={T.chart3} stopOpacity={0}/>
+                </linearGradient>
+              </defs>
+              <CartesianGrid stroke={T.borderSoft} vertical={false} strokeDasharray="3 3"/>
+              <XAxis dataKey="year" stroke={T.inkDim} tick={{ fontSize: 11, fontFamily: FONT_MONO, fill: T.inkMuted }} axisLine={false} tickLine={false}/>
+              <YAxis stroke={T.inkDim} tick={{ fontSize: 11, fontFamily: FONT_MONO, fill: T.inkMuted }} tickFormatter={fmtFCFA} axisLine={false} tickLine={false}/>
+              <Tooltip content={<ChartTooltip />}/>
+              <Legend wrapperStyle={{ fontFamily: FONT_SANS, fontSize: 12, color: T.inkMuted, paddingTop: 10 }}/>
+              <Area type="monotone" dataKey="invested" stroke={T.chart3} strokeWidth={1.5} fill="url(#aInv)" name="Capital investi"/>
+              <Area type="monotone" dataKey="value" stroke={T.blue} strokeWidth={2.5} fill="url(#aVal)" name="Valeur portefeuille"/>
+            </AreaChart>
+          </ResponsiveContainer>
+        </Card>
+      </div>
+
+      {/* Scenarios */}
+      <Card title="Comparaison des 3 scénarios de rendement" subtitle={`DCA ${fmtFCFAfull(monthly)} F/mois · ${years} ans`} icon={Zap}>
+        <ResponsiveContainer width="100%" height={300}>
+          <LineChart data={scenarios} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+            <CartesianGrid stroke={T.borderSoft} vertical={false} strokeDasharray="3 3"/>
+            <XAxis dataKey="year" stroke={T.inkDim} tick={{ fontSize: 11, fontFamily: FONT_MONO, fill: T.inkMuted }} axisLine={false} tickLine={false}/>
+            <YAxis stroke={T.inkDim} tick={{ fontSize: 11, fontFamily: FONT_MONO, fill: T.inkMuted }} tickFormatter={fmtFCFA} axisLine={false} tickLine={false}/>
+            <Tooltip content={<ChartTooltip />}/>
+            <Legend wrapperStyle={{ fontFamily: FONT_SANS, fontSize: 12, paddingTop: 10 }}/>
+            <Line type="monotone" dataKey="invested" stroke={T.inkDim} strokeWidth={1.5} strokeDasharray="4 4" dot={false} name="Capital investi"/>
+            <Line type="monotone" dataKey="conservative" stroke={T.amber} strokeWidth={2} dot={false} name="Conservateur 8%"/>
+            <Line type="monotone" dataKey="central" stroke={T.blue} strokeWidth={2.5} dot={false} name="Central 10%"/>
+            <Line type="monotone" dataKey="optimistic" stroke={T.green} strokeWidth={2} dot={false} name="Optimiste 12%"/>
+          </LineChart>
+        </ResponsiveContainer>
+
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14, marginTop: 24 }}>
+          {[
+            { label: "Conservateur", rate: "8%", value: scenarios[scenarios.length-1]?.conservative, color: T.amber, bg: T.amberSoft },
+            { label: "Central", rate: "10%", value: scenarios[scenarios.length-1]?.central, color: T.blue, bg: T.blueSoft, highlight: true },
+            { label: "Optimiste", rate: "12%", value: scenarios[scenarios.length-1]?.optimistic, color: T.green, bg: T.greenSoft },
+          ].map(s => (
+            <div key={s.label} style={{
+              padding: 18,
+              background: s.highlight ? s.bg : T.bgSubtle,
+              border: `1px solid ${s.highlight ? s.color : T.borderSoft}`,
+              borderRadius: 12,
+            }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                <div style={{ fontFamily: FONT_SANS, fontSize: 12, color: s.color, fontWeight: 600, letterSpacing: "-0.01em" }}>{s.label}</div>
+                <Pill color={s.color} bg={s.bg}>{s.rate}</Pill>
+              </div>
+              <div style={{ fontFamily: FONT_SANS, fontSize: 26, color: T.ink, fontWeight: 700, letterSpacing: "-0.025em", lineHeight: 1 }}>
+                {fmtFCFA(s.value || 0)}
+              </div>
+              <div style={{ fontFamily: FONT_MONO, fontSize: 10, color: T.inkMuted, marginTop: 4 }}>FCFA à {years} ans</div>
+            </div>
+          ))}
+        </div>
+      </Card>
+    </div>
+  );
+}
+
+// ------- TARGET 50-100M -------
+function TargetTab() {
+  const [target, setTarget] = useState(75_000_000);
+  const [targetYears, setTargetYears] = useState(20);
+  const [targetRate, setTargetRate] = useState(10);
+
+  const required = useMemo(() =>
+    requiredMonthly({ target, years: targetYears, annualRate: targetRate }),
+  [target, targetYears, targetRate]);
+
+  const phases = [
+    { label: "Phase 1 — 29→34", monthly: 70000,  duration: 5 },
+    { label: "Phase 2 — 34→39", monthly: 120000, duration: 5 },
+    { label: "Phase 3 — 39→44", monthly: 180000, duration: 5 },
+    { label: "Phase 4 — 44→49", monthly: 250000, duration: 5 },
+  ];
+  const escalatedData = useMemo(() => projectEscalated({ phases, annualRate: targetRate }), [targetRate]);
+  const flatData = useMemo(() => projectDCA({ monthly: 100000, years: 20, annualRate: targetRate }), [targetRate]);
+
+  const combined = useMemo(() => escalatedData.map((d, i) => ({
+    year: d.year,
+    escalated: d.value,
+    escalatedInvested: d.invested,
+    flat: flatData[i]?.value || 0,
+  })), [escalatedData, flatData]);
+
+  const final = escalatedData[escalatedData.length - 1];
+  const flatFinal = flatData[flatData.length - 1];
+
+  return (
+    <div>
+      <PageHeader
+        eyebrow="Simulateur · bloc 6"
+        title="Cible patrimoniale 50-100M FCFA."
+        description="Deux leviers : (1) calculateur inverse — combien épargner pour atteindre X FCFA. (2) DCA escalé par phases de carrière — la mécanique qui surperforme mécaniquement un DCA constant à même total investi."
+      />
+
+      {/* Reverse calculator */}
+      <Card title="Calculateur inverse" subtitle="De la cible au DCA requis" icon={Target} style={{ marginBottom: 16 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1.3fr", gap: 20, alignItems: "end" }}>
+          <Slider label="Capital cible" value={target} setValue={setTarget} min={25_000_000} max={200_000_000} step={5_000_000} suffix=" F" accent={T.chart3}/>
+          <Slider label="Horizon" value={targetYears} setValue={setTargetYears} min={10} max={30} step={1} suffix=" ans" accent={T.chart3}/>
+          <Slider label="Rendement" value={targetRate} setValue={setTargetRate} min={5} max={14} step={0.5} suffix=" %" accent={T.chart3}/>
+          <div style={{
+            padding: 20,
+            background: T.bgDark,
+            borderRadius: 12,
+            color: T.inkInv,
+            position: "relative", overflow: "hidden",
+          }}>
+            <div style={{
+              position: "absolute", top: -50, right: -50,
+              width: 150, height: 150,
+              background: `radial-gradient(circle, ${T.chart3}60, transparent 60%)`,
+              borderRadius: "50%",
+            }}/>
+            <div style={{
+              position: "relative", zIndex: 1,
+            }}>
+              <div style={{ fontFamily: FONT_MONO, fontSize: 10, color: "#A5B4FC", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", marginBottom: 8 }}>DCA mensuel requis</div>
+              <div style={{ fontFamily: FONT_SANS, fontSize: 32, fontWeight: 700, letterSpacing: "-0.025em", lineHeight: 1 }}>
+                {fmtFCFAfull(Math.round(required))} F
+              </div>
+              <div style={{ fontFamily: FONT_MONO, fontSize: 11, color: "#A5B4FC", marginTop: 6 }}>
+                ≈ {fmtEUR(required)} €/mois
+              </div>
+            </div>
+          </div>
+        </div>
+      </Card>
+
+      {/* Escalated comparison */}
+      <div style={{ display: "grid", gridTemplateColumns: "360px 1fr", gap: 16, marginBottom: 16 }}>
+        <Card title="DCA escalé" subtitle="4 phases de carrière, 29→49 ans" icon={Clock}>
+          {phases.map((p, i) => (
+            <div key={i} style={{
+              padding: "14px 0",
+              borderBottom: i < phases.length - 1 ? `1px solid ${T.borderSoft}` : "none",
+              display: "flex", alignItems: "center", justifyContent: "space-between",
+            }}>
+              <div>
+                <div style={{ fontFamily: FONT_SANS, fontSize: 13, color: T.ink, fontWeight: 600 }}>{p.label}</div>
+                <div style={{ fontFamily: FONT_MONO, fontSize: 10, color: T.inkDim, marginTop: 2, letterSpacing: "0.02em" }}>{p.duration} ans · compounding actif</div>
+              </div>
+              <div style={{ textAlign: "right" }}>
+                <div style={{ fontFamily: FONT_MONO, fontSize: 14, color: T.blue, fontWeight: 700 }}>{fmtFCFAfull(p.monthly)}</div>
+                <div style={{ fontFamily: FONT_MONO, fontSize: 10, color: T.inkDim }}>FCFA/mois</div>
+              </div>
+            </div>
+          ))}
+
+          <div style={{
+            marginTop: 18, padding: 18,
+            background: T.bgDark,
+            borderRadius: 12, color: T.inkInv,
+            position: "relative", overflow: "hidden",
+          }}>
+            <div style={{
+              position: "absolute", top: -40, right: -40,
+              width: 120, height: 120,
+              background: `radial-gradient(circle, ${T.green}50, transparent 70%)`,
+              borderRadius: "50%",
+            }}/>
+            <div style={{ position: "relative" }}>
+              <div style={{ fontFamily: FONT_MONO, fontSize: 10, color: "#86EFAC", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", marginBottom: 8 }}>À 49 ans, capital total</div>
+              <div style={{ fontFamily: FONT_SANS, fontSize: 36, fontWeight: 700, letterSpacing: "-0.03em", lineHeight: 1, color: T.neon }}>
+                {fmtFCFA(final?.value || 0)}
+              </div>
+              <div style={{ fontFamily: FONT_MONO, fontSize: 11, color: "#86EFAC", marginTop: 4 }}>FCFA · ≈ {fmtEUR(final?.value || 0)} €</div>
+              <div style={{ marginTop: 14, paddingTop: 14, borderTop: `1px solid ${T.inkMuted}40`, fontFamily: FONT_SANS, fontSize: 12, color: "#D1D5DB" }}>
+                Investi : {fmtFCFA(final?.invested || 0)} F<br/>
+                <span style={{ color: T.neon, fontWeight: 600 }}>+{fmtFCFA(final?.gain || 0)} F</span> de plus-value
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        <Card title="Trajectoire 20 ans" subtitle="Escalé vs Constant à 100k — la différence" icon={TrendingUp}>
+          <ResponsiveContainer width="100%" height={400}>
+            <ComposedChart data={combined} margin={{ top: 20, right: 10, left: -10, bottom: 0 }}>
+              <defs>
+                <linearGradient id="escG" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={T.green} stopOpacity={0.25}/>
+                  <stop offset="100%" stopColor={T.green} stopOpacity={0}/>
+                </linearGradient>
+              </defs>
+              <CartesianGrid stroke={T.borderSoft} vertical={false} strokeDasharray="3 3"/>
+              <XAxis dataKey="year" stroke={T.inkDim} tick={{ fontSize: 11, fontFamily: FONT_MONO, fill: T.inkMuted }} axisLine={false} tickLine={false}/>
+              <YAxis stroke={T.inkDim} tick={{ fontSize: 11, fontFamily: FONT_MONO, fill: T.inkMuted }} tickFormatter={fmtFCFA} axisLine={false} tickLine={false}/>
+              <Tooltip content={<ChartTooltip />}/>
+              <Legend wrapperStyle={{ fontFamily: FONT_SANS, fontSize: 12, paddingTop: 10 }}/>
+              <Area type="monotone" dataKey="escalated" stroke={T.green} strokeWidth={2.5} fill="url(#escG)" name="DCA escalé (objectif)"/>
+              <Line type="monotone" dataKey="flat" stroke={T.blue} strokeWidth={2} dot={false} name="DCA constant 100k"/>
+              <Line type="monotone" dataKey="escalatedInvested" stroke={T.inkDim} strokeWidth={1.2} strokeDasharray="3 3" dot={false} name="Capital investi"/>
+            </ComposedChart>
+          </ResponsiveContainer>
+          <div style={{ marginTop: 8, padding: "10px 14px", background: T.blueSoft, borderRadius: 8, display: "flex", alignItems: "center", gap: 8 }}>
+            <Info size={14} color={T.blue}/>
+            <div style={{ fontFamily: FONT_SANS, fontSize: 12, color: T.inkSoft }}>
+              À 20 ans, le DCA escalé atteint <strong style={{ color: T.green }}>{fmtFCFA(final?.value || 0)}</strong> vs <strong style={{ color: T.blue }}>{fmtFCFA(flatFinal?.value || 0)}</strong> pour le DCA constant. L'escalation génère des contributions plus tardives, capitalisées sur moins de temps, mais compensées par le volume absolu des versements de fin de parcours.
+            </div>
+          </div>
+        </Card>
+      </div>
+
+      {/* Feasibility matrix */}
+      <Card title="Matrice de faisabilité" subtitle="DCA constant requis par combinaison" icon={Layers}>
+        <div style={{ overflowX: "auto" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", fontFamily: FONT_SANS, fontSize: 13 }}>
+            <thead>
+              <tr>
+                {["Horizon × Rendement", "Pour 50M", "Pour 75M", "Pour 100M", "Verdict"].map(h => (
+                  <th key={h} style={{
+                    textAlign: h === "Verdict" ? "left" : (h === "Horizon × Rendement" ? "left" : "right"),
+                    padding: "10px 14px",
+                    fontFamily: FONT_SANS, fontSize: 11, color: T.inkMuted,
+                    fontWeight: 600, letterSpacing: "0.02em", textTransform: "uppercase",
+                    borderBottom: `1px solid ${T.border}`,
+                  }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                { h: 15, r: 8,  v: "50M accessible · 100M exigeant", c: T.amber },
+                { h: 15, r: 10, v: "Cœur réaliste", c: T.blue },
+                { h: 15, r: 12, v: "Confortable dès 100k/mois", c: T.green },
+                { h: 20, r: 8,  v: "50M avec DCA modéré", c: T.blue },
+                { h: 20, r: 10, v: "Zone idéale DCA escalé", c: T.green, highlight: true },
+                { h: 20, r: 12, v: "100M dès 100k constant", c: T.green },
+              ].map((row, i) => {
+                const m50  = Math.round(requiredMonthly({ target: 50_000_000,  years: row.h, annualRate: row.r }));
+                const m75  = Math.round(requiredMonthly({ target: 75_000_000,  years: row.h, annualRate: row.r }));
+                const m100 = Math.round(requiredMonthly({ target: 100_000_000, years: row.h, annualRate: row.r }));
+                return (
+                  <tr key={i} style={{
+                    background: row.highlight ? T.greenSoft : "transparent",
+                    transition: "background 0.15s",
+                  }}
+                  onMouseEnter={e => { if (!row.highlight) e.currentTarget.style.background = T.bgSubtle; }}
+                  onMouseLeave={e => { if (!row.highlight) e.currentTarget.style.background = "transparent"; }}
+                  >
+                    <td style={{ padding: "14px 14px", color: T.ink, fontWeight: 600, borderBottom: `1px solid ${T.borderSoft}` }}>
+                      <Pill color={T.inkSoft} bg={T.bgSoft}>{row.h} ans</Pill>
+                      <span style={{ marginLeft: 8, fontFamily: FONT_MONO, color: T.inkMuted }}>{row.r}%</span>
+                    </td>
+                    <td style={{ padding: "14px 14px", textAlign: "right", fontFamily: FONT_MONO, color: T.inkSoft, borderBottom: `1px solid ${T.borderSoft}` }}>{fmtFCFAfull(m50)}</td>
+                    <td style={{ padding: "14px 14px", textAlign: "right", fontFamily: FONT_MONO, color: T.inkSoft, borderBottom: `1px solid ${T.borderSoft}` }}>{fmtFCFAfull(m75)}</td>
+                    <td style={{ padding: "14px 14px", textAlign: "right", fontFamily: FONT_MONO, color: T.inkSoft, borderBottom: `1px solid ${T.borderSoft}` }}>{fmtFCFAfull(m100)}</td>
+                    <td style={{ padding: "14px 14px", borderBottom: `1px solid ${T.borderSoft}` }}>
+                      <Pill color={row.c} bg={row.c + "18"}>{row.v}</Pill>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </Card>
+    </div>
+  );
+}
+
+// ------- DIVIDENDS -------
+function DividendTab() {
+  const [divInitial, setDivInitial] = useState(200000);
+  const [divMonthly, setDivMonthly] = useState(75000);
+  const [divYears, setDivYears] = useState(15);
+  const [divYield, setDivYield] = useState(8);
+  const [divGrowth, setDivGrowth] = useState(5);
+  const [dripYears, setDripYears] = useState(10);
+  const [taxRate, setTaxRate] = useState(25);
+
+  const dripData = useMemo(() => projectDRIP({
+    initial: divInitial, monthly: divMonthly, years: divYears,
+    yieldPct: divYield, growthDiv: divGrowth, dripYears, taxRate,
+  }), [divInitial, divMonthly, divYears, divYield, divGrowth, dripYears, taxRate]);
+
+  const finalDiv = dripData[dripData.length - 1];
+  const passiveMonthly = finalDiv?.dividendsMonthly || 0;
+
+  const topDiv = [...STOCKS].sort((a, b) => b.yield - a.yield).slice(0, 6);
+
+  return (
+    <div>
+      <PageHeader
+        eyebrow="Simulateur · bloc 3"
+        title="Dividendes & revenus passifs progressifs."
+        description="Le DRIP (Dividend Reinvestment Plan) réinvestit automatiquement chaque coupon perçu les premières années. Puissance du compounding : les dividendes génèrent eux-mêmes des dividendes, qui en génèrent encore."
+      />
+
+      <div style={{ display: "grid", gridTemplateColumns: "360px 1fr", gap: 16, marginBottom: 16 }}>
+        <Card title="Paramètres" icon={Coins}>
+          <Slider label="Capital initial" value={divInitial} setValue={setDivInitial} min={0} max={5_000_000} step={50000} suffix=" F" accent={T.blue}/>
+          <Slider label="DCA mensuel" value={divMonthly} setValue={setDivMonthly} min={25000} max={250000} step={5000} suffix=" F" accent={T.blue}/>
+          <Slider label="Horizon" value={divYears} setValue={setDivYears} min={5} max={25} step={1} suffix=" ans" accent={T.chart3}/>
+          <Slider label="Yield initial moyen" value={divYield} setValue={setDivYield} min={4} max={12} step={0.5} suffix=" %" accent={T.green}/>
+          <Slider label="Croissance div./an" value={divGrowth} setValue={setDivGrowth} min={0} max={15} step={1} suffix=" %" accent={T.green}/>
+          <Slider label="Années DRIP actif" value={dripYears} setValue={setDripYears} min={0} max={divYears} step={1} suffix=" ans" accent={T.chart3}/>
+          <Slider label="Fiscalité totale" value={taxRate} setValue={setTaxRate} min={10} max={40} step={1} suffix=" %" accent={T.red}/>
+        </Card>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14 }}>
+            <MetricCard label="Valeur portefeuille" value={fmtFCFA(finalDiv?.value || 0)} unit="F" deltaLabel={`à ${divYears} ans`} icon={Briefcase} color={T.blue}/>
+            <MetricCard label="Dividendes nets/an" value={fmtFCFA(finalDiv?.dividendsNet || 0)} unit="F" deltaLabel={`fisc. ${taxRate}%`} icon={Coins} color={T.green}/>
+            <div style={{
+              background: T.bgDark,
+              border: `1px solid ${T.bgDark}`,
+              borderRadius: 12,
+              padding: 20,
+              color: T.inkInv,
+              position: "relative", overflow: "hidden",
+            }}>
+              <div style={{
+                position: "absolute", top: -40, right: -40,
+                width: 140, height: 140,
+                background: `radial-gradient(circle, ${passiveMonthly > 50000 ? T.green : T.amber}50, transparent 60%)`,
+                borderRadius: "50%",
+              }}/>
+              <div style={{ position: "relative" }}>
+                <div style={{ fontFamily: FONT_SANS, fontSize: 11, color: "#9CA3AF", fontWeight: 500, letterSpacing: "0.02em", textTransform: "uppercase", marginBottom: 8 }}>Revenu mensuel passif</div>
+                <div style={{ fontFamily: FONT_SANS, fontSize: 28, fontWeight: 700, letterSpacing: "-0.025em", lineHeight: 1, color: passiveMonthly > 50000 ? T.neon : T.amber }}>
+                  {fmtFCFA(passiveMonthly)}
+                </div>
+                <div style={{ fontFamily: FONT_MONO, fontSize: 11, color: "#9CA3AF", marginTop: 4 }}>
+                  F/mois · ≈ {fmtEUR(passiveMonthly * 12) / 12 | 0} €/mois
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <Card title="Valeur + dividendes nets annuels" subtitle="Évolution du portefeuille et des revenus" icon={TrendingUp}>
+            <ResponsiveContainer width="100%" height={300}>
+              <ComposedChart data={dripData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="dG" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor={T.blue} stopOpacity={0.25}/>
+                    <stop offset="100%" stopColor={T.blue} stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid stroke={T.borderSoft} vertical={false} strokeDasharray="3 3"/>
+                <XAxis dataKey="year" stroke={T.inkDim} tick={{ fontSize: 11, fontFamily: FONT_MONO, fill: T.inkMuted }} axisLine={false} tickLine={false}/>
+                <YAxis yAxisId="left" stroke={T.inkDim} tick={{ fontSize: 11, fontFamily: FONT_MONO, fill: T.inkMuted }} tickFormatter={fmtFCFA} axisLine={false} tickLine={false}/>
+                <YAxis yAxisId="right" orientation="right" stroke={T.green} tick={{ fontSize: 11, fontFamily: FONT_MONO, fill: T.green }} tickFormatter={fmtFCFA} axisLine={false} tickLine={false}/>
+                <Tooltip content={<ChartTooltip />}/>
+                <Legend wrapperStyle={{ fontFamily: FONT_SANS, fontSize: 12, paddingTop: 10 }}/>
+                <Area yAxisId="left" type="monotone" dataKey="value" stroke={T.blue} strokeWidth={2.5} fill="url(#dG)" name="Valeur portefeuille"/>
+                <Bar yAxisId="right" dataKey="dividendsNet" fill={T.green} name="Dividendes nets" radius={[4, 4, 0, 0]} opacity={0.9}/>
+              </ComposedChart>
+            </ResponsiveContainer>
+          </Card>
+        </div>
+      </div>
+
+      <Card title="Top 6 signatures dividende BRVM" subtitle="Tri par yield · avril 2026" icon={Coins}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14 }}>
+          {topDiv.map(s => (
+            <div key={s.ticker} style={{
+              padding: 20,
+              background: T.bgSubtle,
+              border: `1px solid ${T.borderSoft}`,
+              borderRadius: 12,
+              position: "relative", overflow: "hidden",
+            }}>
+              <div style={{
+                position: "absolute", top: 16, right: 16,
+                padding: "3px 10px",
+                background: `${SECTOR_COLORS[s.sector]}18`,
+                borderRadius: 999,
+                fontFamily: FONT_MONO, fontSize: 10, color: SECTOR_COLORS[s.sector], fontWeight: 600,
+              }}>{s.sector}</div>
+              <div style={{ fontSize: 20, marginBottom: 8 }}>{s.flag}</div>
+              <div style={{ fontFamily: FONT_SANS, fontSize: 13, color: T.inkMuted, fontWeight: 500, marginBottom: 2 }}>{s.ticker}</div>
+              <div style={{ fontFamily: FONT_SANS, fontSize: 18, color: T.ink, fontWeight: 700, letterSpacing: "-0.015em", marginBottom: 14 }}>{s.name}</div>
+              <div style={{
+                display: "flex", alignItems: "baseline", gap: 4,
+                padding: "10px 12px",
+                background: T.bgCard,
+                borderRadius: 8,
+                marginBottom: 10,
+              }}>
+                <div style={{ fontFamily: FONT_SANS, fontSize: 28, fontWeight: 700, color: T.green, letterSpacing: "-0.025em", lineHeight: 1 }}>{s.yield}</div>
+                <div style={{ fontFamily: FONT_SANS, fontSize: 13, color: T.inkMuted }}>% yield</div>
+              </div>
+              <div style={{ display: "flex", gap: 6 }}>
+                <Pill color={T.inkSoft} bg={T.bgSoft}>P/E {s.pe}</Pill>
+                <Pill color={s.moat === "Fort" ? T.green : T.blue} bg={s.moat === "Fort" ? T.greenSoft : T.blueSoft}>{s.moat}</Pill>
+                <Pill color={s.risk > 5 ? T.red : s.risk > 3 ? T.amber : T.green} bg={s.risk > 5 ? T.redSoft : s.risk > 3 ? T.amberSoft : T.greenSoft}>
+                  Risque {s.risk}
+                </Pill>
+              </div>
+            </div>
+          ))}
+        </div>
+      </Card>
+    </div>
+  );
+}
+
+// ------- PORTFOLIO -------
+function PortfolioTab() {
+  const [weights, setWeights] = useState(
+    STOCKS.reduce((acc, s) => ({ ...acc, [s.ticker]: s.conviction }), {})
+  );
+  const totalWeight = Object.values(weights).reduce((a, b) => a + b, 0);
+  const updateWeight = (t, v) => setWeights(p => ({ ...p, [t]: v }));
+
+  const stats = useMemo(() => {
+    let yW = 0, pW = 0, rW = 0, tot = 0;
+    const secMap = {};
+    STOCKS.forEach(s => {
+      const w = weights[s.ticker] || 0;
+      tot += w; yW += s.yield * w; pW += s.pe * w; rW += s.risk * w;
+      secMap[s.sector] = (secMap[s.sector] || 0) + w;
+    });
+    return {
+      yield: tot > 0 ? (yW / tot).toFixed(2) : 0,
+      pe: tot > 0 ? (pW / tot).toFixed(1) : 0,
+      risk: tot > 0 ? (rW / tot).toFixed(1) : 0,
+      sectors: Object.entries(secMap).map(([name, value]) => ({ name, value })).filter(s => s.value > 0),
+    };
+  }, [weights]);
+
+  const pieData = STOCKS.filter(s => weights[s.ticker] > 0).map(s => ({
+    name: s.ticker, value: weights[s.ticker], sector: s.sector,
+  }));
+  const reset = () => setWeights(STOCKS.reduce((a, s) => ({ ...a, [s.ticker]: s.conviction }), {}));
+
+  return (
+    <div>
+      <PageHeader
+        eyebrow="Simulateur · bloc 4"
+        title="Constructeur de portefeuille interactif."
+        description="Ajustez les pondérations avec les curseurs. Les métriques — yield pondéré, P/E moyen, risque global, répartition sectorielle — se recalculent en temps réel. Cible : 100% total."
+      />
+
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 14, marginBottom: 16 }}>
+        <MetricCard label="Pondération totale" value={totalWeight} unit="%"
+          deltaLabel={totalWeight === 100 ? "✓ équilibré" : totalWeight < 100 ? `${100 - totalWeight}% à allouer` : `${totalWeight - 100}% en excès`}
+          icon={PieIcon}
+          color={totalWeight === 100 ? T.green : totalWeight > 100 ? T.red : T.amber}
+        />
+        <MetricCard label="Yield pondéré" value={stats.yield} unit="%" icon={Coins} color={T.green}/>
+        <MetricCard label="P/E pondéré" value={stats.pe} icon={Calculator} color={T.blue}/>
+        <MetricCard label="Risque moyen" value={stats.risk} unit="/10" icon={Gauge}
+          color={parseFloat(stats.risk) > 5 ? T.red : parseFloat(stats.risk) > 4 ? T.amber : T.green}
+        />
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1.3fr 1fr", gap: 16, marginBottom: 16 }}>
+        <Card title="Pondérations par titre" subtitle="Glissez pour ajuster" icon={Briefcase}
+          action={<button onClick={reset} style={{
+            padding: "6px 12px",
+            background: T.bgSoft,
+            border: `1px solid ${T.border}`,
+            borderRadius: 8,
+            color: T.inkSoft,
+            fontFamily: FONT_SANS, fontSize: 12, fontWeight: 600,
+            cursor: "pointer",
+          }}>Réinitialiser</button>}
+        >
+          {STOCKS.map(s => (
+            <div key={s.ticker} style={{
+              padding: "14px 0",
+              borderBottom: `1px solid ${T.borderSoft}`,
+            }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <div style={{
+                    width: 30, height: 30, borderRadius: 8,
+                    background: SECTOR_COLORS[s.sector] + "18",
+                    display: "grid", placeItems: "center", fontSize: 14,
+                  }}>{s.flag}</div>
+                  <div>
+                    <div>
+                      <span style={{ fontFamily: FONT_MONO, fontSize: 12, color: T.blue, fontWeight: 700, letterSpacing: "0.02em" }}>{s.ticker}</span>
+                      <span style={{ fontFamily: FONT_SANS, fontSize: 13, color: T.ink, marginLeft: 8, fontWeight: 500 }}>{s.name}</span>
+                    </div>
+                    <div style={{ fontFamily: FONT_MONO, fontSize: 10, color: T.inkDim, marginTop: 1 }}>{s.sector} · {s.country} · {s.yield}%</div>
+                  </div>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <Pill color={s.change >= 0 ? T.green : T.red} bg={s.change >= 0 ? T.greenSoft : T.redSoft}>
+                    {fmtPct(s.change)}
+                  </Pill>
+                  <div style={{ fontFamily: FONT_MONO, fontSize: 14, color: T.ink, fontWeight: 700, minWidth: 40, textAlign: "right" }}>{weights[s.ticker]}%</div>
+                </div>
+              </div>
+              <div style={{ position: "relative", height: 4, marginTop: 4 }}>
+                <div style={{ position: "absolute", inset: 0, background: T.bgSoft, borderRadius: 999 }}/>
+                <div style={{
+                  position: "absolute", left: 0, top: 0, bottom: 0,
+                  width: `${(weights[s.ticker] / 30) * 100}%`,
+                  background: SECTOR_COLORS[s.sector] || T.blue,
+                  borderRadius: 999,
+                }}/>
+                <input
+                  type="range"
+                  min={0} max={30} step={1}
+                  value={weights[s.ticker]}
+                  onChange={e => updateWeight(s.ticker, Number(e.target.value))}
+                  style={{
+                    position: "absolute", inset: 0,
+                    width: "100%", height: "100%",
+                    opacity: 0, cursor: "pointer",
+                  }}
+                />
+              </div>
+            </div>
+          ))}
+        </Card>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          <Card title="Répartition par titre" icon={PieIcon}>
+            <ResponsiveContainer width="100%" height={220}>
+              <PieChart>
+                <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%"
+                  innerRadius={55} outerRadius={90}
+                  paddingAngle={3}
+                  label={({ name, value }) => `${name} ${value}%`}
+                  labelLine={false}
+                  style={{ fontFamily: FONT_MONO, fontSize: 10 }}
+                >
+                  {pieData.map((e, i) => (
+                    <Cell key={i} fill={SECTOR_COLORS[e.sector] || T.blue} stroke={T.bgCard} strokeWidth={2}/>
+                  ))}
+                </Pie>
+                <Tooltip content={<ChartTooltip />}/>
+              </PieChart>
+            </ResponsiveContainer>
+          </Card>
+
+          <Card title="Allocation sectorielle" icon={BarChart3}>
+            <ResponsiveContainer width="100%" height={200}>
+              <BarChart data={stats.sectors} layout="vertical" margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+                <CartesianGrid stroke={T.borderSoft} horizontal={false} strokeDasharray="3 3"/>
+                <XAxis type="number" stroke={T.inkDim} tick={{ fontSize: 10, fontFamily: FONT_MONO, fill: T.inkMuted }} axisLine={false} tickLine={false}/>
+                <YAxis type="category" dataKey="name" stroke={T.inkDim} tick={{ fontSize: 11, fontFamily: FONT_SANS, fill: T.inkSoft, fontWeight: 500 }} width={95} axisLine={false} tickLine={false}/>
+                <Tooltip content={<ChartTooltip />}/>
+                <Bar dataKey="value" radius={[0, 6, 6, 0]}>
+                  {stats.sectors.map((e, i) => (
+                    <Cell key={i} fill={SECTOR_COLORS[e.name] || T.blue}/>
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </Card>
+        </div>
+      </div>
+
+      <Card title="Univers BRVM" subtitle="Screening complet · 10 titres sélectionnés" icon={Layers}>
+        <div style={{ overflowX: "auto" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", fontFamily: FONT_SANS, fontSize: 12 }}>
+            <thead>
+              <tr>
+                {["Ticker", "Société", "Pays", "Secteur", "Cours", "P/E", "Yield", "Change", "Risque", "Moat", "FCP"].map(h => (
+                  <th key={h} style={{
+                    padding: "10px 12px",
+                    textAlign: h === "Société" || h === "Pays" || h === "Secteur" ? "left" : "right",
+                    fontFamily: FONT_SANS, fontSize: 11, color: T.inkMuted,
+                    fontWeight: 600, letterSpacing: "0.02em", textTransform: "uppercase",
+                    borderBottom: `1px solid ${T.border}`,
+                  }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {STOCKS.map((s, i) => (
+                <tr key={s.ticker} style={{ transition: "background 0.15s" }}
+                  onMouseEnter={e => e.currentTarget.style.background = T.bgSubtle}
+                  onMouseLeave={e => e.currentTarget.style.background = "transparent"}
+                >
+                  <td style={{ padding: "12px 12px", color: T.blue, fontFamily: FONT_MONO, fontWeight: 700, letterSpacing: "0.02em", borderBottom: `1px solid ${T.borderSoft}` }}>{s.ticker}</td>
+                  <td style={{ padding: "12px 12px", color: T.ink, fontWeight: 500, borderBottom: `1px solid ${T.borderSoft}` }}>{s.name}</td>
+                  <td style={{ padding: "12px 12px", color: T.inkSoft, borderBottom: `1px solid ${T.borderSoft}` }}>{s.flag} {s.country}</td>
+                  <td style={{ padding: "12px 12px", borderBottom: `1px solid ${T.borderSoft}` }}>
+                    <Pill color={SECTOR_COLORS[s.sector]} bg={SECTOR_COLORS[s.sector] + "18"}>{s.sector}</Pill>
+                  </td>
+                  <td style={{ padding: "12px 12px", textAlign: "right", fontFamily: FONT_MONO, color: T.inkSoft, borderBottom: `1px solid ${T.borderSoft}` }}>{fmtFCFAfull(s.price)}</td>
+                  <td style={{ padding: "12px 12px", textAlign: "right", fontFamily: FONT_MONO, color: T.inkSoft, borderBottom: `1px solid ${T.borderSoft}` }}>{s.pe}</td>
+                  <td style={{ padding: "12px 12px", textAlign: "right", fontFamily: FONT_MONO, color: T.green, fontWeight: 700, borderBottom: `1px solid ${T.borderSoft}` }}>{s.yield}%</td>
+                  <td style={{ padding: "12px 12px", textAlign: "right", borderBottom: `1px solid ${T.borderSoft}` }}>
+                    <Pill color={s.change >= 0 ? T.green : T.red} bg={s.change >= 0 ? T.greenSoft : T.redSoft}>{fmtPct(s.change)}</Pill>
+                  </td>
+                  <td style={{ padding: "12px 12px", textAlign: "right", fontFamily: FONT_MONO, color: s.risk > 5 ? T.red : s.risk > 3 ? T.amber : T.green, fontWeight: 600, borderBottom: `1px solid ${T.borderSoft}` }}>{s.risk}/10</td>
+                  <td style={{ padding: "12px 12px", textAlign: "right", color: s.moat === "Fort" ? T.green : T.inkSoft, fontWeight: 500, borderBottom: `1px solid ${T.borderSoft}` }}>{s.moat}</td>
+                  <td style={{ padding: "12px 12px", textAlign: "right", borderBottom: `1px solid ${T.borderSoft}` }}>
+                    <Pill color={s.fcpOverlap === "Non" ? T.green : s.fcpOverlap === "Complém." ? T.blue : T.amber}
+                      bg={s.fcpOverlap === "Non" ? T.greenSoft : s.fcpOverlap === "Complém." ? T.blueSoft : T.amberSoft}>
+                      {s.fcpOverlap}
+                    </Pill>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Card>
+    </div>
+  );
+}
+
+// ------- STRATEGY -------
+function StrategyTab() {
+  const calendar = [
+    { m: "M1", month: "mai",   main: "SNTS", units: "1 × 29 000", second: "CIEC", second2: "6 × 3 400", logic: "Initier cœur télécoms + utility" },
+    { m: "M2", month: "juin",  main: "ORAC", units: "3 × 15 000", second: "ETIT", second2: "100 × 34", logic: "Télécoms #1 + sonde Ecobank" },
+    { m: "M3", month: "juil.", main: "BOAB", units: "8 × 5 965",  second: "—", second2: "—", logic: "BOA Bénin post-détachement (9,4%)" },
+    { m: "M4", month: "août",  main: "CIEC", units: "9 × 3 400",  second: "SDCC", second2: "2 × 7 400", logic: "Utilities avant détach. SODECI sept." },
+    { m: "M5", month: "sept.", main: "SNTS", units: "1 × 29 000", second: "CIEC", second2: "5 × 3 400", logic: "Renforcer cœur sur consolidation" },
+    { m: "M6", month: "oct.",  main: "PALC", units: "5 × 8 150",  second: "—", second2: "—", logic: "Diversification agro (satellite)" },
+    { m: "M7", month: "nov.",  main: "ORAC", units: "3 × 15 000", second: "—", second2: "—", logic: "Renforcer #1 capi marché" },
+    { m: "M8", month: "déc.",  main: "SDCC", units: "6 × 7 400",  second: "—", second2: "—", logic: "Water utility défensif fin d'année" },
+    { m: "M9", month: "janv.", main: "SNTS", units: "1 × 29 000", second: "BOAS", second2: "3 × 6 850", logic: "Nouvelle année — signatures rdt" },
+    { m: "M10", month: "févr.",main: "CIEC", units: "14 × 3 400", second: "—", second2: "—", logic: "Full CIE — liquidité/prix idéal" },
+    { m: "M11", month: "mars", main: "SPHC", units: "6 × 7 300",  second: "—", second2: "—", logic: "SAPH — avant AGO" },
+    { m: "M12", month: "avr.", main: "ORAC", units: "3 × 15 000", second: "—", second2: "—", logic: "Fin cycle — renforcer leader" },
+  ];
+
+  return (
+    <div>
+      <PageHeader
+        eyebrow="Playbook · bloc 2"
+        title="Calendrier d'exécution & règles tactiques."
+        description="Plan opérationnel pour DCA 50k FCFA/mois la première année, aligné sur le calendrier des détachements de dividendes BRVM, les règles de priorisation et les plafonds de rééquilibrage."
+      />
+
+      <Card title="Calendrier 12 mois" subtitle="DCA 50k FCFA · scénario conservateur" icon={Clock} style={{ marginBottom: 16 }}>
+        <div style={{ overflowX: "auto" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", fontFamily: FONT_SANS, fontSize: 12 }}>
+            <thead>
+              <tr>
+                {["Mois", "Principal", "Units × Prix", "Complément.", "Units × Prix", "Logique"].map((h, i) => (
+                  <th key={i} style={{
+                    padding: "10px 12px", textAlign: "left",
+                    fontFamily: FONT_SANS, fontSize: 11, color: T.inkMuted, fontWeight: 600,
+                    letterSpacing: "0.02em", textTransform: "uppercase",
+                    borderBottom: `1px solid ${T.border}`,
+                  }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {calendar.map((r, i) => (
+                <tr key={i} style={{ transition: "background 0.15s" }}
+                  onMouseEnter={e => e.currentTarget.style.background = T.bgSubtle}
+                  onMouseLeave={e => e.currentTarget.style.background = "transparent"}
+                >
+                  <td style={{ padding: "12px 12px", borderBottom: `1px solid ${T.borderSoft}` }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <div style={{
+                        width: 28, height: 28, borderRadius: 8,
+                        background: T.bgDark, color: T.inkInv,
+                        display: "grid", placeItems: "center",
+                        fontFamily: FONT_MONO, fontSize: 11, fontWeight: 700,
+                      }}>{r.m}</div>
+                      <span style={{ fontFamily: FONT_SANS, fontSize: 12, color: T.inkMuted, fontWeight: 500 }}>{r.month}</span>
+                    </div>
+                  </td>
+                  <td style={{ padding: "12px 12px", borderBottom: `1px solid ${T.borderSoft}` }}>
+                    <span style={{
+                      fontFamily: FONT_MONO, fontSize: 12, color: T.blue, fontWeight: 700,
+                      background: T.blueSoft, padding: "3px 8px", borderRadius: 6,
+                    }}>{r.main}</span>
+                  </td>
+                  <td style={{ padding: "12px 12px", fontFamily: FONT_MONO, fontSize: 11, color: T.inkSoft, borderBottom: `1px solid ${T.borderSoft}` }}>{r.units}</td>
+                  <td style={{ padding: "12px 12px", borderBottom: `1px solid ${T.borderSoft}` }}>
+                    {r.second === "—" ? (
+                      <span style={{ color: T.inkDim }}>—</span>
+                    ) : (
+                      <span style={{ fontFamily: FONT_MONO, fontSize: 12, color: T.chart3, fontWeight: 700, background: "#EDE9FE", padding: "3px 8px", borderRadius: 6 }}>{r.second}</span>
+                    )}
+                  </td>
+                  <td style={{ padding: "12px 12px", fontFamily: FONT_MONO, fontSize: 11, color: T.inkSoft, borderBottom: `1px solid ${T.borderSoft}` }}>{r.second2}</td>
+                  <td style={{ padding: "12px 12px", color: T.inkMuted, fontStyle: "italic", borderBottom: `1px solid ${T.borderSoft}` }}>{r.logic}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Card>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+        <Card title="Règles de priorisation mensuelle" subtitle="Ordre de décision" icon={Compass}>
+          {[
+            { n: "01", title: "Fenêtre dividende imminente", desc: "Si un titre cœur est à ≤ 30 jours d'un détachement et que son cours n'a pas dérivé de +5% vs moyenne 3 mois, le prioriser." },
+            { n: "02", title: "Décote technique", desc: "Si un titre cœur recule de -8% vs moyenne 3 mois sans dégradation fondamentale, renforcer pour moyenner à la baisse." },
+            { n: "03", title: "Équilibrage sectoriel", desc: "Aucun secteur > 35% du portefeuille direct. Si dépassement, basculer vers un autre secteur." },
+            { n: "04", title: "Rotation par défaut", desc: "SNTS → ORAC → Utility → Banque hors CI → Satellite. Ordonner selon le calendrier annuel." },
+          ].map(r => (
+            <div key={r.n} style={{
+              padding: "16px 0",
+              borderBottom: `1px solid ${T.borderSoft}`,
+              display: "flex", gap: 14,
+            }}>
+              <div style={{
+                width: 38, height: 38, flexShrink: 0,
+                borderRadius: 10,
+                background: `linear-gradient(135deg, ${T.blue}, ${T.indigo})`,
+                color: T.inkInv,
+                fontFamily: FONT_MONO, fontSize: 14, fontWeight: 700,
+                display: "grid", placeItems: "center",
+                letterSpacing: "-0.02em",
+              }}>{r.n}</div>
+              <div>
+                <div style={{ fontFamily: FONT_SANS, fontSize: 14, color: T.ink, fontWeight: 600, marginBottom: 4, letterSpacing: "-0.01em" }}>{r.title}</div>
+                <div style={{ fontFamily: FONT_SANS, fontSize: 12, color: T.inkMuted, lineHeight: 1.55 }}>{r.desc}</div>
+              </div>
+            </div>
+          ))}
+        </Card>
+
+        <Card title="Plafonds de rééquilibrage" subtitle="Revue semestrielle · juin & décembre" icon={Gauge}>
+          {[
+            { label: "Par ligne individuelle", value: "20%", desc: "Max d'une position dans le portefeuille direct.", color: T.blue },
+            { label: "Par secteur direct", value: "35%", desc: "SF ≤ 30% car FCP BAM déjà à 43% SF.", color: T.chart3 },
+            { label: "Côte d'Ivoire", value: "60%", desc: "Dominante autorisée, jamais monopole.", color: T.green },
+            { label: "Zone AES combinée", value: "5%", desc: "Burkina + Mali + Niger — risque souverain.", color: T.red },
+            { label: "Cash tactique", value: "5-10%", desc: "Pour saisir corrections de -15% à -25%.", color: T.amber },
+          ].map((r, i, arr) => (
+            <div key={r.label} style={{
+              display: "flex", justifyContent: "space-between", alignItems: "flex-start",
+              padding: "16px 0",
+              borderBottom: i < arr.length - 1 ? `1px solid ${T.borderSoft}` : "none",
+            }}>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontFamily: FONT_SANS, fontSize: 13, color: T.ink, fontWeight: 600, marginBottom: 3, letterSpacing: "-0.01em" }}>{r.label}</div>
+                <div style={{ fontFamily: FONT_SANS, fontSize: 12, color: T.inkMuted, lineHeight: 1.5 }}>{r.desc}</div>
+              </div>
+              <div style={{
+                padding: "6px 14px",
+                background: r.color + "18",
+                color: r.color,
+                fontFamily: FONT_SANS, fontSize: 16, fontWeight: 700,
+                borderRadius: 8, letterSpacing: "-0.02em",
+                marginLeft: 14,
+              }}>{r.value}</div>
+            </div>
+          ))}
+        </Card>
+      </div>
+    </div>
+  );
+}
+
+// ------- RISKS & IPS -------
+function RisksTab() {
+  const risks = [
+    { title: "Sahel / AES", severity: "Élevé", sevColor: T.red, desc: "AES hors CEDEAO depuis 2024, instabilité persistante.", mit: "Plafond 5% combiné BOA Burkina+Mali+Niger, éviter ONATEL Burkina, ORGT." },
+    { title: "Réforme ECO / FCFA flottant", severity: "Modéré", sevColor: T.amber, desc: "Projet relancé depuis 2019, dévaluation possible -15 à -25%.", mit: "Hedge naturel PALC + SPHC (ventes USD). Obligations ECO double-cotées Lux." },
+    { title: "Fiscalité France", severity: "Modéré", sevColor: T.amber, desc: "PFU 30% stable mais contesté politiquement.", mit: "Suivi LF annuel. Anticiper retour résidence Sénégal phase 4." },
+    { title: "Faillite SGI / Cyber", severity: "Faible", sevColor: T.blue, desc: "FGI agréée CREPMF, mais portefeuille 50-100M mérite diligence.", mit: "Titres nominatif pur au DC/BR. Diversifier 2 SGI dès 30M FCFA." },
+    { title: "Choc systémique global", severity: "Élevé", sevColor: T.red, desc: "BRVM -30% en mars 2020. Un choc similaire probable sur 20 ans.", mit: "Cash tactique 5-10% pour renforcer sur -15% à -25%." },
+    { title: "Risque vie personnelle", severity: "Certain", sevColor: T.inkMuted, desc: "Mariage, enfants, immobilier modifient l'équation financière.", mit: "Cloisonner : BRVM ≠ épargne précaution ≠ projet immo. 6-12 mois charges liquides." },
+  ];
+
+  const ipsRules = [
+    { n: "01", title: "Automatiser le DCA", desc: "Virement auto mensuel vers FGI dès salaire (J+1). Ratio fixe 15-20% du net.", color: T.blue },
+    { n: "02", title: "Revaloriser annuellement", desc: "Chaque 1er janvier, revoir le DCA à la hausse. +10 à +20%/an les 10 premières années.", color: T.chart3 },
+    { n: "03", title: "Concentrer avec l'âge", desc: "10-12 lignes phase 1-2 → 6-8 lignes phase 3-4. Simplifier progressivement.", color: T.green },
+    { n: "04", title: "DRIP jusqu'à 41-44 ans", desc: "Ne pas prélever de dividendes avant. Le compounding fait la différence 50M vs 90M.", color: T.amber },
+    { n: "05", title: "Anti-fragilité comportementale", desc: "Ne jamais liquider pour motif émotionnel. Préserver la discipline du cycle long.", color: T.red },
+    { n: "06", title: "Revue triennale", desc: "À 32, 35, 38, 41, 44, 47 ans. Ajuster la tactique, jamais la stratégie fondamentale.", color: T.chart5 },
+    { n: "07", title: "Documenter les ordres", desc: "Journal d'investissement : date, ticker, units, prix, thèse 3 phrases. Actif stratégique sur 20 ans.", color: T.chart6 },
+  ];
+
+  const glidePath = [
+    { phase: "P1 — 29→34", actions: 95, obligations: 0, cash: 5 },
+    { phase: "P2 — 34→39", actions: 90, obligations: 5, cash: 5 },
+    { phase: "P3 — 39→44", actions: 80, obligations: 15, cash: 5 },
+    { phase: "P4 — 44→49", actions: 65, obligations: 25, cash: 10 },
+  ];
+
+  return (
+    <div>
+      <PageHeader
+        eyebrow="Gouvernance · bloc 5"
+        title="Risques & Investment Policy Statement."
+        description="L'IPS codifie votre discipline sur 20 ans. C'est ce qui vous protège contre vos propres émotions quand le marché chute de 30% — mathématiquement, le facteur qui fait la différence entre atteindre 50M et 100M."
+      />
+
+      <Card title="Glide path 20 ans" subtitle="Évolution de l'allocation par phase de carrière" icon={Gauge} style={{ marginBottom: 16 }}>
+        <ResponsiveContainer width="100%" height={280}>
+          <BarChart data={glidePath} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+            <CartesianGrid stroke={T.borderSoft} vertical={false} strokeDasharray="3 3"/>
+            <XAxis dataKey="phase" stroke={T.inkDim} tick={{ fontSize: 12, fontFamily: FONT_SANS, fill: T.inkSoft, fontWeight: 500 }} axisLine={false} tickLine={false}/>
+            <YAxis stroke={T.inkDim} tick={{ fontSize: 11, fontFamily: FONT_MONO, fill: T.inkMuted }} axisLine={false} tickLine={false}/>
+            <Tooltip content={<ChartTooltip />}/>
+            <Legend wrapperStyle={{ fontFamily: FONT_SANS, fontSize: 12, paddingTop: 10 }}/>
+            <Bar dataKey="actions"     stackId="a" fill={T.blue}  name="Actions BRVM"/>
+            <Bar dataKey="obligations" stackId="a" fill={T.chart3} name="Obligations UMOA"/>
+            <Bar dataKey="cash"        stackId="a" fill={T.inkDim} name="Cash tactique" radius={[6, 6, 0, 0]}/>
+          </BarChart>
+        </ResponsiveContainer>
+      </Card>
+
+      <Card title="Cartographie des risques 15-20 ans" subtitle="Identification & mitigation" icon={ShieldAlert} style={{ marginBottom: 16 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14 }}>
+          {risks.map((r, i) => (
+            <div key={i} style={{
+              padding: 18,
+              background: T.bgSubtle,
+              border: `1px solid ${T.borderSoft}`,
+              borderRadius: 12,
+              borderTop: `3px solid ${r.sevColor}`,
+            }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                <div style={{ fontFamily: FONT_SANS, fontSize: 15, color: T.ink, fontWeight: 600, letterSpacing: "-0.01em" }}>{r.title}</div>
+                <Pill color={r.sevColor} bg={r.sevColor + "18"}>{r.severity}</Pill>
+              </div>
+              <div style={{ fontFamily: FONT_SANS, fontSize: 12, color: T.inkMuted, lineHeight: 1.5, marginBottom: 12 }}>{r.desc}</div>
+              <div style={{
+                padding: "10px 12px",
+                background: T.greenSoft,
+                borderRadius: 8,
+                display: "flex", gap: 8, alignItems: "flex-start",
+              }}>
+                <CheckCircle2 size={14} color={T.green} style={{ flexShrink: 0, marginTop: 2 }}/>
+                <div style={{ fontFamily: FONT_SANS, fontSize: 11, color: T.inkSoft, lineHeight: 1.5 }}>{r.mit}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </Card>
+
+      <Card title="IPS — Les 7 règles à graver" subtitle="Document d'ancrage 20 ans" icon={BookOpen}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 14 }}>
+          {ipsRules.map(r => (
+            <div key={r.n} style={{
+              display: "flex", gap: 14, alignItems: "flex-start",
+              padding: 18,
+              background: T.bgSubtle,
+              border: `1px solid ${T.borderSoft}`,
+              borderRadius: 12,
+              transition: "all 0.15s",
+              cursor: "default",
+            }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = r.color; e.currentTarget.style.background = T.bgCard; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = T.borderSoft; e.currentTarget.style.background = T.bgSubtle; }}
+            >
+              <div style={{
+                width: 44, height: 44, flexShrink: 0,
+                borderRadius: 10,
+                background: r.color + "18", color: r.color,
+                fontFamily: FONT_MONO, fontSize: 15, fontWeight: 700,
+                display: "grid", placeItems: "center",
+                letterSpacing: "-0.02em",
+              }}>{r.n}</div>
+              <div>
+                <div style={{ fontFamily: FONT_SANS, fontSize: 14, color: T.ink, fontWeight: 600, marginBottom: 4, letterSpacing: "-0.01em" }}>{r.title}</div>
+                <div style={{ fontFamily: FONT_SANS, fontSize: 12, color: T.inkMuted, lineHeight: 1.55 }}>{r.desc}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div style={{
+          marginTop: 24, padding: 28,
+          background: T.bgDark,
+          borderRadius: 12,
+          color: T.inkInv,
+          position: "relative", overflow: "hidden",
+        }}>
+          <div style={{
+            position: "absolute", top: -60, right: -60,
+            width: 200, height: 200,
+            background: `radial-gradient(circle, ${T.blue}40, transparent 65%)`,
+            borderRadius: "50%",
+          }}/>
+          <div style={{
+            position: "absolute", bottom: -60, left: -60,
+            width: 200, height: 200,
+            background: `radial-gradient(circle, ${T.chart3}40, transparent 65%)`,
+            borderRadius: "50%",
+          }}/>
+          <div style={{ position: "relative", textAlign: "center" }}>
+            <div style={{ fontFamily: FONT_MONO, fontSize: 10, color: "#93C5FD", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 14 }}>Principe fondateur</div>
+            <div style={{
+              fontFamily: FONT_SANS, fontSize: 24, fontWeight: 500,
+              lineHeight: 1.4, letterSpacing: "-0.02em",
+              maxWidth: 760, margin: "0 auto",
+              fontStyle: "italic",
+            }}>
+              « Votre meilleur atout à 29 ans n'est pas le stock picking.<br/>C'est le <span style={{ background: `linear-gradient(90deg, ${T.blue}, ${T.neon})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", fontWeight: 700 }}>temps</span>. »
+            </div>
+          </div>
+        </div>
+      </Card>
+    </div>
+  );
+}
+
+// ============================================================
+// MAIN
+// ============================================================
+export default function Dashboard() {
+  const [tab, setTab] = useState("overview");
+
+  useEffect(() => {
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = "https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap";
+    document.head.appendChild(link);
+    return () => { document.head.removeChild(link); };
+  }, []);
+
+  const Content = () => {
+    switch (tab) {
+      case "overview":  return <OverviewTab />;
+      case "dca":       return <DCATab />;
+      case "target":    return <TargetTab />;
+      case "dividends": return <DividendTab />;
+      case "portfolio": return <PortfolioTab />;
+      case "strategy":  return <StrategyTab />;
+      case "risks":     return <RisksTab />;
+      default: return <OverviewTab />;
+    }
+  };
+
+  return (
+    <div style={{
+      minHeight: "100vh",
+      background: T.bg,
+      color: T.ink,
+      fontFamily: FONT_SANS,
+    }}>
+      <Nav tab={tab} setTab={setTab}/>
+      <main style={{
+        maxWidth: 1440, margin: "0 auto",
+        padding: "40px 28px 80px",
+      }}>
+        <Content />
+      </main>
+      <footer style={{
+        maxWidth: 1440, margin: "0 auto",
+        padding: "32px 28px",
+        borderTop: `1px solid ${T.border}`,
+        display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 16,
+      }}>
+        <div style={{
+          fontFamily: FONT_SANS, fontSize: 12, color: T.inkMuted,
+        }}>
+          <strong style={{ color: T.ink }}>Baobab Capital</strong> · BRVM Intelligence Platform
+        </div>
+        <div style={{
+          fontFamily: FONT_MONO, fontSize: 11, color: T.inkDim,
+        }}>
+          Sources : BOC BRVM · SikaFinance · FluxBourse · UMOA-Titres · avril 2026
+        </div>
+      </footer>
+    </div>
+  );
+}
