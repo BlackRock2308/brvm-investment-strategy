@@ -1,31 +1,44 @@
 import React from "react";
-import { Clock, Compass, Gauge, Layers, ShieldCheck } from "lucide-react";
+import { Clock, Compass, Gauge, Briefcase, Target, CheckCircle2, AlertCircle } from "lucide-react";
 import { T, FONT_SANS, FONT_MONO } from "../../theme";
+import { fmtFCFAfull } from "../../utils/format";
 import useResponsive from "../../hooks/useResponsive";
 
 import PageHeader from "../ui/PageHeader";
 import Card from "../ui/Card";
+import Pill from "../ui/Pill";
+
+const startingLines = [
+  { ticker: "SNTS", name: "Sonatel",     qty: 1,  value: 29000,  held: true },
+  { ticker: "CIEC", name: "CIE",         qty: 7,  value: 23800,  held: true },
+  { ticker: "ORAC", name: "Orange CI",   qty: 0,  value: 0,      held: false },
+  { ticker: "BOAB", name: "BOA Bénin",   qty: 0,  value: 0,      held: false },
+  { ticker: "SGBC", name: "SGBCI",       qty: 0,  value: 0,      held: false },
+];
 
 const calendar = [
-  { m: "M1",  month: "mai",   main: "SNTS", units: "1 × 29 000", second: "CIEC",  second2: "6 × 3 400", logic: "Initier cœur télécoms + utility" },
-  { m: "M2",  month: "juin",  main: "ORAC", units: "3 × 15 000", second: "—",     second2: "—",          logic: "Renforcer #1 capitalisation marché" },
-  { m: "M3",  month: "juil.", main: "BOAB", units: "8 × 5 965",  second: "—",     second2: "—",          logic: "BOA Bénin post-détachement (yield 9,4%)" },
-  { m: "M4",  month: "août",  main: "CIEC", units: "9 × 3 400",  second: "SGBC",  second2: "1 × 31 000", logic: "Doubler sur utilities + initier SGBC" },
-  { m: "M5",  month: "sept.", main: "SNTS", units: "1 × 29 000", second: "CIEC",  second2: "5 × 3 400",  logic: "Renforcer cœur sur consolidation" },
-  { m: "M6",  month: "oct.",  main: "SGBC", units: "1 × 31 000", second: "BOAB",  second2: "3 × 5 965",  logic: "Banques — profiter de la saisonnalité Q4" },
-  { m: "M7",  month: "nov.",  main: "ORAC", units: "3 × 15 000", second: "—",     second2: "—",          logic: "Renforcer Orange CI avant résultats" },
-  { m: "M8",  month: "déc.",  main: "CIEC", units: "14 × 3 400", second: "—",     second2: "—",          logic: "CIE — plein sur utility défensive fin d'année" },
-  { m: "M9",  month: "janv.", main: "SNTS", units: "1 × 29 000", second: "BOAB",  second2: "3 × 5 965",  logic: "Nouvelle année — signatures de rendement" },
-  { m: "M10", month: "févr.", main: "ORAC", units: "3 × 15 000", second: "—",     second2: "—",          logic: "Renforcer télécoms avant résultats T1" },
-  { m: "M11", month: "mars",  main: "SGBC", units: "1 × 31 000", second: "CIEC",  second2: "5 × 3 400",  logic: "SGBC + utility — pré-AGO" },
-  { m: "M12", month: "avr.",  main: "ORAC", units: "3 × 15 000", second: "—",     second2: "—",          logic: "Fin cycle — renforcer leader" },
+  { m: "M2",  month: "mai 26",   main: "BOAB", units: "5 × 5 965",  second: "ORAC", second2: "1 × 15 000", total: 44825,  logic: "Initier BOA Bénin avant détachement juin-juillet + initier ORAC. SNTS détache déjà le 22/05 sur la position existante." },
+  { m: "M3",  month: "juin 26",  main: "ORAC", units: "2 × 15 000", second: "BOAB", second2: "3 × 5 965",  total: 47895,  logic: "Renforcer ORAC très sous-pondérée + continuer BOAB pré-détachement." },
+  { m: "M4",  month: "juil. 26", main: "BOAB", units: "5 × 5 965",  second: "CIEC", second2: "5 × 3 400",  total: 46825,  logic: "Post-détachement BOAB sur baisse mécanique du cours. Lisser CIEC." },
+  { m: "M5",  month: "août 26",  main: "SGBC", units: "1 × 31 000", second: "ORAC", second2: "1 × 15 000", total: 46000,  logic: "Initier SGBC — 5e et dernière ligne cœur Phase 1 enfin ouverte." },
+  { m: "M6",  month: "sept. 26", main: "ORAC", units: "3 × 15 000", second: "—",    second2: "—",          total: 45000,  logic: "Plein sur Orange CI — toujours la ligne la plus sous-pondérée vs cible 22%." },
+  { m: "M7",  month: "oct. 26",  main: "BOAB", units: "7 × 5 965",  second: "—",    second2: "—",          total: 41755,  logic: "Renforcer BOAB pour converger vers 20% cible." },
+  { m: "M8",  month: "nov. 26",  main: "ORAC", units: "3 × 15 000", second: "—",    second2: "—",          total: 45000,  logic: "Encore Orange CI — convergence cible structurelle longue." },
+  { m: "M9",  month: "déc. 26",  main: "SNTS", units: "1 × 29 000", second: "CIEC", second2: "5 × 3 400",  total: 46000,  logic: "Renforcer Sonatel fin d'année + lisser CIEC." },
+  { m: "M10", month: "janv. 27", main: "SGBC", units: "1 × 31 000", second: "ORAC", second2: "1 × 15 000", total: 46000,  logic: "Deuxième achat SGBC + ORAC continue convergence." },
+  { m: "M11", month: "févr. 27", main: "BOAB", units: "7 × 5 965",  second: "—",    second2: "—",          total: 41755,  logic: "BOAB encore — compounder dividende, conviction maintenue." },
+  { m: "M12", month: "mars 27",  main: "ORAC", units: "3 × 15 000", second: "—",    second2: "—",          total: 45000,  logic: "Plein ORAC pré-AGO entreprises ivoiriennes." },
+  { m: "M13", month: "avr. 27",  main: "SNTS", units: "1 × 29 000", second: "CIEC", second2: "5 × 3 400",  total: 46000,  logic: "Boucler le cycle annuel — SNTS pré-détachement mai + lisser CIEC." },
 ];
 
-const concentrationRules = [
-  { n: "01", title: "Démarrer concentré", desc: "Phase 1 : uniquement 5 titres à forte conviction. Chaque ordre mensuel renforce une ligne existante plutôt que d'en ouvrir une nouvelle.", color: T.blue },
-  { n: "02", title: "Vérifier la corrélation", desc: "Avant d'ajouter une 6e ligne (Phase 2), s'assurer que la corrélation avec le portefeuille existant est < 0.50 pour réduire le risque global.", color: T.green },
-  { n: "03", title: "Plafonner à 8 lignes", desc: "Au-delà de 8 lignes, la taille moyenne par position est trop faible pour générer un impact significatif. Le suivi devient aussi plus coûteux en temps.", color: T.amber },
+const projected = [
+  { ticker: "SNTS", qty: 3,  value: 87000,  pct: 14, target: 28 },
+  { ticker: "ORAC", qty: 17, value: 255000, pct: 41, target: 22 },
+  { ticker: "CIEC", qty: 22, value: 74800,  pct: 12, target: 17 },
+  { ticker: "BOAB", qty: 27, value: 161055, pct: 26, target: 20 },
+  { ticker: "SGBC", qty: 2,  value: 62000,  pct: 10, target: 13 },
 ];
+const projectedTotal = projected.reduce((s, p) => s + p.value, 0);
 
 const rules = [
   { n: "01", title: "Fenêtre dividende imminente", desc: "Si un titre cœur est à ≤ 30 jours d'un détachement et que son cours n'a pas dérivé de +5% vs moyenne 3 mois, le prioriser." },
@@ -43,50 +56,71 @@ const caps = [
 ];
 
 export default function StrategyTab() {
-  const { isMobile } = useResponsive();
+  const { isMobile, cols } = useResponsive();
 
   return (
     <div>
       <PageHeader
         eyebrow="Playbook · bloc 2"
         title="Calendrier d'exécution & règles tactiques."
-        description="Plan opérationnel pour DCA 50k FCFA/mois la première année, aligné sur le calendrier des détachements de dividendes BRVM."
+        description="Plan opérationnel pour DCA 50k FCFA/mois de mai 2026 à avril 2027, aligné sur le calendrier des détachements de dividendes BRVM."
       />
 
-      <Card title="Règle de concentration progressive" subtitle="Méthodologie avant d'ajouter des lignes" icon={Layers} style={{ marginBottom: 16 }}>
+      {/* --- Card 1: Point de départ --- */}
+      <Card title="Point de départ — fin avril 2026" subtitle="Portefeuille existant avant le cycle DCA" icon={Briefcase} style={{ marginBottom: 16 }}>
         <div style={{
           display: "grid",
-          gridTemplateColumns: isMobile ? "1fr" : "repeat(3, 1fr)",
-          gap: 14,
+          gridTemplateColumns: cols("1fr", "repeat(3, 1fr)", "repeat(5, 1fr)"),
+          gap: 10, marginBottom: 16,
         }}>
-          {concentrationRules.map(r => (
-            <div key={r.n} style={{
-              display: "flex", gap: 14, alignItems: "flex-start",
-              padding: isMobile ? 14 : 18,
-              background: T.bgSubtle, border: `1px solid ${T.borderSoft}`,
-              borderRadius: 12,
+          {startingLines.map(s => (
+            <div key={s.ticker} style={{
+              padding: isMobile ? 14 : 16, borderRadius: 12,
+              background: T.bgSubtle,
+              border: `1px solid ${s.held ? T.green : T.amber}30`,
+              position: "relative",
             }}>
               <div style={{
-                width: 40, height: 40, flexShrink: 0, borderRadius: 10,
-                background: r.color + "18", color: r.color,
-                fontFamily: FONT_MONO, fontSize: 14, fontWeight: 700,
-                display: "grid", placeItems: "center",
-              }}>{r.n}</div>
-              <div style={{ minWidth: 0 }}>
-                <div style={{ fontFamily: FONT_SANS, fontSize: 14, color: T.ink, fontWeight: 600, marginBottom: 4 }}>{r.title}</div>
-                <div style={{ fontFamily: FONT_SANS, fontSize: 12, color: T.inkMuted, lineHeight: 1.55 }}>{r.desc}</div>
+                position: "absolute", top: -1, left: 16, right: 16, height: 3,
+                background: s.held ? T.green : T.amber, borderRadius: "0 0 3px 3px",
+              }} />
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                <span style={{ fontFamily: FONT_MONO, fontSize: 13, fontWeight: 700, color: T.blue }}>{s.ticker}</span>
+                <Pill
+                  color={s.held ? T.green : T.amber}
+                  bg={s.held ? T.greenSoft : T.amberSoft}
+                >
+                  {s.held ? "Détenue" : "À initier"}
+                </Pill>
+              </div>
+              <div style={{ fontFamily: FONT_SANS, fontSize: 11, color: T.inkMuted, marginBottom: 4 }}>{s.name}</div>
+              <div style={{ fontFamily: FONT_MONO, fontSize: 12, color: T.inkSoft }}>
+                {s.qty > 0 ? `${s.qty} action${s.qty > 1 ? "s" : ""}` : "—"}
+              </div>
+              <div style={{ fontFamily: FONT_MONO, fontSize: 14, fontWeight: 700, color: T.ink, marginTop: 2 }}>
+                {s.value > 0 ? fmtFCFAfull(s.value) + " F" : "0 F"}
               </div>
             </div>
           ))}
         </div>
+        <div style={{
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          padding: "12px 16px", background: T.blueSoft, borderRadius: 10,
+        }}>
+          <span style={{ fontFamily: FONT_SANS, fontSize: 13, color: T.inkSoft, fontWeight: 500 }}>Capital total engagé</span>
+          <span style={{ fontFamily: FONT_MONO, fontSize: 18, fontWeight: 700, color: T.blue }}>
+            {fmtFCFAfull(startingLines.reduce((s, l) => s + l.value, 0))} F
+          </span>
+        </div>
       </Card>
 
-      <Card title="Calendrier Phase 1 — Concentration cœur" subtitle="DCA 50k FCFA · SNTS, ORAC, CIEC, BOAB, SGBC uniquement" icon={Clock} style={{ marginBottom: 16 }}>
+      {/* --- Card 2: Calendrier 12 mois --- */}
+      <Card title="Calendrier Phase 1 — DCA 50k mai 2026 → avril 2027" subtitle="Convergence progressive vers les 5 cibles Phase 1" icon={Clock} style={{ marginBottom: 16 }}>
         <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
-          <table style={{ width: "100%", minWidth: 700, borderCollapse: "collapse", fontFamily: FONT_SANS, fontSize: 12 }}>
+          <table style={{ width: "100%", minWidth: 780, borderCollapse: "collapse", fontFamily: FONT_SANS, fontSize: 12 }}>
             <thead>
               <tr>
-                {["Mois", "Principal", "Units × Prix", "Compl.", "Units × Prix", "Logique"].map((h, i) => (
+                {["Mois", "Principal", "Qty × Prix", "Compl.", "Qty × Prix", "Total", "Logique"].map((h, i) => (
                   <th key={i} style={{
                     padding: "10px 10px", textAlign: "left",
                     fontFamily: FONT_SANS, fontSize: 11, color: T.inkMuted, fontWeight: 600,
@@ -105,7 +139,7 @@ export default function StrategyTab() {
                         width: 28, height: 28, borderRadius: 8,
                         background: T.bgDark, color: T.inkInv,
                         display: "grid", placeItems: "center",
-                        fontFamily: FONT_MONO, fontSize: 11, fontWeight: 700, flexShrink: 0,
+                        fontFamily: FONT_MONO, fontSize: 10, fontWeight: 700, flexShrink: 0,
                       }}>{r.m}</div>
                       <span style={{ fontFamily: FONT_SANS, fontSize: 12, color: T.inkMuted, fontWeight: 500, whiteSpace: "nowrap" }}>{r.month}</span>
                     </div>
@@ -125,7 +159,10 @@ export default function StrategyTab() {
                     )}
                   </td>
                   <td style={{ padding: "10px 10px", fontFamily: FONT_MONO, fontSize: 11, color: T.inkSoft, borderBottom: `1px solid ${T.borderSoft}`, whiteSpace: "nowrap" }}>{r.second2}</td>
-                  <td style={{ padding: "10px 10px", color: T.inkMuted, fontStyle: "italic", borderBottom: `1px solid ${T.borderSoft}`, minWidth: 180 }}>{r.logic}</td>
+                  <td style={{ padding: "10px 10px", fontFamily: FONT_MONO, fontSize: 12, fontWeight: 600, color: T.ink, borderBottom: `1px solid ${T.borderSoft}`, whiteSpace: "nowrap" }}>
+                    {fmtFCFAfull(r.total)} F
+                  </td>
+                  <td style={{ padding: "10px 10px", color: T.inkMuted, fontStyle: "italic", borderBottom: `1px solid ${T.borderSoft}`, minWidth: 200 }}>{r.logic}</td>
                 </tr>
               ))}
             </tbody>
@@ -133,6 +170,76 @@ export default function StrategyTab() {
         </div>
       </Card>
 
+      {/* --- Card 3: Composition cible projetée --- */}
+      <Card title="Composition cible à fin avril 2027" subtitle="Projection 12 mois de DCA à 50k FCFA/mois" icon={Target} style={{ marginBottom: 16 }}>
+        <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
+          <table style={{ width: "100%", minWidth: 620, borderCollapse: "collapse", fontFamily: FONT_SANS, fontSize: 12 }}>
+            <thead>
+              <tr>
+                {["Ticker", "Actions", "Valeur", "Poids", "Cible", "Écart"].map(h => (
+                  <th key={h} style={{
+                    padding: "10px 12px",
+                    textAlign: h === "Ticker" ? "left" : "right",
+                    fontFamily: FONT_SANS, fontSize: 11, color: T.inkMuted, fontWeight: 600,
+                    letterSpacing: "0.02em", textTransform: "uppercase",
+                    borderBottom: `1px solid ${T.border}`, whiteSpace: "nowrap",
+                  }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {projected.map(p => {
+                const gap = p.pct - p.target;
+                const absGap = Math.abs(gap);
+                const gapColor = absGap > 5 ? T.amber : T.green;
+                return (
+                  <tr key={p.ticker}>
+                    <td style={{ padding: "12px 12px", borderBottom: `1px solid ${T.borderSoft}` }}>
+                      <span style={{
+                        fontFamily: FONT_MONO, fontSize: 12, fontWeight: 700, color: T.blue,
+                        background: T.blueSoft, padding: "3px 8px", borderRadius: 6,
+                      }}>{p.ticker}</span>
+                    </td>
+                    <td style={{ padding: "12px 12px", textAlign: "right", fontFamily: FONT_MONO, color: T.inkSoft, borderBottom: `1px solid ${T.borderSoft}` }}>{p.qty}</td>
+                    <td style={{ padding: "12px 12px", textAlign: "right", fontFamily: FONT_MONO, fontWeight: 600, color: T.ink, borderBottom: `1px solid ${T.borderSoft}` }}>
+                      ~{fmtFCFAfull(p.value)} F
+                    </td>
+                    <td style={{ padding: "12px 12px", textAlign: "right", fontFamily: FONT_MONO, fontWeight: 700, color: T.ink, borderBottom: `1px solid ${T.borderSoft}` }}>{p.pct}%</td>
+                    <td style={{ padding: "12px 12px", textAlign: "right", fontFamily: FONT_MONO, color: T.inkMuted, borderBottom: `1px solid ${T.borderSoft}` }}>{p.target}%</td>
+                    <td style={{ padding: "12px 12px", textAlign: "right", borderBottom: `1px solid ${T.borderSoft}` }}>
+                      <Pill color={gapColor} bg={gapColor + "18"}>
+                        {gap >= 0 ? "+" : ""}{gap} pp
+                      </Pill>
+                    </td>
+                  </tr>
+                );
+              })}
+              <tr style={{ background: T.bgSubtle }}>
+                <td style={{ padding: "12px 12px", fontFamily: FONT_SANS, fontWeight: 700, color: T.ink }}>Total</td>
+                <td style={{ padding: "12px 12px", textAlign: "right", fontFamily: FONT_MONO, fontWeight: 600, color: T.inkSoft }}>{projected.reduce((s, p) => s + p.qty, 0)}</td>
+                <td style={{ padding: "12px 12px", textAlign: "right", fontFamily: FONT_MONO, fontWeight: 700, color: T.blue, fontSize: 14 }}>
+                  ~{fmtFCFAfull(projectedTotal)} F
+                </td>
+                <td colSpan={3} />
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div style={{
+          marginTop: 16, padding: "14px 16px",
+          background: T.bgSubtle, borderRadius: 10,
+          border: `1px solid ${T.borderSoft}`,
+          display: "flex", alignItems: "flex-start", gap: 10,
+        }}>
+          <AlertCircle size={14} color={T.blue} style={{ flexShrink: 0, marginTop: 2 }} />
+          <div style={{ fontFamily: FONT_SANS, fontSize: 12, color: T.inkMuted, lineHeight: 1.6 }}>
+            La convergence vers les pondérations cibles prend 18-24 mois à 50k/mois. C'est mécanique : SNTS (29k l'unité) et SGBC (31k l'unité) ne peuvent pas être achetées chaque mois. ORAC et BOAB sur-convergent temporairement parce que leurs prix unitaires permettent des achats plus fréquents.
+          </div>
+        </div>
+      </Card>
+
+      {/* --- Cards 4 & 5: Règles + Plafonds --- */}
       <div style={{
         display: "grid",
         gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
