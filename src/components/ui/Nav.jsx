@@ -1,7 +1,7 @@
 import React from "react";
 import {
   TrendingUp, Target, Coins, Briefcase, ShieldAlert,
-  Sparkles, BookOpen, Gauge,
+  Sparkles, BookOpen, Gauge, CalendarDays, Layers,
 } from "lucide-react";
 import { T, FONT_SANS, FONT_MONO } from "../../theme";
 import useResponsive from "../../hooks/useResponsive";
@@ -11,7 +11,9 @@ const TABS = [
   { id: "dca",       label: "DCA",            icon: TrendingUp },
   { id: "target",    label: "Cible",          icon: Target },
   { id: "dividends", label: "Dividendes",     icon: Coins },
+  { id: "calendar",  label: "Calendrier",     icon: CalendarDays },
   { id: "portfolio", label: "Allocation",     icon: Briefcase },
+  { id: "concentration", label: "Concentration", icon: Layers },
   { id: "strategy",  label: "Playbook",       icon: BookOpen },
   { id: "risks",     label: "Risques",        icon: ShieldAlert },
 ];

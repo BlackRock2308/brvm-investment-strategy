@@ -9,7 +9,7 @@ import {
   Layers, Wallet, Building2,
 } from "lucide-react";
 import { T, FONT_SANS, FONT_MONO } from "../../theme";
-import { STOCKS, SECTOR_COLORS } from "../../data/stocks";
+import { STOCKS, SECTOR_COLORS, PHASE_CONFIG } from "../../data/stocks";
 import { fmtFCFAfull, fmtPct } from "../../utils/format";
 import useResponsive from "../../hooks/useResponsive";
 
@@ -53,6 +53,29 @@ export default function OverviewTab() {
         description="4 stratégies imbriquées — DCA, dividendes compounding, value investing, glide path défensif — exécutées depuis une SGI diaspora pour un horizon 20 ans."
       />
 
+      {/* Phase 1 banner */}
+      <div style={{
+        padding: isMobile ? 14 : 18, marginBottom: isMobile ? 16 : 24,
+        background: T.bgCard, border: `1px solid ${T.border}`,
+        borderLeft: `4px solid ${T.blue}`, borderRadius: 10,
+        display: "flex", alignItems: "center", gap: 14,
+      }}>
+        <div style={{
+          width: 36, height: 36, borderRadius: 8,
+          background: T.blueSoft, display: "grid", placeItems: "center", flexShrink: 0,
+        }}>
+          <Layers size={16} color={T.blue} strokeWidth={2.2} />
+        </div>
+        <div>
+          <div style={{ fontFamily: FONT_SANS, fontSize: 14, fontWeight: 700, color: T.ink }}>
+            Phase 1 — Construction du cœur
+          </div>
+          <div style={{ fontFamily: FONT_SANS, fontSize: 12, color: T.inkMuted, marginTop: 2 }}>
+            Capital cible &lt;5M FCFA · 5 lignes concentrées · SNTS, ORAC, BOAB, CIEC, SGBC
+          </div>
+        </div>
+      </div>
+
       {/* Top metrics */}
       <div style={{
         display: "grid",
@@ -91,9 +114,9 @@ export default function OverviewTab() {
           </ResponsiveContainer>
         </Card>
 
-        <Card title="Top holdings" subtitle="Pondérations cibles portefeuille" icon={Briefcase}>
+        <Card title="Top holdings — Phase 1" subtitle="5 lignes cœur · pondérations cibles" icon={Briefcase}>
           <div>
-            {STOCKS.slice(0, 5).map((s, i) => (
+            {STOCKS.filter(s => s.phaseEntry === 1).sort((a, b) => b.conviction - a.conviction).map((s, i) => (
               <div key={s.ticker} style={{
                 display: "grid",
                 gridTemplateColumns: "auto 1fr auto",

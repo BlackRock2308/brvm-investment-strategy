@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   PieChart, Pie, Cell, BarChart, Bar,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -8,7 +8,7 @@ import {
   Gauge, BarChart3, Layers,
 } from "lucide-react";
 import { T, FONT_SANS, FONT_MONO } from "../../theme";
-import { STOCKS, SECTOR_COLORS } from "../../data/stocks";
+import { STOCKS, SECTOR_COLORS, PHASE_CONFIG } from "../../data/stocks";
 import { fmtFCFAfull, fmtPct } from "../../utils/format";
 import useResponsive from "../../hooks/useResponsive";
 
@@ -18,18 +18,32 @@ import MetricCard from "../ui/MetricCard";
 import Pill from "../ui/Pill";
 import ChartTooltip from "../ui/ChartTooltip";
 
+function defaultWeightsForPhase(p) {
+  const cfg = PHASE_CONFIG[p - 1];
+  const out = {};
+  STOCKS.forEach(s => { out[s.ticker] = cfg.weights[s.ticker] || 0; });
+  return out;
+}
+
 export default function PortfolioTab() {
-  const [weights, setWeights] = useState(
-    STOCKS.reduce((acc, s) => ({ ...acc, [s.ticker]: s.conviction }), {})
-  );
+  const [phase, setPhase] = useState(1);
+  const [weights, setWeights] = useState(() => defaultWeightsForPhase(1));
+  const { isMobile, cols } = useResponsive();
+
+  const phaseCfg = PHASE_CONFIG[phase - 1];
+  const visibleStocks = useMemo(() => STOCKS.filter(s => s.phaseEntry <= phase), [phase]);
+
+  useEffect(() => {
+    setWeights(defaultWeightsForPhase(phase));
+  }, [phase]);
+
   const totalWeight = Object.values(weights).reduce((a, b) => a + b, 0);
   const updateWeight = (t, v) => setWeights(p => ({ ...p, [t]: v }));
-  const { isMobile, cols } = useResponsive();
 
   const stats = useMemo(() => {
     let yW = 0, pW = 0, rW = 0, tot = 0;
     const secMap = {};
-    STOCKS.forEach(s => {
+    visibleStocks.forEach(s => {
       const w = weights[s.ticker] || 0;
       tot += w; yW += s.yield * w; pW += s.pe * w; rW += s.risk * w;
       secMap[s.sector] = (secMap[s.sector] || 0) + w;
@@ -40,20 +54,47 @@ export default function PortfolioTab() {
       risk: tot > 0 ? (rW / tot).toFixed(1) : 0,
       sectors: Object.entries(secMap).map(([name, value]) => ({ name, value })).filter(s => s.value > 0),
     };
-  }, [weights]);
+  }, [weights, visibleStocks]);
 
-  const pieData = STOCKS.filter(s => weights[s.ticker] > 0).map(s => ({
+  const pieData = visibleStocks.filter(s => weights[s.ticker] > 0).map(s => ({
     name: s.ticker, value: weights[s.ticker], sector: s.sector,
   }));
-  const reset = () => setWeights(STOCKS.reduce((a, s) => ({ ...a, [s.ticker]: s.conviction }), {}));
+  const reset = () => setWeights(defaultWeightsForPhase(phase));
 
   return (
     <div>
       <PageHeader
         eyebrow="Simulateur · bloc 4"
         title="Constructeur de portefeuille interactif."
-        description="Ajustez les pondérations — les métriques se recalculent en temps réel. Cible : 100%."
+        description={`Phase ${phase} — ${phaseCfg.maxLines} lignes · ${phaseCfg.capitalRange}. Ajustez les pondérations — les métriques se recalculent en temps réel.`}
       />
+
+      {/* Phase selector */}
+      <div style={{
+        display: "flex", gap: 6, marginBottom: 20,
+        background: T.bgSoft, padding: 5, borderRadius: 10,
+        border: `1px solid ${T.border}`, width: "fit-content",
+      }}>
+        {PHASE_CONFIG.map(p => {
+          const active = phase === p.phase;
+          return (
+            <button key={p.phase} onClick={() => setPhase(p.phase)} style={{
+              padding: isMobile ? "7px 12px" : "8px 16px",
+              border: "none", borderRadius: 8,
+              background: active ? T.bgCard : "transparent",
+              color: active ? T.ink : T.inkMuted,
+              fontFamily: FONT_SANS, fontSize: 12, fontWeight: active ? 700 : 500,
+              cursor: "pointer", transition: "all 0.15s",
+              boxShadow: active ? "0 1px 3px rgba(0,0,0,0.05)" : "none",
+            }}>
+              Phase {p.phase}
+              <span style={{ fontFamily: FONT_MONO, fontSize: 10, marginLeft: 6, color: active ? T.blue : T.inkDim }}>
+                {p.maxLines}L
+              </span>
+            </button>
+          );
+        })}
+      </div>
 
       <div style={{
         display: "grid",
@@ -77,14 +118,14 @@ export default function PortfolioTab() {
         gridTemplateColumns: isMobile ? "1fr" : "1.3fr 1fr",
         gap: 16, marginBottom: 16,
       }}>
-        <Card title="Pondérations par titre" subtitle="Glissez pour ajuster" icon={Briefcase}
+        <Card title={`Pondérations Phase ${phase}`} subtitle={`${visibleStocks.length} lignes actives`} icon={Briefcase}
           action={<button onClick={reset} style={{
             padding: "6px 12px", background: T.bgSoft,
             border: `1px solid ${T.border}`, borderRadius: 8,
             color: T.inkSoft, fontFamily: FONT_SANS, fontSize: 12, fontWeight: 600, cursor: "pointer",
           }}>Réinitialiser</button>}
         >
-          {STOCKS.map(s => (
+          {visibleStocks.map(s => (
             <div key={s.ticker} style={{ padding: "14px 0", borderBottom: `1px solid ${T.borderSoft}` }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0, flex: 1 }}>
@@ -95,7 +136,7 @@ export default function PortfolioTab() {
                   }}>{s.flag}</div>
                   <div style={{ minWidth: 0 }}>
                     <div>
-                      <span style={{ fontFamily: FONT_MONO, fontSize: 12, color: T.blue, fontWeight: 700, letterSpacing: "0.02em" }}>{s.ticker}</span>
+                      <span style={{ fontFamily: FONT_MONO, fontSize: 12, color: T.blue, fontWeight: 700 }}>{s.ticker}</span>
                       {!isMobile && <span style={{ fontFamily: FONT_SANS, fontSize: 13, color: T.ink, marginLeft: 8, fontWeight: 500 }}>{s.name}</span>}
                     </div>
                     <div style={{ fontFamily: FONT_MONO, fontSize: 10, color: T.inkDim, marginTop: 1 }}>{s.sector} · {s.yield}%</div>
@@ -170,10 +211,10 @@ export default function PortfolioTab() {
 
       <Card title="Univers BRVM" subtitle="Screening complet · 10 titres" icon={Layers}>
         <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
-          <table style={{ width: "100%", minWidth: 800, borderCollapse: "collapse", fontFamily: FONT_SANS, fontSize: 12 }}>
+          <table style={{ width: "100%", minWidth: 860, borderCollapse: "collapse", fontFamily: FONT_SANS, fontSize: 12 }}>
             <thead>
               <tr>
-                {["Ticker", "Société", "Pays", "Secteur", "Cours", "P/E", "Yield", "Change", "Risque", "Moat", "FCP"].map(h => (
+                {["Ticker", "Société", "Phase", "Pays", "Secteur", "Cours", "P/E", "Yield", "Change", "Risque", "Moat", "FCP"].map(h => (
                   <th key={h} style={{
                     padding: "10px 10px",
                     textAlign: h === "Société" || h === "Pays" || h === "Secteur" ? "left" : "right",
@@ -185,30 +226,39 @@ export default function PortfolioTab() {
               </tr>
             </thead>
             <tbody>
-              {STOCKS.map(s => (
-                <tr key={s.ticker}>
-                  <td style={{ padding: "10px 10px", color: T.blue, fontFamily: FONT_MONO, fontWeight: 700, borderBottom: `1px solid ${T.borderSoft}` }}>{s.ticker}</td>
-                  <td style={{ padding: "10px 10px", color: T.ink, fontWeight: 500, borderBottom: `1px solid ${T.borderSoft}`, whiteSpace: "nowrap" }}>{s.name}</td>
-                  <td style={{ padding: "10px 10px", color: T.inkSoft, borderBottom: `1px solid ${T.borderSoft}`, whiteSpace: "nowrap" }}>{s.flag} {s.country}</td>
-                  <td style={{ padding: "10px 10px", borderBottom: `1px solid ${T.borderSoft}` }}>
-                    <Pill color={SECTOR_COLORS[s.sector]} bg={SECTOR_COLORS[s.sector] + "18"}>{s.sector}</Pill>
-                  </td>
-                  <td style={{ padding: "10px 10px", textAlign: "right", fontFamily: FONT_MONO, color: T.inkSoft, borderBottom: `1px solid ${T.borderSoft}` }}>{fmtFCFAfull(s.price)}</td>
-                  <td style={{ padding: "10px 10px", textAlign: "right", fontFamily: FONT_MONO, color: T.inkSoft, borderBottom: `1px solid ${T.borderSoft}` }}>{s.pe}</td>
-                  <td style={{ padding: "10px 10px", textAlign: "right", fontFamily: FONT_MONO, color: T.green, fontWeight: 700, borderBottom: `1px solid ${T.borderSoft}` }}>{s.yield}%</td>
-                  <td style={{ padding: "10px 10px", textAlign: "right", borderBottom: `1px solid ${T.borderSoft}` }}>
-                    <Pill color={s.change >= 0 ? T.green : T.red} bg={s.change >= 0 ? T.greenSoft : T.redSoft}>{fmtPct(s.change)}</Pill>
-                  </td>
-                  <td style={{ padding: "10px 10px", textAlign: "right", fontFamily: FONT_MONO, color: s.risk > 5 ? T.red : s.risk > 3 ? T.amber : T.green, fontWeight: 600, borderBottom: `1px solid ${T.borderSoft}` }}>{s.risk}/10</td>
-                  <td style={{ padding: "10px 10px", textAlign: "right", color: s.moat === "Fort" ? T.green : T.inkSoft, fontWeight: 500, borderBottom: `1px solid ${T.borderSoft}` }}>{s.moat}</td>
-                  <td style={{ padding: "10px 10px", textAlign: "right", borderBottom: `1px solid ${T.borderSoft}` }}>
-                    <Pill color={s.fcpOverlap === "Non" ? T.green : s.fcpOverlap === "Complém." ? T.blue : T.amber}
-                      bg={s.fcpOverlap === "Non" ? T.greenSoft : s.fcpOverlap === "Complém." ? T.blueSoft : T.amberSoft}>
-                      {s.fcpOverlap}
-                    </Pill>
-                  </td>
-                </tr>
-              ))}
+              {STOCKS.map(s => {
+                const inPhase = s.phaseEntry <= phase;
+                return (
+                  <tr key={s.ticker} style={{ opacity: inPhase ? 1 : 0.4 }}>
+                    <td style={{ padding: "10px 10px", color: T.blue, fontFamily: FONT_MONO, fontWeight: 700, borderBottom: `1px solid ${T.borderSoft}` }}>{s.ticker}</td>
+                    <td style={{ padding: "10px 10px", color: T.ink, fontWeight: 500, borderBottom: `1px solid ${T.borderSoft}`, whiteSpace: "nowrap" }}>{s.name}</td>
+                    <td style={{ padding: "10px 10px", textAlign: "right", borderBottom: `1px solid ${T.borderSoft}` }}>
+                      <Pill
+                        color={s.phaseEntry === 1 ? T.blue : s.phaseEntry === 2 ? T.chart3 : s.phaseEntry === 3 ? T.green : T.amber}
+                        bg={(s.phaseEntry === 1 ? T.blue : s.phaseEntry === 2 ? T.chart3 : s.phaseEntry === 3 ? T.green : T.amber) + "18"}
+                      >P{s.phaseEntry}</Pill>
+                    </td>
+                    <td style={{ padding: "10px 10px", color: T.inkSoft, borderBottom: `1px solid ${T.borderSoft}`, whiteSpace: "nowrap" }}>{s.flag} {s.country}</td>
+                    <td style={{ padding: "10px 10px", borderBottom: `1px solid ${T.borderSoft}` }}>
+                      <Pill color={SECTOR_COLORS[s.sector]} bg={SECTOR_COLORS[s.sector] + "18"}>{s.sector}</Pill>
+                    </td>
+                    <td style={{ padding: "10px 10px", textAlign: "right", fontFamily: FONT_MONO, color: T.inkSoft, borderBottom: `1px solid ${T.borderSoft}` }}>{fmtFCFAfull(s.price)}</td>
+                    <td style={{ padding: "10px 10px", textAlign: "right", fontFamily: FONT_MONO, color: T.inkSoft, borderBottom: `1px solid ${T.borderSoft}` }}>{s.pe}</td>
+                    <td style={{ padding: "10px 10px", textAlign: "right", fontFamily: FONT_MONO, color: T.green, fontWeight: 700, borderBottom: `1px solid ${T.borderSoft}` }}>{s.yield}%</td>
+                    <td style={{ padding: "10px 10px", textAlign: "right", borderBottom: `1px solid ${T.borderSoft}` }}>
+                      <Pill color={s.change >= 0 ? T.green : T.red} bg={s.change >= 0 ? T.greenSoft : T.redSoft}>{fmtPct(s.change)}</Pill>
+                    </td>
+                    <td style={{ padding: "10px 10px", textAlign: "right", fontFamily: FONT_MONO, color: s.risk > 5 ? T.red : s.risk > 3 ? T.amber : T.green, fontWeight: 600, borderBottom: `1px solid ${T.borderSoft}` }}>{s.risk}/10</td>
+                    <td style={{ padding: "10px 10px", textAlign: "right", color: s.moat === "Fort" ? T.green : T.inkSoft, fontWeight: 500, borderBottom: `1px solid ${T.borderSoft}` }}>{s.moat}</td>
+                    <td style={{ padding: "10px 10px", textAlign: "right", borderBottom: `1px solid ${T.borderSoft}` }}>
+                      <Pill color={s.fcpOverlap === "Non" ? T.green : s.fcpOverlap === "Complém." ? T.blue : T.amber}
+                        bg={s.fcpOverlap === "Non" ? T.greenSoft : s.fcpOverlap === "Complém." ? T.blueSoft : T.amberSoft}>
+                        {s.fcpOverlap}
+                      </Pill>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

@@ -1,5 +1,5 @@
 import React from "react";
-import { Clock, Compass, Gauge } from "lucide-react";
+import { Clock, Compass, Gauge, Layers, ShieldCheck } from "lucide-react";
 import { T, FONT_SANS, FONT_MONO } from "../../theme";
 import useResponsive from "../../hooks/useResponsive";
 
@@ -7,18 +7,24 @@ import PageHeader from "../ui/PageHeader";
 import Card from "../ui/Card";
 
 const calendar = [
-  { m: "M1", month: "mai",   main: "SNTS", units: "1 × 29 000", second: "CIEC", second2: "6 × 3 400", logic: "Initier cœur télécoms + utility" },
-  { m: "M2", month: "juin",  main: "ORAC", units: "3 × 15 000", second: "ETIT", second2: "100 × 34", logic: "Télécoms #1 + sonde Ecobank" },
-  { m: "M3", month: "juil.", main: "BOAB", units: "8 × 5 965",  second: "—", second2: "—", logic: "BOA Bénin post-détachement (9,4%)" },
-  { m: "M4", month: "août",  main: "CIEC", units: "9 × 3 400",  second: "SDCC", second2: "2 × 7 400", logic: "Utilities avant détach. SODECI sept." },
-  { m: "M5", month: "sept.", main: "SNTS", units: "1 × 29 000", second: "CIEC", second2: "5 × 3 400", logic: "Renforcer cœur sur consolidation" },
-  { m: "M6", month: "oct.",  main: "PALC", units: "5 × 8 150",  second: "—", second2: "—", logic: "Diversification agro (satellite)" },
-  { m: "M7", month: "nov.",  main: "ORAC", units: "3 × 15 000", second: "—", second2: "—", logic: "Renforcer #1 capi marché" },
-  { m: "M8", month: "déc.",  main: "SDCC", units: "6 × 7 400",  second: "—", second2: "—", logic: "Water utility défensif fin d'année" },
-  { m: "M9", month: "janv.", main: "SNTS", units: "1 × 29 000", second: "BOAS", second2: "3 × 6 850", logic: "Nouvelle année — signatures rdt" },
-  { m: "M10", month: "févr.",main: "CIEC", units: "14 × 3 400", second: "—", second2: "—", logic: "Full CIE — liquidité/prix idéal" },
-  { m: "M11", month: "mars", main: "SPHC", units: "6 × 7 300",  second: "—", second2: "—", logic: "SAPH — avant AGO" },
-  { m: "M12", month: "avr.", main: "ORAC", units: "3 × 15 000", second: "—", second2: "—", logic: "Fin cycle — renforcer leader" },
+  { m: "M1",  month: "mai",   main: "SNTS", units: "1 × 29 000", second: "CIEC",  second2: "6 × 3 400", logic: "Initier cœur télécoms + utility" },
+  { m: "M2",  month: "juin",  main: "ORAC", units: "3 × 15 000", second: "—",     second2: "—",          logic: "Renforcer #1 capitalisation marché" },
+  { m: "M3",  month: "juil.", main: "BOAB", units: "8 × 5 965",  second: "—",     second2: "—",          logic: "BOA Bénin post-détachement (yield 9,4%)" },
+  { m: "M4",  month: "août",  main: "CIEC", units: "9 × 3 400",  second: "SGBC",  second2: "1 × 31 000", logic: "Doubler sur utilities + initier SGBC" },
+  { m: "M5",  month: "sept.", main: "SNTS", units: "1 × 29 000", second: "CIEC",  second2: "5 × 3 400",  logic: "Renforcer cœur sur consolidation" },
+  { m: "M6",  month: "oct.",  main: "SGBC", units: "1 × 31 000", second: "BOAB",  second2: "3 × 5 965",  logic: "Banques — profiter de la saisonnalité Q4" },
+  { m: "M7",  month: "nov.",  main: "ORAC", units: "3 × 15 000", second: "—",     second2: "—",          logic: "Renforcer Orange CI avant résultats" },
+  { m: "M8",  month: "déc.",  main: "CIEC", units: "14 × 3 400", second: "—",     second2: "—",          logic: "CIE — plein sur utility défensive fin d'année" },
+  { m: "M9",  month: "janv.", main: "SNTS", units: "1 × 29 000", second: "BOAB",  second2: "3 × 5 965",  logic: "Nouvelle année — signatures de rendement" },
+  { m: "M10", month: "févr.", main: "ORAC", units: "3 × 15 000", second: "—",     second2: "—",          logic: "Renforcer télécoms avant résultats T1" },
+  { m: "M11", month: "mars",  main: "SGBC", units: "1 × 31 000", second: "CIEC",  second2: "5 × 3 400",  logic: "SGBC + utility — pré-AGO" },
+  { m: "M12", month: "avr.",  main: "ORAC", units: "3 × 15 000", second: "—",     second2: "—",          logic: "Fin cycle — renforcer leader" },
+];
+
+const concentrationRules = [
+  { n: "01", title: "Démarrer concentré", desc: "Phase 1 : uniquement 5 titres à forte conviction. Chaque ordre mensuel renforce une ligne existante plutôt que d'en ouvrir une nouvelle.", color: T.blue },
+  { n: "02", title: "Vérifier la corrélation", desc: "Avant d'ajouter une 6e ligne (Phase 2), s'assurer que la corrélation avec le portefeuille existant est < 0.50 pour réduire le risque global.", color: T.green },
+  { n: "03", title: "Plafonner à 8 lignes", desc: "Au-delà de 8 lignes, la taille moyenne par position est trop faible pour générer un impact significatif. Le suivi devient aussi plus coûteux en temps.", color: T.amber },
 ];
 
 const rules = [
@@ -47,7 +53,35 @@ export default function StrategyTab() {
         description="Plan opérationnel pour DCA 50k FCFA/mois la première année, aligné sur le calendrier des détachements de dividendes BRVM."
       />
 
-      <Card title="Calendrier 12 mois" subtitle="DCA 50k FCFA · scénario conservateur" icon={Clock} style={{ marginBottom: 16 }}>
+      <Card title="Règle de concentration progressive" subtitle="Méthodologie avant d'ajouter des lignes" icon={Layers} style={{ marginBottom: 16 }}>
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: isMobile ? "1fr" : "repeat(3, 1fr)",
+          gap: 14,
+        }}>
+          {concentrationRules.map(r => (
+            <div key={r.n} style={{
+              display: "flex", gap: 14, alignItems: "flex-start",
+              padding: isMobile ? 14 : 18,
+              background: T.bgSubtle, border: `1px solid ${T.borderSoft}`,
+              borderRadius: 12,
+            }}>
+              <div style={{
+                width: 40, height: 40, flexShrink: 0, borderRadius: 10,
+                background: r.color + "18", color: r.color,
+                fontFamily: FONT_MONO, fontSize: 14, fontWeight: 700,
+                display: "grid", placeItems: "center",
+              }}>{r.n}</div>
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontFamily: FONT_SANS, fontSize: 14, color: T.ink, fontWeight: 600, marginBottom: 4 }}>{r.title}</div>
+                <div style={{ fontFamily: FONT_SANS, fontSize: 12, color: T.inkMuted, lineHeight: 1.55 }}>{r.desc}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </Card>
+
+      <Card title="Calendrier Phase 1 — Concentration cœur" subtitle="DCA 50k FCFA · SNTS, ORAC, CIEC, BOAB, SGBC uniquement" icon={Clock} style={{ marginBottom: 16 }}>
         <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
           <table style={{ width: "100%", minWidth: 700, borderCollapse: "collapse", fontFamily: FONT_SANS, fontSize: 12 }}>
             <thead>
