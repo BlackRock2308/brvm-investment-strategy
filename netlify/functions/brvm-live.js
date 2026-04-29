@@ -1,19 +1,22 @@
-// Netlify Function — scrapes afx.kwayisi.org/brvm/ for live BRVM data
+// Netlify Function — scrapes brvm.org for live BRVM data
 // Endpoint: GET /api/brvm-live
 
 import https from "https";
 
-function fetchPage(url) {
+function fetchPage(url, timeout = 8000) {
   return new Promise((resolve, reject) => {
     const req = https.get(url, {
-      headers: { "User-Agent": "OmaadCapital/1.0 (BRVM Dashboard)" },
-      timeout: 10000,
+      headers: {
+        "User-Agent": "Mozilla/5.0 (compatible; OmaadCapital/1.0)",
+        "Accept": "text/html",
+      },
+      timeout,
     }, (res) => {
       if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
-        return fetchPage(res.headers.location).then(resolve, reject);
+        return fetchPage(res.headers.location, timeout).then(resolve, reject);
       }
       if (res.statusCode !== 200) {
-        return reject(new Error(`Source returned ${res.statusCode}`));
+        return reject(new Error(`HTTP ${res.statusCode}`));
       }
       let body = "";
       res.on("data", (chunk) => { body += chunk; });
@@ -21,14 +24,19 @@ function fetchPage(url) {
       res.on("error", reject);
     });
     req.on("error", reject);
-    req.on("timeout", () => { req.destroy(); reject(new Error("Request timed out")); });
+    req.on("timeout", () => { req.destroy(); reject(new Error("Timeout")); });
   });
 }
 
-export default async (request) => {
+export default async () => {
   try {
-    const html = await fetchPage("https://afx.kwayisi.org/brvm/");
-    const data = parseHTML(html);
+    const [homeHtml, resumeHtml] = await Promise.all([
+      fetchPage("https://www.brvm.org/"),
+      fetchPage("https://www.brvm.org/fr/resume").catch(() => null),
+    ]);
+
+    const data = parseHome(homeHtml);
+    if (resumeHtml) parseResume(resumeHtml, data);
 
     return new Response(JSON.stringify(data), {
       status: 200,
@@ -47,63 +55,56 @@ export default async (request) => {
 
 export const config = { path: "/api/brvm-live" };
 
-function parseHTML(html) {
+function parseHome(html) {
   const result = {
     date: null,
-    index: { value: 0, change: 0, changePct: 0, ytd: 0 },
+    index: null,
     top5: [],
     flop5: [],
     marketCap: null,
   };
 
-  const timeMatch = html.match(/<time[^>]+datetime="([^"]+)"/);
-  if (timeMatch) result.date = timeMatch[1].split("T")[0];
+  // Session date: <p class="header-seance">Mercredi, 29 avril, 2026 - 17:46</p>
+  const dateMatch = html.match(/class="header-seance">([^<]+)/);
+  if (dateMatch) result.date = dateMatch[1].trim();
 
-  const indexBlock = html.match(/<table[^>]*>.*?BRVM-CI Index.*?<\/table>/s);
-  if (indexBlock) {
-    const cells = [...indexBlock[0].matchAll(/<td[^>]*>(.*?)<\/td>/gs)].map(m => m[1]);
-    if (cells[0]) {
-      const valMatch = cells[0].match(/([\d,.]+)\s*<span[^>]*>\(\+?([-\d,.]+)\)/);
-      if (valMatch) {
-        result.index.value = parseNum(valMatch[1]);
-        result.index.change = parseNum(valMatch[2]);
-      }
-    }
-    if (cells[1]) {
-      const ytdMatch = cells[1].match(/([\d,.]+)%/);
-      if (ytdMatch) result.index.ytd = parseNum(ytdMatch[1]);
-      const chgPctMatch = cells[1].match(/\(([\d,.]+)%\)/);
-      if (chgPctMatch) result.index.changePct = parseNum(chgPctMatch[1]);
-    }
-    if (cells[2]) {
-      const capMatch = cells[2].match(/XOF\s+([\d,.]+\w+)/);
-      if (capMatch) result.marketCap = capMatch[1];
-    }
-  }
+  // All stocks: <div class="item"><span>TICKER</span>&nbsp;<span>PRICE</span>&nbsp;<span>CHANGE%</span>&nbsp;<span class="icone-seance good|bad|nul"></span></div>
+  const items = [...html.matchAll(
+    /<div class="item"><span>(\w+)<\/span>&nbsp;<span>([\d\s]+)<\/span>&nbsp;<span>([-\d,]+%)<\/span>/g
+  )];
 
-  const statBlock = html.match(/<div data-stat[^>]*>(.*?)<\/div>/s);
-  if (statBlock) {
-    const tables = statBlock[1].split("</table>");
-    if (tables[0]) result.top5 = parseMoversTable(tables[0]);
-    if (tables[1]) result.flop5 = parseMoversTable(tables[1]);
-  }
+  const stocks = items.map(m => ({
+    ticker: m[1],
+    price: parseInt(m[2].replace(/\s/g, ""), 10),
+    changePct: parseFloat(m[3].replace(",", ".")),
+  }));
+
+  const gainers = stocks.filter(s => s.changePct > 0).sort((a, b) => b.changePct - a.changePct);
+  const losers = stocks.filter(s => s.changePct < 0).sort((a, b) => a.changePct - b.changePct);
+
+  result.top5 = gainers.slice(0, 5);
+  result.flop5 = losers.slice(0, 5);
 
   return result;
 }
 
-function parseMoversTable(tableHtml) {
-  const rows = [];
-  const rowMatches = [...tableHtml.matchAll(/<tr><td><a[^>]+>(\w+)<\/a><td[^>]*>([\d,]+)<td[^>]*>([+-]?[\d,.]+%)/g)];
-  for (const m of rowMatches.slice(0, 5)) {
-    rows.push({
-      ticker: m[1],
-      price: parseNum(m[2]),
-      changePct: parseFloat(m[3].replace(",", ".")),
-    });
+function parseResume(html, data) {
+  // BRVM-CI: ||BRVM-C||403,38||0,00%
+  const ciMatch = html.match(/BRVM-C(?:OMPOSITE)?[^>]*>([^<]*)<[^>]*>(\d[\d\s,.]*)<[^>]*>([\d,.]+)/s);
+  if (!ciMatch) {
+    const altMatch = html.match(/BRVM - COMPOSITE\|*([\d,.]+)\|*([\d,.]+)/);
+    if (!altMatch) return;
   }
-  return rows;
-}
 
-function parseNum(str) {
-  return parseFloat(str.replace(/,/g, ""));
+  // Better approach: look for the BRVM-C row in the table
+  const rowMatch = html.match(/BRVM-C[^<]*<\/td>\s*<td[^>]*>([\d,.\s]+)<\/td>\s*<td[^>]*>([\d,.\s]+)<\/td>/s);
+  if (rowMatch) {
+    const value = parseFloat(rowMatch[1].replace(/\s/g, "").replace(",", "."));
+    const prev = parseFloat(rowMatch[2].replace(/\s/g, "").replace(",", "."));
+    if (value) {
+      const change = Math.round((value - prev) * 100) / 100;
+      const changePct = prev ? Math.round(((value - prev) / prev) * 10000) / 100 : 0;
+      data.index = { value, change, changePct };
+    }
+  }
 }
