@@ -1,15 +1,33 @@
 // Netlify Function — scrapes afx.kwayisi.org/brvm/ for live BRVM data
-// Endpoint: GET /.netlify/functions/brvm-live
+// Endpoint: GET /api/brvm-live
+
+import https from "https";
+
+function fetchPage(url) {
+  return new Promise((resolve, reject) => {
+    const req = https.get(url, {
+      headers: { "User-Agent": "OmaadCapital/1.0 (BRVM Dashboard)" },
+      timeout: 10000,
+    }, (res) => {
+      if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+        return fetchPage(res.headers.location).then(resolve, reject);
+      }
+      if (res.statusCode !== 200) {
+        return reject(new Error(`Source returned ${res.statusCode}`));
+      }
+      let body = "";
+      res.on("data", (chunk) => { body += chunk; });
+      res.on("end", () => resolve(body));
+      res.on("error", reject);
+    });
+    req.on("error", reject);
+    req.on("timeout", () => { req.destroy(); reject(new Error("Request timed out")); });
+  });
+}
 
 export default async (request) => {
   try {
-    const response = await fetch("https://afx.kwayisi.org/brvm/", {
-      headers: { "User-Agent": "OmaadCapital/1.0 (BRVM Dashboard)" },
-    });
-
-    if (!response.ok) throw new Error(`Source returned ${response.status}`);
-
-    const html = await response.text();
+    const html = await fetchPage("https://afx.kwayisi.org/brvm/");
     const data = parseHTML(html);
 
     return new Response(JSON.stringify(data), {
