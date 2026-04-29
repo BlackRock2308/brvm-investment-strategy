@@ -48,7 +48,7 @@ export default function OverviewTab() {
   return (
     <div>
       <PageHeader
-        eyebrow="Tableau de bord · avril 2026"
+        eyebrow="Tableau de bord · mai 2026"
         title="Votre patrimoine BRVM, piloté avec précision."
         description="4 stratégies imbriquées — DCA, dividendes compounding, value investing, glide path défensif — exécutées depuis une SGI diaspora pour un horizon 20 ans."
       />
@@ -68,10 +68,10 @@ export default function OverviewTab() {
         </div>
         <div>
           <div style={{ fontFamily: FONT_SANS, fontSize: 14, fontWeight: 700, color: T.ink }}>
-            Phase 1 — Construction du cœur
+            Phase 1 — Construction en cours
           </div>
           <div style={{ fontFamily: FONT_SANS, fontSize: 12, color: T.inkMuted, marginTop: 2 }}>
-            Capital cible &lt;5M FCFA · 5 lignes concentrées · SNTS, ORAC, BOAB, CIEC, SGBC
+            4 lignes ouvertes sur 5 · Capital direct 106 490 F · Date 28 mai 2026
           </div>
         </div>
       </div>
@@ -114,38 +114,56 @@ export default function OverviewTab() {
           </ResponsiveContainer>
         </Card>
 
-        <Card title="Top holdings — Phase 1" subtitle="5 lignes cœur · pondérations cibles" icon={Briefcase}>
+        <Card title="Top holdings — Phase 1" subtitle="Pondérations actuelles vs cibles Phase 1" icon={Briefcase}>
           <div>
-            {STOCKS.filter(s => s.phaseEntry === 1).sort((a, b) => b.conviction - a.conviction).map((s, i) => (
-              <div key={s.ticker} style={{
-                display: "grid",
-                gridTemplateColumns: "auto 1fr auto",
-                gap: 12, alignItems: "center",
-                padding: "12px 0",
-                borderBottom: i < 4 ? `1px solid ${T.borderSoft}` : "none",
-              }}>
-                <div style={{
-                  width: 36, height: 36, borderRadius: 10,
-                  background: SECTOR_COLORS[s.sector] + "18",
-                  display: "grid", placeItems: "center", fontSize: 16,
-                }}>{s.flag}</div>
-                <div style={{ minWidth: 0 }}>
-                  <div style={{ fontFamily: FONT_SANS, fontSize: 13, fontWeight: 600, color: T.ink, letterSpacing: "-0.01em" }}>
-                    {s.ticker}
-                    <span style={{ fontWeight: 400, color: T.inkMuted, marginLeft: 6 }}>{s.name}</span>
+            {[
+              { ticker: "CIEC", pct: 34, target: 17, note: null },
+              { ticker: "SNTS", pct: 27, target: 28, note: null },
+              { ticker: "BOAB", pct: 24, target: 20, note: null },
+              { ticker: "ORAC", pct: 14, target: 22, note: null },
+              { ticker: "SGBC", pct: 0,  target: 13, note: "À initier" },
+            ].map((h, i) => {
+              const s = STOCKS.find(st => st.ticker === h.ticker);
+              return (
+                <div key={h.ticker} style={{
+                  display: "grid",
+                  gridTemplateColumns: "auto 1fr auto",
+                  gap: 12, alignItems: "center",
+                  padding: "12px 0",
+                  borderBottom: i < 4 ? `1px solid ${T.borderSoft}` : "none",
+                }}>
+                  <div style={{
+                    width: 36, height: 36, borderRadius: 10,
+                    background: SECTOR_COLORS[s.sector] + "18",
+                    display: "grid", placeItems: "center", fontSize: 16,
+                  }}>{s.flag}</div>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontFamily: FONT_SANS, fontSize: 13, fontWeight: 600, color: T.ink, letterSpacing: "-0.01em" }}>
+                      {s.ticker}
+                      <span style={{ fontWeight: 400, color: T.inkMuted, marginLeft: 6 }}>{s.name}</span>
+                    </div>
+                    <div style={{ fontFamily: FONT_MONO, fontSize: 10, color: T.inkDim, marginTop: 2 }}>
+                      {s.sector} · cible {h.target}%
+                    </div>
                   </div>
-                  <div style={{ fontFamily: FONT_MONO, fontSize: 10, color: T.inkDim, marginTop: 2 }}>
-                    {s.sector} · {fmtFCFAfull(s.price)} F
+                  <div style={{ textAlign: "right" }}>
+                    <div style={{ fontFamily: FONT_MONO, fontSize: 13, color: T.ink, fontWeight: 600 }}>
+                      {h.pct > 0 ? `${h.pct}%` : "—"}
+                    </div>
+                    {h.note ? (
+                      <Pill color={T.amber} bg={T.amberSoft}>{h.note}</Pill>
+                    ) : (
+                      <Pill
+                        color={Math.abs(h.pct - h.target) > 5 ? T.amber : T.green}
+                        bg={Math.abs(h.pct - h.target) > 5 ? T.amberSoft : T.greenSoft}
+                      >
+                        {h.pct - h.target >= 0 ? "+" : ""}{h.pct - h.target} pp
+                      </Pill>
+                    )}
                   </div>
                 </div>
-                <div style={{ textAlign: "right" }}>
-                  <div style={{ fontFamily: FONT_MONO, fontSize: 13, color: T.ink, fontWeight: 600 }}>{s.conviction}%</div>
-                  <Pill color={s.change >= 0 ? T.green : T.red} bg={s.change >= 0 ? T.greenSoft : T.redSoft}>
-                    {fmtPct(s.change)}
-                  </Pill>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </Card>
       </div>

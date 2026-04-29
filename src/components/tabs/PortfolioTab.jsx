@@ -18,23 +18,35 @@ import MetricCard from "../ui/MetricCard";
 import Pill from "../ui/Pill";
 import ChartTooltip from "../ui/ChartTooltip";
 
-function defaultWeightsForPhase(p) {
+const ACTUAL_WEIGHTS = { SNTS: 27, ORAC: 14, CIEC: 34, BOAB: 24, SGBC: 0, BOAS: 0, SDCC: 0, ETIT: 0, PALC: 0, SPHC: 0 };
+
+function targetWeightsForPhase(p) {
   const cfg = PHASE_CONFIG[p - 1];
   const out = {};
   STOCKS.forEach(s => { out[s.ticker] = cfg.weights[s.ticker] || 0; });
   return out;
 }
 
+function actualWeightsInit() {
+  const out = {};
+  STOCKS.forEach(s => { out[s.ticker] = ACTUAL_WEIGHTS[s.ticker] || 0; });
+  return out;
+}
+
 export default function PortfolioTab() {
   const [phase, setPhase] = useState(1);
-  const [weights, setWeights] = useState(() => defaultWeightsForPhase(1));
+  const [weights, setWeights] = useState(actualWeightsInit);
   const { isMobile, cols } = useResponsive();
 
   const phaseCfg = PHASE_CONFIG[phase - 1];
   const visibleStocks = useMemo(() => STOCKS.filter(s => s.phaseEntry <= phase), [phase]);
 
   useEffect(() => {
-    setWeights(defaultWeightsForPhase(phase));
+    if (phase === 1) {
+      setWeights(actualWeightsInit());
+    } else {
+      setWeights(targetWeightsForPhase(phase));
+    }
   }, [phase]);
 
   const totalWeight = Object.values(weights).reduce((a, b) => a + b, 0);
@@ -59,7 +71,7 @@ export default function PortfolioTab() {
   const pieData = visibleStocks.filter(s => weights[s.ticker] > 0).map(s => ({
     name: s.ticker, value: weights[s.ticker], sector: s.sector,
   }));
-  const reset = () => setWeights(defaultWeightsForPhase(phase));
+  const reset = () => setWeights(targetWeightsForPhase(phase));
 
   return (
     <div>
@@ -123,7 +135,7 @@ export default function PortfolioTab() {
             padding: "6px 12px", background: T.bgSoft,
             border: `1px solid ${T.border}`, borderRadius: 8,
             color: T.inkSoft, fontFamily: FONT_SANS, fontSize: 12, fontWeight: 600, cursor: "pointer",
-          }}>Réinitialiser</button>}
+          }}>Réinitialiser aux cibles Phase {phase}</button>}
         >
           {visibleStocks.map(s => (
             <div key={s.ticker} style={{ padding: "14px 0", borderBottom: `1px solid ${T.borderSoft}` }}>
@@ -155,10 +167,10 @@ export default function PortfolioTab() {
                 <div style={{ position: "absolute", inset: 0, background: T.bgSoft, borderRadius: 999 }}/>
                 <div style={{
                   position: "absolute", left: 0, top: 0, bottom: 0,
-                  width: `${(weights[s.ticker] / 30) * 100}%`,
+                  width: `${Math.min((weights[s.ticker] / 50) * 100, 100)}%`,
                   background: SECTOR_COLORS[s.sector] || T.blue, borderRadius: 999,
                 }}/>
-                <input type="range" min={0} max={30} step={1}
+                <input type="range" min={0} max={50} step={1}
                   value={weights[s.ticker]}
                   onChange={e => updateWeight(s.ticker, Number(e.target.value))}
                   style={{
