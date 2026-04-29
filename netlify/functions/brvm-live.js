@@ -90,21 +90,13 @@ function parseHome(html) {
 }
 
 function parseResume(html, data) {
-  // BRVM-CI: ||BRVM-C||403,38||0,00%
-  const ciMatch = html.match(/BRVM-C(?:OMPOSITE)?[^>]*>([^<]*)<[^>]*>(\d[\d\s,.]*)<[^>]*>([\d,.]+)/s);
-  if (!ciMatch) {
-    const altMatch = html.match(/BRVM - COMPOSITE\|*([\d,.]+)\|*([\d,.]+)/);
-    if (!altMatch) return;
-  }
-
-  // Better approach: look for the BRVM-C row in the table
-  const rowMatch = html.match(/BRVM-C[^<]*<\/td>\s*<td[^>]*>([\d,.\s]+)<\/td>\s*<td[^>]*>([\d,.\s]+)<\/td>/s);
+  // Row: BRVM-C</td><td class="text-right">403,38</td><td class="text-right">0,00% <span...></td>
+  const rowMatch = html.match(/BRVM-C<\/td>\s*<td[^>]*>([\d,.\s]+)<\/td>\s*<td[^>]*>([-\d,.\s]+)%/s);
   if (rowMatch) {
     const value = parseFloat(rowMatch[1].replace(/\s/g, "").replace(",", "."));
-    const prev = parseFloat(rowMatch[2].replace(/\s/g, "").replace(",", "."));
+    const changePct = parseFloat(rowMatch[2].replace(/\s/g, "").replace(",", "."));
     if (value) {
-      const change = Math.round((value - prev) * 100) / 100;
-      const changePct = prev ? Math.round(((value - prev) / prev) * 10000) / 100 : 0;
+      const change = Math.round(value * changePct / 100 * 100) / 100;
       data.index = { value, change, changePct };
     }
   }
