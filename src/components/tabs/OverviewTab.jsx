@@ -18,6 +18,8 @@ import Card from "../ui/Card";
 import MetricCard from "../ui/MetricCard";
 import Pill from "../ui/Pill";
 import ChartTooltip from "../ui/ChartTooltip";
+import MarketTicker from "../ui/MarketTicker";
+import { BRVM_API_URL } from "../../data/config";
 
 const marketData = [
   { year: "21", index: 171 },
@@ -52,6 +54,9 @@ export default function OverviewTab() {
         title="Votre patrimoine BRVM, piloté avec précision."
         description="4 stratégies imbriquées — DCA, dividendes compounding, value investing, glide path défensif — exécutées depuis une SGI diaspora pour un horizon 20 ans."
       />
+
+      {/* Live market data */}
+      <MarketTicker endpoint={BRVM_API_URL} />
 
       {/* Phase 1 banner */}
       <div style={{

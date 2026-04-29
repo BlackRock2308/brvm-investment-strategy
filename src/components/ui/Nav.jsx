@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   TrendingUp, Target, Coins, Briefcase, ShieldAlert,
   Sparkles, BookOpen, Gauge, CalendarDays, Layers,
@@ -18,9 +18,34 @@ const TABS = [
   { id: "risks",     label: "Risques",        icon: ShieldAlert },
 ];
 
+// BRVM official hours (UTC) — source: brvm.org/en/trading-hours
+// Pre-opening  09:00–09:45 | Continuous 09:45–14:00 | Pre-closing 14:00–14:30
+// Closing fix  14:30       | Last price 14:30–15:00 | Official close 15:00
+function getBrvmStatus() {
+  const now = new Date();
+  const day = now.getUTCDay();
+  const h = now.getUTCHours();
+  const m = now.getUTCMinutes();
+  const t = h * 60 + m;
+
+  if (day === 0 || day === 6) return { label: "BRVM fermée", sub: "Week-end", color: T.inkMuted, bg: T.bgSoft, dot: T.inkDim };
+  if (t < 540)               return { label: "BRVM fermée", sub: `Ouvre à 09h00 UTC`, color: T.inkMuted, bg: T.bgSoft, dot: T.inkDim };
+  if (t < 585)               return { label: "Pré-ouverture", sub: "Fixing 09h45", color: T.amber, bg: T.amberSoft, dot: T.amber };
+  if (t < 840)               return { label: "BRVM ouverte", sub: "Continu → 14h00", color: T.green, bg: T.greenSoft, dot: T.green };
+  if (t < 870)               return { label: "Pré-clôture", sub: "Fixing 14h30", color: T.amber, bg: T.amberSoft, dot: T.amber };
+  if (t < 900)               return { label: "Dernier cours", sub: "Clôture 15h00", color: T.amber, bg: T.amberSoft, dot: T.amber };
+  return                        { label: "BRVM fermée", sub: "Reprend demain 09h00", color: T.inkMuted, bg: T.bgSoft, dot: T.inkDim };
+}
+
 export default function Nav({ tab, setTab }) {
   const { isMobile, isTablet } = useResponsive();
   const compact = isMobile || isTablet;
+  const [status, setStatus] = useState(getBrvmStatus);
+
+  useEffect(() => {
+    const id = setInterval(() => setStatus(getBrvmStatus()), 30_000);
+    return () => clearInterval(id);
+  }, []);
 
   return (
     <nav style={{
@@ -64,11 +89,20 @@ export default function Nav({ tab, setTab }) {
           <div style={{
             display: "flex", alignItems: "center", gap: 8,
             padding: "6px 12px",
-            background: T.greenSoft, borderRadius: 999,
-            fontFamily: FONT_SANS, fontSize: 12, color: T.green, fontWeight: 600,
+            background: status.bg, borderRadius: 999,
+            fontFamily: FONT_SANS, fontSize: 12, color: status.color, fontWeight: 600,
           }}>
-            <div style={{ width: 7, height: 7, borderRadius: "50%", background: T.green, boxShadow: `0 0 0 3px ${T.greenSoft}` }} />
-            BRVM ouverte
+            <div style={{
+              width: 7, height: 7, borderRadius: "50%",
+              background: status.dot,
+              boxShadow: status.color === T.green ? `0 0 0 3px ${T.greenSoft}` : "none",
+              animation: status.color === T.green ? "pulse 2s infinite" : "none",
+            }} />
+            <span>{status.label}</span>
+            <span style={{
+              fontFamily: FONT_MONO, fontSize: 10, color: status.color,
+              opacity: 0.7, marginLeft: 2,
+            }}>{status.sub}</span>
           </div>
         )}
       </div>
