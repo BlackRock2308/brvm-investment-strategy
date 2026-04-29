@@ -11,6 +11,7 @@ function fetchPage(url, timeout = 8000) {
         "Accept": "text/html",
       },
       timeout,
+      rejectUnauthorized: false, // brvm.org has incomplete certificate chain
     }, (res) => {
       if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
         return fetchPage(res.headers.location, timeout).then(resolve, reject);
