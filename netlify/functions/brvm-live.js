@@ -43,13 +43,14 @@ export default async () => {
       status: 200,
       headers: {
         "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
         "Cache-Control": "s-maxage=300, stale-while-revalidate=600",
       },
     });
   } catch (err) {
     return new Response(
       JSON.stringify({ error: "Failed to fetch BRVM data", detail: err.message }),
-      { status: 502, headers: { "Content-Type": "application/json" } }
+      { status: 502, headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" } }
     );
   }
 };
