@@ -76,7 +76,7 @@ export default function OverviewTab() {
             Phase 1 — Construction en cours
           </div>
           <div style={{ fontFamily: FONT_SANS, fontSize: 12, color: T.inkMuted, marginTop: 2 }}>
-            4 lignes ouvertes sur 5 · Capital direct 106 490 F · Date 28 mai 2026
+            4 lignes ouvertes sur 5 · DCA 75k · Capital direct 106 490 F · Objectif clôture 31/12/2026 ~611k F
           </div>
         </div>
       </div>
@@ -88,7 +88,7 @@ export default function OverviewTab() {
         gap: isMobile ? 10 : 16, marginBottom: isMobile ? 20 : 28,
       }}>
         <MetricCard label="BRVM Composite" value="402" unit="pts" delta={25.3} deltaLabel="YTD" icon={Activity} color={T.blue} sparklineData={sparkGold}/>
-        <MetricCard label="Cible 10 ans" value="10,8M" unit="FCFA" delta={79.4} deltaLabel="vs capital" icon={Target} color={T.chart3} sparklineData={[{v:600},{v:1500},{v:2800},{v:4500},{v:6700},{v:8500},{v:10800}]}/>
+        <MetricCard label="Objectif fin 2026" value="611k" unit="FCFA" delta={474} deltaLabel="vs 28/12 actuel" icon={Target} color={T.chart3} sparklineData={[{v:106},{v:181},{v:251},{v:326},{v:398},{v:472},{v:546},{v:611}]}/>
         <MetricCard label="Cible 20 ans" value="90M" unit="FCFA" delta={142} deltaLabel="vs capital" icon={TrendingUp} color={T.green} sparklineData={[{v:600},{v:3000},{v:7200},{v:14500},{v:26000},{v:45000},{v:90000}]}/>
         <MetricCard label="Revenu passif 49 ans" value="600k" unit="FCFA/mo" delta={12.3} deltaLabel="vs SMIC" icon={Wallet} color={T.amber} sparklineData={[{v:50},{v:120},{v:210},{v:340},{v:470},{v:600}]}/>
       </div>

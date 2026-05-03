@@ -17,8 +17,8 @@ import ChartTooltip from "../ui/ChartTooltip";
 
 export default function DCATab() {
   const [monthly, setMonthly] = useState(75000);
-  const [years, setYears] = useState(10);
-  const [rate, setRate] = useState(10);
+  const [years, setYears] = useState(7);
+  const [rate, setRate] = useState(9);
   const { isMobile, cols } = useResponsive();
 
   const data = useMemo(() => projectDCA({ monthly, years, annualRate: rate }), [monthly, years, rate]);

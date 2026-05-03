@@ -24,6 +24,11 @@ const journal = [
     text: "Premier dividende perçu — SNTS détache 1 740 F brut, soit 1 480 F net après IRVM 15%. Premier flux de revenus passifs. À réinvestir au prochain ordre.",
     color: T.green,
   },
+  {
+    date: "Juin 2026 (M3)",
+    text: "Décision stratégique : passage du DCA de 50k à 75k FCFA/mois. Objectif : atteindre les cibles Phase 1 quasi parfaitement à fin décembre 2026 (clôture activité). Cette montée du DCA permet d'acheter 1 SNTS par mois (vs 1 tous les 3 mois), ce qui était le maillon faible du plan précédent. Aucune projection au-delà du 31/12/2026.",
+    color: T.amber,
+  },
 ];
 
 const situationLines = [
@@ -38,28 +43,21 @@ const situationTotal = 106490;
 const STORAGE_KEY = "omaad-calendar-done";
 
 const calendar = [
-  { m: "M1",  month: "avr. 26",  main: "SNTS", units: "1 × 29 000",  second: "CIEC", second2: "7 × 3 400",  total: 52800,  logic: "Initiation portefeuille direct — 1ère ligne cœur télécoms + utility défensive." },
-  { m: "M2",  month: "mai 26",   main: "BOAB", units: "3 × 8 500",   second: "CIEC", second2: "4 × 3 210",  total: 53690,  logic: "Initier BOAB pré-détachement + ORAC 1 × 15 350 F + renforcer CIEC sur baisse à 3 210 F." },
-  { m: "M3",  month: "juin 26",  main: "ORAC", units: "2 × 15 245",  second: "SGBC", second2: "1 × 34 500", total: 64990,  logic: "Renforcer ORAC très sous-pondérée (14% actuel vs 22% cible) + initier SGBC (5e ligne cœur). DCA exceptionnellement supérieur à 50k pour intégrer la 5e ligne." },
-  { m: "M4",  month: "juil. 26", main: "BOAB", units: "4 × 7 800",   second: "CIEC", second2: "5 × 3 100",  total: 46700,  logic: "Renforcer BOAB sur baisse mécanique post-détachement juin-juillet + lisser CIEC." },
-  { m: "M5",  month: "août 26",  main: "ORAC", units: "3 × 15 245",  second: "—",    second2: "—",          total: 45735,  logic: "Plein sur Orange CI — convergence vers cible 22%." },
-  { m: "M6",  month: "sept. 26", main: "SGBC", units: "1 × 34 500",  second: "CIEC", second2: "4 × 3 100",  total: 46900,  logic: "SGBC 2e achat + CIEC pré-détachement utility automne." },
-  { m: "M7",  month: "oct. 26",  main: "BOAB", units: "5 × 7 800",   second: "CIEC", second2: "3 × 3 100",  total: 48300,  logic: "Renforcer BOAB pour atteindre cible 20% + CIEC pré-détachement nov." },
-  { m: "M8",  month: "nov. 26",  main: "ORAC", units: "3 × 15 245",  second: "—",    second2: "—",          total: 45735,  logic: "ORAC reste la ligne la plus sous-cible structurellement." },
-  { m: "M9",  month: "déc. 26",  main: "SNTS", units: "1 × 28 500",  second: "CIEC", second2: "5 × 3 100",  total: 44000,  logic: "Renforcer SNTS fin d'année + lisser CIEC post-détachement." },
-  { m: "M10", month: "janv. 27", main: "SGBC", units: "1 × 34 500",  second: "ORAC", second2: "1 × 15 245", total: 49745,  logic: "SGBC 3e achat + ORAC continue convergence." },
-  { m: "M11", month: "févr. 27", main: "BOAB", units: "6 × 7 800",   second: "—",    second2: "—",          total: 46800,  logic: "BOAB renforcement — compounder dividende." },
-  { m: "M12", month: "mars 27",  main: "ORAC", units: "3 × 15 245",  second: "—",    second2: "—",          total: 45735,  logic: "Plein ORAC pré-AGO entreprises ivoiriennes." },
-  { m: "M13", month: "avr. 27",  main: "SNTS", units: "1 × 28 500",  second: "BOAB", second2: "2 × 7 800",  total: 44100,  logic: "SNTS pré-détachement mai + BOAB lissage." },
-  { m: "M14", month: "mai 27",   main: "SNTS", units: "1 × 28 500",  second: "CIEC", second2: "5 × 3 100",  total: 44000,  logic: "Boucler le cycle annuel — SNTS post-détachement année 2 + CIEC." },
+  { m: "M3",  month: "juin 26",  main: "SNTS", units: "1 × 28 500",  second: "ORAC", second2: "2 × 15 245", third: "CIEC", third2: "5 × 3 100",  total: 74490,  logic: "Initier le rythme SNTS mensuel + renforcer ORAC sous-pondérée + lisser CIEC. BOAB reporté à juillet pour profiter du post-détachement." },
+  { m: "M4",  month: "juil. 26", main: "SGBC", units: "1 × 34 500",  second: "CIEC", second2: "4 × 3 100",  third: "BOAB", third2: "3 × 7 800",  total: 70300,  logic: "Initier SGBC enfin (5e ligne cœur). BOAB renforcé sur baisse mécanique post-détachement (prix anticipé 7 800 F)." },
+  { m: "M5",  month: "août 26",  main: "SNTS", units: "1 × 28 500",  second: "ORAC", second2: "2 × 15 245", third: "BOAB", third2: "2 × 8 100",  total: 75190,  logic: "SNTS mensuel + ORAC plein + BOAB convergence." },
+  { m: "M6",  month: "sept. 26", main: "SNTS", units: "1 × 28 500",  second: "BOAB", second2: "3 × 8 100",  third: "CIEC", third2: "6 × 3 100",  total: 71400,  logic: "SNTS mensuel + BOAB + CIEC pré-détachement utility automne." },
+  { m: "M7",  month: "oct. 26",  main: "SNTS", units: "1 × 28 500",  second: "ORAC", second2: "2 × 15 245", third: "CIEC", third2: "5 × 3 100",  total: 74490,  logic: "SNTS mensuel + ORAC continue + CIEC pré-détachement nov." },
+  { m: "M8",  month: "nov. 26",  main: "SGBC", units: "1 × 34 500",  second: "BOAB", second2: "3 × 8 100",  third: "ORAC", third2: "1 × 15 245", total: 74045,  logic: "SGBC 2e achat (cible 2 unités atteinte) + BOAB + ORAC." },
+  { m: "M9",  month: "déc. 26",  main: "SNTS", units: "1 × 28 500",  second: "BOAB", second2: "3 × 8 100",  third: "ORAC", third2: "1 × 15 245", total: 68045,  logic: "Boucler 2026 — SNTS final + BOAB convergence + ORAC. Solde 2026 fermé." },
 ];
 
 const projected = [
-  { ticker: "SNTS", qty: 4,  value: 114000,  pct: 13, target: 28 },
-  { ticker: "ORAC", qty: 14, value: 213430,  pct: 24, target: 22 },
-  { ticker: "CIEC", qty: 33, value: 102300,  pct: 12, target: 17 },
-  { ticker: "BOAB", qty: 20, value: 156000,  pct: 18, target: 20 },
-  { ticker: "SGBC", qty: 3,  value: 103500,  pct: 12, target: 13 },
+  { ticker: "SNTS", qty: 6,  invested: 171500, value: 171000, pct: 27, target: 28 },
+  { ticker: "ORAC", qty: 9,  invested: 137110, value: 137200, pct: 22, target: 22 },
+  { ticker: "BOAB", qty: 17, invested: 142200, value: 138000, pct: 22, target: 20 },
+  { ticker: "CIEC", qty: 31, invested: 99040,  value: 96100,  pct: 15, target: 17 },
+  { ticker: "SGBC", qty: 2,  invested: 69000,  value: 69000,  pct: 11, target: 13 },
 ];
 const projectedTotal = projected.reduce((s, p) => s + p.value, 0);
 
@@ -81,8 +79,8 @@ const caps = [
 function loadChecked() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : ["M1", "M2"];
-  } catch { return ["M1", "M2"]; }
+    return raw ? JSON.parse(raw) : [];
+  } catch { return []; }
 }
 
 export default function StrategyTab() {
@@ -102,7 +100,7 @@ export default function StrategyTab() {
       <PageHeader
         eyebrow="Playbook · bloc 2"
         title="Calendrier d'exécution & règles tactiques."
-        description="Plan opérationnel pour DCA ~50k FCFA/mois de juin 2026 à mai 2027 (M3→M14), aligné sur le calendrier des détachements de dividendes BRVM."
+        description="Plan opérationnel DCA 75k FCFA/mois de juin à décembre 2026 (M3→M9), aligné sur le calendrier des détachements de dividendes BRVM. Clôture activité 31/12/2026."
       />
 
       {/* --- Card 0: Journal de bord --- */}
@@ -196,12 +194,12 @@ export default function StrategyTab() {
       </Card>
 
       {/* --- Card 2: Calendrier 12 mois --- */}
-      <Card title="Calendrier Phase 1 — DCA avril 2026 → mai 2027 (M1 à M14)" subtitle="Cochez chaque mois une fois l'ordre exécuté" icon={Clock} style={{ marginBottom: 16 }}>
+      <Card title="Calendrier Phase 1 — DCA 75k juin → décembre 2026" subtitle="Convergence vers cibles Phase 1 à clôture 2026" icon={Clock} style={{ marginBottom: 16 }}>
         <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
-          <table style={{ width: "100%", minWidth: 820, borderCollapse: "collapse", fontFamily: FONT_SANS, fontSize: 12 }}>
+          <table style={{ width: "100%", minWidth: 1020, borderCollapse: "collapse", fontFamily: FONT_SANS, fontSize: 12 }}>
             <thead>
               <tr>
-                {["✓", "Mois", "Principal", "Qty × Prix", "Compl.", "Qty × Prix", "Total", "Logique"].map((h, i) => (
+                {["✓", "Mois", "Principal", "Qty × Prix", "Compl.", "Qty × Prix", "Compl. 2", "Qty × Prix", "Total", "Logique"].map((h, i) => (
                   <th key={i} style={{
                     padding: "10px 10px", textAlign: i === 0 ? "center" : "left",
                     fontFamily: FONT_SANS, fontSize: 11, color: T.inkMuted, fontWeight: 600,
@@ -266,6 +264,14 @@ export default function StrategyTab() {
                       )}
                     </td>
                     <td style={{ padding: "10px 10px", fontFamily: FONT_MONO, fontSize: 11, color: T.inkSoft, borderBottom: `1px solid ${T.borderSoft}`, whiteSpace: "nowrap" }}>{r.second2}</td>
+                    <td style={{ padding: "10px 10px", borderBottom: `1px solid ${T.borderSoft}` }}>
+                      {!r.third || r.third === "—" ? (
+                        <span style={{ color: T.inkDim }}>—</span>
+                      ) : (
+                        <span style={{ fontFamily: FONT_MONO, fontSize: 12, color: T.green, fontWeight: 700, background: T.greenSoft, padding: "3px 8px", borderRadius: 6, whiteSpace: "nowrap" }}>{r.third}</span>
+                      )}
+                    </td>
+                    <td style={{ padding: "10px 10px", fontFamily: FONT_MONO, fontSize: 11, color: T.inkSoft, borderBottom: `1px solid ${T.borderSoft}`, whiteSpace: "nowrap" }}>{r.third2 || "—"}</td>
                     <td style={{ padding: "10px 10px", fontFamily: FONT_MONO, fontSize: 12, fontWeight: 600, color: T.ink, borderBottom: `1px solid ${T.borderSoft}`, whiteSpace: "nowrap" }}>
                       {fmtFCFAfull(r.total)} F
                     </td>
@@ -279,12 +285,12 @@ export default function StrategyTab() {
       </Card>
 
       {/* --- Card 3: Composition cible projetée --- */}
-      <Card title="Composition cible à fin mai 2027" subtitle="Projection 12 mois de DCA à ~50k FCFA/mois" icon={Target} style={{ marginBottom: 16 }}>
+      <Card title="Composition projetée au 31 décembre 2026" subtitle="DCA 75k FCFA/mois · 7 mois (juin → décembre 2026)" icon={Target} style={{ marginBottom: 16 }}>
         <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
-          <table style={{ width: "100%", minWidth: 620, borderCollapse: "collapse", fontFamily: FONT_SANS, fontSize: 12 }}>
+          <table style={{ width: "100%", minWidth: 720, borderCollapse: "collapse", fontFamily: FONT_SANS, fontSize: 12 }}>
             <thead>
               <tr>
-                {["Ticker", "Actions", "Valeur", "Poids", "Cible", "Écart"].map(h => (
+                {["Ticker", "Actions", "Investi", "Valeur", "Poids", "Cible", "Écart"].map(h => (
                   <th key={h} style={{
                     padding: "10px 12px",
                     textAlign: h === "Ticker" ? "left" : "right",
@@ -299,7 +305,7 @@ export default function StrategyTab() {
               {projected.map(p => {
                 const gap = p.pct - p.target;
                 const absGap = Math.abs(gap);
-                const gapColor = absGap > 5 ? T.amber : T.green;
+                const gapColor = absGap > 5 ? T.red : absGap > 2 ? T.amber : T.green;
                 return (
                   <tr key={p.ticker}>
                     <td style={{ padding: "12px 12px", borderBottom: `1px solid ${T.borderSoft}` }}>
@@ -309,6 +315,9 @@ export default function StrategyTab() {
                       }}>{p.ticker}</span>
                     </td>
                     <td style={{ padding: "12px 12px", textAlign: "right", fontFamily: FONT_MONO, color: T.inkSoft, borderBottom: `1px solid ${T.borderSoft}` }}>{p.qty}</td>
+                    <td style={{ padding: "12px 12px", textAlign: "right", fontFamily: FONT_MONO, color: T.inkSoft, borderBottom: `1px solid ${T.borderSoft}` }}>
+                      {fmtFCFAfull(p.invested)} F
+                    </td>
                     <td style={{ padding: "12px 12px", textAlign: "right", fontFamily: FONT_MONO, fontWeight: 600, color: T.ink, borderBottom: `1px solid ${T.borderSoft}` }}>
                       ~{fmtFCFAfull(p.value)} F
                     </td>
@@ -316,17 +325,27 @@ export default function StrategyTab() {
                     <td style={{ padding: "12px 12px", textAlign: "right", fontFamily: FONT_MONO, color: T.inkMuted, borderBottom: `1px solid ${T.borderSoft}` }}>{p.target}%</td>
                     <td style={{ padding: "12px 12px", textAlign: "right", borderBottom: `1px solid ${T.borderSoft}` }}>
                       <Pill color={gapColor} bg={gapColor + "18"}>
-                        {gap >= 0 ? "+" : ""}{gap} pp
+                        {gap >= 0 ? "+" : ""}{gap} pp {absGap <= 2 ? "✓" : ""}
                       </Pill>
                     </td>
                   </tr>
                 );
               })}
               <tr style={{ background: T.bgSubtle }}>
-                <td style={{ padding: "12px 12px", fontFamily: FONT_SANS, fontWeight: 700, color: T.ink }}>Total</td>
+                <td style={{ padding: "12px 12px", fontFamily: FONT_SANS, fontWeight: 700, color: T.ink }}>Total direct</td>
                 <td style={{ padding: "12px 12px", textAlign: "right", fontFamily: FONT_MONO, fontWeight: 600, color: T.inkSoft }}>{projected.reduce((s, p) => s + p.qty, 0)}</td>
+                <td style={{ padding: "12px 12px", textAlign: "right", fontFamily: FONT_MONO, fontWeight: 600, color: T.inkSoft }}>
+                  {fmtFCFAfull(projected.reduce((s, p) => s + p.invested, 0))} F
+                </td>
                 <td style={{ padding: "12px 12px", textAlign: "right", fontFamily: FONT_MONO, fontWeight: 700, color: T.blue, fontSize: 14 }}>
                   ~{fmtFCFAfull(projectedTotal)} F
+                </td>
+                <td colSpan={3} />
+              </tr>
+              <tr style={{ background: T.blueSoft }}>
+                <td colSpan={3} style={{ padding: "12px 12px", fontFamily: FONT_SANS, fontWeight: 700, color: T.blue }}>Capital total avec FCP BAM WURUS</td>
+                <td style={{ padding: "12px 12px", textAlign: "right", fontFamily: FONT_MONO, fontWeight: 700, color: T.blue, fontSize: 14 }}>
+                  ~{fmtFCFAfull(projectedTotal + 200000)} F
                 </td>
                 <td colSpan={3} />
               </tr>
@@ -342,7 +361,7 @@ export default function StrategyTab() {
         }}>
           <AlertCircle size={14} color={T.blue} style={{ flexShrink: 0, marginTop: 2 }} />
           <div style={{ fontFamily: FONT_SANS, fontSize: 12, color: T.inkMuted, lineHeight: 1.6 }}>
-            À 50k FCFA/mois, la convergence vers les pondérations cibles atteint un bon équilibre à 24 mois. SNTS reste sous-cible (prix unitaire 28-29k F absorbe trop d'un seul DCA mensuel). ORAC, BOAB, CIEC, SGBC convergent correctement. Pour accélérer SNTS, envisager des achats opportunistes lors de fenêtres de baisse.
+            DCA 75k FCFA/mois permet une convergence quasi parfaite vers les pondérations cibles Phase 1 à fin décembre 2026 (tous écarts ≤ 2pp). Le passage de 50k à 75k a permis d'inclure SNTS quasi tous les mois (5 achats sur 7), ce qui amène le poids à 27% — la cible 28%. Aucune projection au-delà du 31/12/2026 — un nouveau plan sera défini début 2027 selon l'évolution des prix et de la situation.
           </div>
         </div>
       </Card>
