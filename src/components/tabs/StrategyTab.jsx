@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Clock, Compass, Gauge, Briefcase, Target, AlertCircle, Activity, Coins, CheckSquare } from "lucide-react";
+import { Clock, Compass, Gauge, Briefcase, Target, AlertCircle, Activity, Coins, CheckSquare, TrendingUp } from "lucide-react";
 import { T, FONT_SANS, FONT_MONO } from "../../theme";
 import { fmtFCFAfull } from "../../utils/format";
 import useResponsive from "../../hooks/useResponsive";
@@ -20,6 +20,11 @@ const journal = [
     color: T.chart3,
   },
   {
+    date: "4 mai 2026",
+    text: "Snapshot portefeuille complet. Direct : SNTS ×1, CIEC ×11, BOAB ×3, ORAC ×1 — total investi 105 347 F, valorisation 105 660 F (+0.3%). FCP BAM WURUS : 11 parts, investi 200 000 F, valorisation 202 545 F (+1.3%). Décision : geler le FCP (aucune contribution future) et l'utiliser uniquement comme benchmark pour mesurer la surperformance du stock picking direct.",
+    color: T.chart5,
+  },
+  {
     date: "22 mai 2026",
     text: "Premier dividende perçu — SNTS détache 1 740 F brut, soit 1 480 F net après IRVM 15%. Premier flux de revenus passifs. À réinvestir au prochain ordre.",
     color: T.green,
@@ -32,13 +37,34 @@ const journal = [
 ];
 
 const situationLines = [
-  { ticker: "SNTS", name: "Sonatel",   qty: 1,  invested: 29000,  avgPrice: 29000,  badge: "✓ Détenue (M1)",      held: true },
-  { ticker: "CIEC", name: "CIE",       qty: 11, invested: 36640,  avgPrice: 3331,   badge: "✓ Renforcée (M1+M2)", held: true },
-  { ticker: "BOAB", name: "BOA Bénin", qty: 3,  invested: 25500,  avgPrice: 8500,   badge: "✓ Initiée (M2)",      held: true },
-  { ticker: "ORAC", name: "Orange CI", qty: 1,  invested: 15350,  avgPrice: 15350,  badge: "✓ Initiée (M2)",      held: true },
+  { ticker: "SNTS", name: "Sonatel",   qty: 1,  invested: 28919,  avgPrice: 28919,  badge: "✓ Détenue (M1)",      held: true },
+  { ticker: "CIEC", name: "CIE",       qty: 11, invested: 35077,  avgPrice: 3188,   badge: "✓ Renforcée (M1+M2)", held: true },
+  { ticker: "BOAB", name: "BOA Bénin", qty: 3,  invested: 25875,  avgPrice: 8625,   badge: "✓ Initiée (M2)",      held: true },
+  { ticker: "ORAC", name: "Orange CI", qty: 1,  invested: 15476,  avgPrice: 15476,  badge: "✓ Initiée (M2)",      held: true },
   { ticker: "SGBC", name: "SGBCI",     qty: 0,  invested: 0,      avgPrice: 0,      badge: "À initier (M3 ou M4)",held: false },
 ];
-const situationTotal = 106490;
+const situationTotal = 105347;
+
+const fcpHolding = {
+  name: "FCP BAM WURUS",
+  qty: 11,
+  invested: 200000,
+  navPerShare: 17144,
+  value: 202545,
+  costPerShare: 16928,
+  get pnl() { return this.value - this.invested; },
+  get pnlPct() { return ((this.value - this.invested) / this.invested * 100).toFixed(1); },
+};
+
+const directValues = {
+  SNTS: 28700,
+  CIEC: 35750,
+  BOAB: 26550,
+  ORAC: 14660,
+};
+const directValue = Object.values(directValues).reduce((a, b) => a + b, 0);
+const directPnl = directValue - situationTotal;
+const directPnlPct = ((directPnl / situationTotal) * 100).toFixed(1);
 
 const STORAGE_KEY = "omaad-calendar-done";
 
@@ -135,7 +161,7 @@ export default function StrategyTab() {
       </Card>
 
       {/* --- Card 1: Point de situation --- */}
-      <Card title="Point de situation — fin mai 2026 (M1 + M2 exécutés)" subtitle="État réel du portefeuille après 2 mois de DCA" icon={Briefcase} style={{ marginBottom: 16 }}>
+      <Card title="Point de situation — 4 mai 2026 (M1 + M2 exécutés)" subtitle="État réel du portefeuille après 2 mois de DCA" icon={Briefcase} style={{ marginBottom: 16 }}>
         <div style={{
           display: "grid",
           gridTemplateColumns: cols("1fr", "repeat(3, 1fr)", "repeat(5, 1fr)"),
@@ -176,9 +202,54 @@ export default function StrategyTab() {
           display: "flex", alignItems: "center", justifyContent: "space-between",
           padding: "12px 16px", background: T.blueSoft, borderRadius: 10, marginBottom: 10,
         }}>
-          <span style={{ fontFamily: FONT_SANS, fontSize: 13, color: T.inkSoft, fontWeight: 500 }}>Capital total investi en direct</span>
+          <span style={{ fontFamily: FONT_SANS, fontSize: 13, color: T.inkSoft, fontWeight: 500 }}>Capital investi en direct (actions)</span>
           <span style={{ fontFamily: FONT_MONO, fontSize: 18, fontWeight: 700, color: T.blue }}>
             {fmtFCFAfull(situationTotal)} F
+          </span>
+        </div>
+
+        {/* FCP BAM WURUS — legacy / benchmark */}
+        <div style={{
+          padding: "14px 16px", background: T.bgSubtle, borderRadius: 10, marginBottom: 10,
+          border: `1px solid ${T.border}`,
+        }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <span style={{ fontFamily: FONT_MONO, fontSize: 13, fontWeight: 700, color: T.inkSoft }}>FCP BAM WURUS</span>
+              <Pill color={T.inkMuted} bg={T.bgSoft}>Gelé · benchmark</Pill>
+            </div>
+            <span style={{ fontFamily: FONT_MONO, fontSize: 16, fontWeight: 700, color: T.ink }}>
+              {fmtFCFAfull(fcpHolding.value)} F
+            </span>
+          </div>
+          <div style={{ display: "flex", gap: 20, flexWrap: "wrap" }}>
+            <span style={{ fontFamily: FONT_SANS, fontSize: 11, color: T.inkMuted }}>
+              {fcpHolding.qty} parts · coût {fmtFCFAfull(fcpHolding.costPerShare)} F/part
+            </span>
+            <span style={{ fontFamily: FONT_SANS, fontSize: 11, color: T.inkMuted }}>
+              Investi : {fmtFCFAfull(fcpHolding.invested)} F
+            </span>
+            <span style={{
+              fontFamily: FONT_MONO, fontSize: 11, fontWeight: 600,
+              color: fcpHolding.pnl >= 0 ? T.green : T.red,
+            }}>
+              {fcpHolding.pnl >= 0 ? "+" : ""}{fmtFCFAfull(fcpHolding.pnl)} F ({fcpHolding.pnlPct}%)
+            </span>
+          </div>
+          <div style={{ fontFamily: FONT_SANS, fontSize: 11, color: T.inkDim, marginTop: 6, fontStyle: "italic" }}>
+            Position gelée — aucune contribution future. Performance utilisée comme benchmark vs portefeuille direct.
+          </div>
+        </div>
+
+        <div style={{
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          padding: "12px 16px", background: `linear-gradient(135deg, ${T.blue}12, ${T.indigo}12)`,
+          borderRadius: 10, marginBottom: 10,
+          border: `1px solid ${T.blue}25`,
+        }}>
+          <span style={{ fontFamily: FONT_SANS, fontSize: 13, color: T.inkSoft, fontWeight: 600 }}>Capital total portefeuille</span>
+          <span style={{ fontFamily: FONT_MONO, fontSize: 18, fontWeight: 700, color: T.blue }}>
+            {fmtFCFAfull(situationTotal + fcpHolding.invested)} F
           </span>
         </div>
 
@@ -189,6 +260,115 @@ export default function StrategyTab() {
           <Coins size={14} color={T.green} style={{ flexShrink: 0 }} />
           <div style={{ fontFamily: FONT_SANS, fontSize: 12, color: T.inkSoft }}>
             <strong style={{ color: T.green }}>Premier dividende perçu</strong> — SNTS · 22/05/2026 · 1 740 F brut → <strong>1 480 F net</strong> (IRVM 15%)
+          </div>
+        </div>
+      </Card>
+
+      {/* --- Card 1b: Direct vs FCP performance comparison --- */}
+      <Card title="Direct vs FCP BAM WURUS — Performance comparée" subtitle="Snapshot courtier · 4 mai 2026" icon={TrendingUp} style={{ marginBottom: 16 }}>
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
+          gap: 16,
+        }}>
+          {/* Direct portfolio */}
+          <div style={{
+            padding: 20, borderRadius: 12,
+            background: T.bgSubtle, border: `1px solid ${T.blue}25`,
+            position: "relative",
+          }}>
+            <div style={{
+              position: "absolute", top: -1, left: 16, right: 16, height: 3,
+              background: T.blue, borderRadius: "0 0 3px 3px",
+            }} />
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+              <span style={{ fontFamily: FONT_SANS, fontSize: 14, fontWeight: 700, color: T.ink }}>Portefeuille direct</span>
+              <Pill color={T.blue} bg={T.blueSoft}>Actif · DCA</Pill>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+              <div>
+                <div style={{ fontFamily: FONT_SANS, fontSize: 10, color: T.inkDim, textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: 4 }}>Investi</div>
+                <div style={{ fontFamily: FONT_MONO, fontSize: 14, fontWeight: 600, color: T.inkSoft }}>{fmtFCFAfull(situationTotal)} F</div>
+              </div>
+              <div>
+                <div style={{ fontFamily: FONT_SANS, fontSize: 10, color: T.inkDim, textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: 4 }}>Valorisation</div>
+                <div style={{ fontFamily: FONT_MONO, fontSize: 14, fontWeight: 600, color: T.ink }}>{fmtFCFAfull(directValue)} F</div>
+              </div>
+              <div>
+                <div style={{ fontFamily: FONT_SANS, fontSize: 10, color: T.inkDim, textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: 4 }}>+/- Value</div>
+                <div style={{ fontFamily: FONT_MONO, fontSize: 14, fontWeight: 700, color: directPnl >= 0 ? T.green : T.red }}>
+                  {directPnl >= 0 ? "+" : ""}{fmtFCFAfull(directPnl)} F
+                </div>
+              </div>
+              <div>
+                <div style={{ fontFamily: FONT_SANS, fontSize: 10, color: T.inkDim, textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: 4 }}>Performance</div>
+                <div style={{
+                  fontFamily: FONT_MONO, fontSize: 20, fontWeight: 700,
+                  color: directPnl >= 0 ? T.green : T.red,
+                }}>
+                  {directPnl >= 0 ? "+" : ""}{directPnlPct}%
+                </div>
+              </div>
+            </div>
+            <div style={{ marginTop: 12, fontFamily: FONT_SANS, fontSize: 10, color: T.inkDim }}>
+              4 lignes · SNTS, CIEC, BOAB, ORAC
+            </div>
+          </div>
+
+          {/* FCP BAM WURUS */}
+          <div style={{
+            padding: 20, borderRadius: 12,
+            background: T.bgSubtle, border: `1px solid ${T.inkMuted}25`,
+            position: "relative",
+          }}>
+            <div style={{
+              position: "absolute", top: -1, left: 16, right: 16, height: 3,
+              background: T.inkMuted, borderRadius: "0 0 3px 3px",
+            }} />
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+              <span style={{ fontFamily: FONT_SANS, fontSize: 14, fontWeight: 700, color: T.ink }}>FCP BAM WURUS</span>
+              <Pill color={T.inkMuted} bg={T.bgSoft}>Gelé · benchmark</Pill>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+              <div>
+                <div style={{ fontFamily: FONT_SANS, fontSize: 10, color: T.inkDim, textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: 4 }}>Investi</div>
+                <div style={{ fontFamily: FONT_MONO, fontSize: 14, fontWeight: 600, color: T.inkSoft }}>{fmtFCFAfull(fcpHolding.invested)} F</div>
+              </div>
+              <div>
+                <div style={{ fontFamily: FONT_SANS, fontSize: 10, color: T.inkDim, textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: 4 }}>Valorisation</div>
+                <div style={{ fontFamily: FONT_MONO, fontSize: 14, fontWeight: 600, color: T.ink }}>{fmtFCFAfull(fcpHolding.value)} F</div>
+              </div>
+              <div>
+                <div style={{ fontFamily: FONT_SANS, fontSize: 10, color: T.inkDim, textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: 4 }}>+/- Value</div>
+                <div style={{ fontFamily: FONT_MONO, fontSize: 14, fontWeight: 700, color: fcpHolding.pnl >= 0 ? T.green : T.red }}>
+                  {fcpHolding.pnl >= 0 ? "+" : ""}{fmtFCFAfull(fcpHolding.pnl)} F
+                </div>
+              </div>
+              <div>
+                <div style={{ fontFamily: FONT_SANS, fontSize: 10, color: T.inkDim, textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: 4 }}>Performance</div>
+                <div style={{
+                  fontFamily: FONT_MONO, fontSize: 20, fontWeight: 700,
+                  color: fcpHolding.pnl >= 0 ? T.green : T.red,
+                }}>
+                  {fcpHolding.pnl >= 0 ? "+" : ""}{fcpHolding.pnlPct}%
+                </div>
+              </div>
+            </div>
+            <div style={{ marginTop: 12, fontFamily: FONT_SANS, fontSize: 10, color: T.inkDim }}>
+              {fcpHolding.qty} parts · position gelée depuis avril 2026
+            </div>
+          </div>
+        </div>
+
+        <div style={{
+          marginTop: 16, padding: "12px 16px",
+          background: T.bgSubtle, borderRadius: 10,
+          border: `1px solid ${T.borderSoft}`,
+          display: "flex", alignItems: "flex-start", gap: 10,
+        }}>
+          <AlertCircle size={14} color={T.blue} style={{ flexShrink: 0, marginTop: 2 }} />
+          <div style={{ fontFamily: FONT_SANS, fontSize: 12, color: T.inkMuted, lineHeight: 1.6 }}>
+            Comparaison brute à la date du snapshot. Le portefeuille direct est en phase d'accumulation (DCA actif) tandis que le FCP est gelé. La comparaison deviendra significative à mesure que l'historique s'allonge — objectif : surperformer le FCP sur 12+ mois avec le stock picking direct.
           </div>
         </div>
       </Card>
@@ -343,9 +523,9 @@ export default function StrategyTab() {
                 <td colSpan={3} />
               </tr>
               <tr style={{ background: T.blueSoft }}>
-                <td colSpan={3} style={{ padding: "12px 12px", fontFamily: FONT_SANS, fontWeight: 700, color: T.blue }}>Capital total avec FCP BAM WURUS</td>
+                <td colSpan={3} style={{ padding: "12px 12px", fontFamily: FONT_SANS, fontWeight: 700, color: T.blue }}>Capital total avec FCP BAM WURUS (gelé)</td>
                 <td style={{ padding: "12px 12px", textAlign: "right", fontFamily: FONT_MONO, fontWeight: 700, color: T.blue, fontSize: 14 }}>
-                  ~{fmtFCFAfull(projectedTotal + 200000)} F
+                  ~{fmtFCFAfull(projectedTotal + fcpHolding.value)} F
                 </td>
                 <td colSpan={3} />
               </tr>

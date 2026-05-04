@@ -18,7 +18,7 @@ import MetricCard from "../ui/MetricCard";
 import Pill from "../ui/Pill";
 import ChartTooltip from "../ui/ChartTooltip";
 
-const ACTUAL_WEIGHTS = { SNTS: 27, ORAC: 14, CIEC: 34, BOAB: 24, SGBC: 0, BOAS: 0, SDCC: 0, ETIT: 0, PALC: 0, SPHC: 0 };
+const ACTUAL_WEIGHTS = { SNTS: 27, ORAC: 14, CIEC: 34, BOAB: 25, SGBC: 0, BOAS: 0, SDCC: 0, ETIT: 0, PALC: 0, SPHC: 0 };
 
 function targetWeightsForPhase(p) {
   const cfg = PHASE_CONFIG[p - 1];
