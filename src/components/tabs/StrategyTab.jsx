@@ -25,6 +25,11 @@ const journal = [
     color: T.chart5,
   },
   {
+    date: "15 mai 2026",
+    text: "Nouveau snapshot portefeuille. Direct : SNTS ×2 (CMP 29 122), CIEC ×17 (CMP 3 227), BOAB ×3 (CMP 8 625), ORAC ×1 (CMP 15 476) — total investi 154 459 F, valorisation 157 230 F (+2 771 F, +1.8%). FCP BAM WURUS : 11 parts, valorisation 202 606 F (+1.3%). Valorisation globale 359 836 F sur 354 459 F investis (+5 378 F, +1.5%). SNTS et CIEC renforcées depuis le 4 mai.",
+    color: T.chart5,
+  },
+  {
     date: "22 mai 2026",
     text: "Premier dividende perçu — SNTS détache 1 740 F brut, soit 1 480 F net après IRVM 15%. Premier flux de revenus passifs. À réinvestir au prochain ordre.",
     color: T.green,
@@ -37,30 +42,30 @@ const journal = [
 ];
 
 const situationLines = [
-  { ticker: "SNTS", name: "Sonatel",   qty: 1,  invested: 28919,  avgPrice: 28919,  badge: "✓ Détenue (M1)",      held: true },
-  { ticker: "CIEC", name: "CIE",       qty: 11, invested: 35077,  avgPrice: 3188,   badge: "✓ Renforcée (M1+M2)", held: true },
+  { ticker: "SNTS", name: "Sonatel",   qty: 2,  invested: 58244,  avgPrice: 29122,  badge: "✓ Renforcée (M1+M2)", held: true },
+  { ticker: "CIEC", name: "CIE",       qty: 17, invested: 54864,  avgPrice: 3227,   badge: "✓ Renforcée (M1+M2)", held: true },
   { ticker: "BOAB", name: "BOA Bénin", qty: 3,  invested: 25875,  avgPrice: 8625,   badge: "✓ Initiée (M2)",      held: true },
   { ticker: "ORAC", name: "Orange CI", qty: 1,  invested: 15476,  avgPrice: 15476,  badge: "✓ Initiée (M2)",      held: true },
   { ticker: "SGBC", name: "SGBCI",     qty: 0,  invested: 0,      avgPrice: 0,      badge: "À initier (M3 ou M4)",held: false },
 ];
-const situationTotal = 105347;
+const situationTotal = 154459;
 
 const fcpHolding = {
   name: "FCP BAM WURUS",
   qty: 11,
   invested: 200000,
-  navPerShare: 17144,
-  value: 202545,
+  navPerShare: 17149,
+  value: 202606,
   costPerShare: 16928,
   get pnl() { return this.value - this.invested; },
   get pnlPct() { return ((this.value - this.invested) / this.invested * 100).toFixed(1); },
 };
 
 const directValues = {
-  SNTS: 28700,
-  CIEC: 35750,
-  BOAB: 26550,
-  ORAC: 14660,
+  SNTS: 57900,
+  CIEC: 56100,
+  BOAB: 28230,
+  ORAC: 15000,
 };
 const directValue = Object.values(directValues).reduce((a, b) => a + b, 0);
 const directPnl = directValue - situationTotal;
