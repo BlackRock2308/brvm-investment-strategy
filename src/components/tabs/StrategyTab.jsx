@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Clock, Compass, Gauge, Briefcase, Target, AlertCircle, Activity, Coins, CheckSquare, TrendingUp } from "lucide-react";
 import { T, FONT_SANS, FONT_MONO } from "../../theme";
-import { fmtFCFAfull } from "../../utils/format";
-import { CURRENT_HOLDINGS } from "../../data/stocks";
+import { fmtFCFA, fmtFCFAfull, fmtEUR } from "../../utils/format";
+import { CURRENT_HOLDINGS, STOCKS, PHASE_CONFIG } from "../../data/stocks";
+import { computeDividendTargets } from "../../utils/projections";
 import useResponsive from "../../hooks/useResponsive";
 
 import PageHeader from "../ui/PageHeader";
@@ -121,6 +122,36 @@ function loadChecked() {
   } catch { return []; }
 }
 
+const MILESTONE_TARGET = 100_000;
+const DCA_MONTHLY = 75_000;
+const IRVM_RATE = 15;
+
+function buildMilestoneData() {
+  const phase1 = PHASE_CONFIG[0];
+  const results = computeDividendTargets({
+    targets: [MILESTONE_TARGET],
+    stocks: STOCKS,
+    phaseWeights: phase1.weights,
+    currentHoldings: CURRENT_HOLDINGS,
+    taxRate: IRVM_RATE,
+    dcaMonthly: DCA_MONTHLY,
+  });
+  return results[0];
+}
+
+const milestone = buildMilestoneData();
+
+const projectedMonths = calendar.length;
+const projectedEnd = projected.reduce((s, p) => s + p.value, 0);
+const projectedEndDivGross = projected.reduce((sum, p) => {
+  const s = STOCKS.find(st => st.ticker === p.ticker);
+  return sum + (s ? p.qty * s.price * (s.yield / 100) : 0);
+}, 0);
+const projectedEndDivNet = Math.round(projectedEndDivGross * (1 - IRVM_RATE / 100));
+const projectedEndPct = milestone.requiredCapital > 0
+  ? Math.min(100, Math.round((projectedEnd / milestone.requiredCapital) * 100))
+  : 0;
+
 export default function StrategyTab() {
   const { isMobile, cols } = useResponsive();
   const [checked, setChecked] = useState(loadChecked);
@@ -140,6 +171,158 @@ export default function StrategyTab() {
         title="Calendrier d'exécution & règles tactiques."
         description="Plan opérationnel DCA 75k FCFA/mois de juin à décembre 2026 (M3→M9), aligné sur le calendrier des détachements de dividendes BRVM. Clôture activité 31/12/2026."
       />
+
+      {/* --- Milestone Tracker --- */}
+      <div style={{
+        marginBottom: 20, borderRadius: 16, overflow: "hidden",
+        background: `linear-gradient(135deg, ${T.bgDark} 0%, #1a1f35 100%)`,
+        border: `1px solid ${T.bgDark}`,
+        position: "relative",
+      }}>
+        <div style={{
+          position: "absolute", top: -60, right: -60,
+          width: 240, height: 240,
+          background: `radial-gradient(circle, ${T.green}25, transparent 65%)`,
+          borderRadius: "50%",
+        }} />
+        <div style={{
+          position: "absolute", bottom: -40, left: -40,
+          width: 180, height: 180,
+          background: `radial-gradient(circle, ${T.blue}20, transparent 65%)`,
+          borderRadius: "50%",
+        }} />
+
+        <div style={{ position: "relative", padding: isMobile ? 20 : 28 }}>
+          {/* Header */}
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
+            <div style={{
+              width: 36, height: 36, borderRadius: 10,
+              background: `linear-gradient(135deg, ${T.green}, ${T.neon})`,
+              display: "grid", placeItems: "center",
+              boxShadow: `0 4px 16px ${T.green}40`,
+            }}>
+              <Target size={18} color="white" strokeWidth={2.2} />
+            </div>
+            <div>
+              <div style={{ fontFamily: FONT_SANS, fontSize: 15, fontWeight: 700, color: T.inkInv, letterSpacing: "-0.01em" }}>
+                Milestone #1
+              </div>
+              <div style={{ fontFamily: FONT_MONO, fontSize: 11, color: "#9CA3AF", letterSpacing: "0.02em" }}>
+                Premier objectif dividendes
+              </div>
+            </div>
+          </div>
+
+          {/* Target amount */}
+          <div style={{ marginBottom: 24 }}>
+            <div style={{ fontFamily: FONT_MONO, fontSize: 11, color: "#9CA3AF", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 6 }}>
+              Objectif
+            </div>
+            <div style={{ display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap" }}>
+              <span style={{ fontFamily: FONT_SANS, fontSize: isMobile ? 32 : 40, fontWeight: 700, color: T.neon, letterSpacing: "-0.03em", lineHeight: 1 }}>
+                {fmtFCFAfull(MILESTONE_TARGET)}
+              </span>
+              <span style={{ fontFamily: FONT_SANS, fontSize: 16, color: "#9CA3AF", fontWeight: 500 }}>
+                F net/an
+              </span>
+            </div>
+            <div style={{ fontFamily: FONT_MONO, fontSize: 12, color: "#6B7280", marginTop: 4 }}>
+              {fmtFCFAfull(Math.round(MILESTONE_TARGET / 12))} F/mois · ≈ {fmtEUR(MILESTONE_TARGET)} €/an
+            </div>
+          </div>
+
+          {/* Progress bar */}
+          <div style={{ marginBottom: 24 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 8 }}>
+              <span style={{ fontFamily: FONT_SANS, fontSize: 12, color: "#9CA3AF", fontWeight: 500 }}>Progression vers le capital requis</span>
+              <span style={{ fontFamily: FONT_MONO, fontSize: 13, color: T.neon, fontWeight: 700 }}>
+                {milestone.progressPct}%
+              </span>
+            </div>
+            <div style={{ height: 12, background: "#1f2937", borderRadius: 999, overflow: "hidden", position: "relative" }}>
+              <div style={{
+                height: "100%", borderRadius: 999,
+                width: `${milestone.progressPct}%`,
+                background: `linear-gradient(90deg, ${T.blue}, ${T.green}, ${T.neon})`,
+                transition: "width 0.6s ease",
+                boxShadow: `0 0 12px ${T.green}60`,
+              }} />
+              {/* End-of-2026 projected marker */}
+              {projectedEndPct < 100 && (
+                <div style={{
+                  position: "absolute", top: -4, bottom: -4,
+                  left: `${projectedEndPct}%`, transform: "translateX(-50%)",
+                  width: 3, background: T.amber, borderRadius: 999,
+                  boxShadow: `0 0 8px ${T.amber}80`,
+                }} />
+              )}
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6 }}>
+              <span style={{ fontFamily: FONT_MONO, fontSize: 10, color: "#6B7280" }}>
+                Aujourd'hui : {fmtFCFA(milestone.currentValue)} F
+              </span>
+              <span style={{ fontFamily: FONT_MONO, fontSize: 10, color: "#6B7280" }}>
+                Cible : {fmtFCFA(milestone.requiredCapital)} F
+              </span>
+            </div>
+            {projectedEndPct < 100 && projectedEndPct > milestone.progressPct && (
+              <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 6 }}>
+                <div style={{ width: 8, height: 3, background: T.amber, borderRadius: 999 }} />
+                <span style={{ fontFamily: FONT_MONO, fontSize: 10, color: T.amber }}>
+                  Fin 2026 projetée : {fmtFCFA(projectedEnd)} F ({projectedEndPct}%)
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* Key metrics grid */}
+          <div style={{
+            display: "grid",
+            gridTemplateColumns: cols("repeat(2, 1fr)", "repeat(4, 1fr)", "repeat(4, 1fr)"),
+            gap: isMobile ? 10 : 14,
+          }}>
+            <div style={{ padding: "14px 16px", background: "rgba(255,255,255,0.05)", borderRadius: 10, border: "1px solid rgba(255,255,255,0.08)" }}>
+              <div style={{ fontFamily: FONT_MONO, fontSize: 10, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: 6 }}>Capital requis</div>
+              <div style={{ fontFamily: FONT_SANS, fontSize: isMobile ? 18 : 22, fontWeight: 700, color: T.inkInv, letterSpacing: "-0.02em" }}>
+                {fmtFCFA(milestone.requiredCapital)} F
+              </div>
+            </div>
+            <div style={{ padding: "14px 16px", background: "rgba(255,255,255,0.05)", borderRadius: 10, border: "1px solid rgba(255,255,255,0.08)" }}>
+              <div style={{ fontFamily: FONT_MONO, fontSize: 10, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: 6 }}>Reste à investir</div>
+              <div style={{ fontFamily: FONT_SANS, fontSize: isMobile ? 18 : 22, fontWeight: 700, color: T.amber, letterSpacing: "-0.02em" }}>
+                +{fmtFCFA(milestone.additionalCapital)} F
+              </div>
+            </div>
+            <div style={{ padding: "14px 16px", background: "rgba(255,255,255,0.05)", borderRadius: 10, border: "1px solid rgba(255,255,255,0.08)" }}>
+              <div style={{ fontFamily: FONT_MONO, fontSize: 10, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: 6 }}>Durée estimée</div>
+              <div style={{ fontFamily: FONT_SANS, fontSize: isMobile ? 18 : 22, fontWeight: 700, color: T.inkInv, letterSpacing: "-0.02em" }}>
+                {milestone.fullYears > 0 ? `${milestone.fullYears}a ` : ""}{milestone.remainingMonths}m
+              </div>
+            </div>
+            <div style={{ padding: "14px 16px", background: "rgba(255,255,255,0.05)", borderRadius: 10, border: "1px solid rgba(255,255,255,0.08)" }}>
+              <div style={{ fontFamily: FONT_MONO, fontSize: 10, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: 6 }}>Div. nets actuels</div>
+              <div style={{ fontFamily: FONT_SANS, fontSize: isMobile ? 18 : 22, fontWeight: 700, color: T.green, letterSpacing: "-0.02em" }}>
+                {fmtFCFAfull(milestone.currentDivNet)} F/an
+              </div>
+            </div>
+          </div>
+
+          {/* Projected end-of-2026 dividends */}
+          <div style={{
+            marginTop: 16, padding: "12px 16px",
+            background: "rgba(255,255,255,0.04)", borderRadius: 10,
+            border: "1px solid rgba(255,255,255,0.06)",
+            display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap",
+          }}>
+            <Coins size={14} color={T.amber} style={{ flexShrink: 0 }} />
+            <div style={{ fontFamily: FONT_SANS, fontSize: 12, color: "#9CA3AF", lineHeight: 1.6 }}>
+              <strong style={{ color: T.amber }}>Projection fin 2026</strong> — avec le calendrier M3→M9 exécuté, dividendes nets estimés :
+              <strong style={{ color: T.green }}> {fmtFCFAfull(projectedEndDivNet)} F/an</strong>
+              <span style={{ color: "#6B7280" }}> ({Math.round(projectedEndDivNet / MILESTONE_TARGET * 100)}% de l'objectif)</span>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* --- Card 0: Journal de bord --- */}
       <Card title="Journal de bord — Décisions clés" subtitle="Historique chronologique des ordres exécutés" icon={Activity} style={{ marginBottom: 16 }}>
