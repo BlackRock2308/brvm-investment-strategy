@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { Clock, Compass, Gauge, Briefcase, Target, AlertCircle, Activity, Coins, CheckSquare, TrendingUp } from "lucide-react";
 import { T, FONT_SANS, FONT_MONO } from "../../theme";
 import { fmtFCFAfull } from "../../utils/format";
+import { CURRENT_HOLDINGS } from "../../data/stocks";
 import useResponsive from "../../hooks/useResponsive";
 
 import PageHeader from "../ui/PageHeader";
@@ -41,14 +42,20 @@ const journal = [
   },
 ];
 
-const situationLines = [
-  { ticker: "SNTS", name: "Sonatel",   qty: 2,  invested: 58244,  avgPrice: 29122,  badge: "✓ Renforcée (M1+M2)", held: true },
-  { ticker: "CIEC", name: "CIE",       qty: 17, invested: 54864,  avgPrice: 3227,   badge: "✓ Renforcée (M1+M2)", held: true },
-  { ticker: "BOAB", name: "BOA Bénin", qty: 3,  invested: 25875,  avgPrice: 8625,   badge: "✓ Initiée (M2)",      held: true },
-  { ticker: "ORAC", name: "Orange CI", qty: 1,  invested: 15476,  avgPrice: 15476,  badge: "✓ Initiée (M2)",      held: true },
-  { ticker: "SGBC", name: "SGBCI",     qty: 0,  invested: 0,      avgPrice: 0,      badge: "À initier (M3 ou M4)",held: false },
-];
-const situationTotal = 154459;
+const BADGE_MAP = {
+  SNTS: "✓ Renforcée (M1+M2)",
+  CIEC: "✓ Renforcée (M1+M2)",
+  BOAB: "✓ Initiée (M2)",
+  ORAC: "✓ Initiée (M2)",
+  SGBC: "À initier (M3 ou M4)",
+};
+const NAME_MAP = { SNTS: "Sonatel", CIEC: "CIE", BOAB: "BOA Bénin", ORAC: "Orange CI", SGBC: "SGBCI" };
+const situationLines = CURRENT_HOLDINGS.map(h => ({
+  ...h, name: NAME_MAP[h.ticker] || h.ticker,
+  invested: h.invested, badge: BADGE_MAP[h.ticker] || "",
+  held: h.qty > 0,
+}));
+const situationTotal = CURRENT_HOLDINGS.reduce((s, h) => s + h.invested, 0);
 
 const fcpHolding = {
   name: "FCP BAM WURUS",

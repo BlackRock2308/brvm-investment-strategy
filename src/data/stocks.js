@@ -36,6 +36,16 @@ export const PHASE_CONFIG = [
   },
 ];
 
+export const CURRENT_HOLDINGS = [
+  { ticker: "SNTS", qty: 2,  invested: 58244,  avgPrice: 29122 },
+  { ticker: "CIEC", qty: 17, invested: 54864,  avgPrice: 3227  },
+  { ticker: "BOAB", qty: 3,  invested: 25875,  avgPrice: 8625  },
+  { ticker: "ORAC", qty: 1,  invested: 15476,  avgPrice: 15476 },
+  { ticker: "SGBC", qty: 0,  invested: 0,      avgPrice: 0     },
+];
+
+export const CURRENT_HOLDINGS_TOTAL = CURRENT_HOLDINGS.reduce((s, h) => s + h.invested, 0);
+
 export const SECTOR_COLORS = {
   "Télécoms":        T.blue,
   "Utilities":       T.chart6,

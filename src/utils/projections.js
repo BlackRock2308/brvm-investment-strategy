@@ -52,6 +52,79 @@ export function requiredMonthly({ target, years, annualRate }) {
   return (target * monthlyRate) / (Math.pow(1 + monthlyRate, n) - 1);
 }
 
+export function computeDividendTargets({ targets, stocks, phaseWeights, currentHoldings, taxRate, dcaMonthly }) {
+  const taxMul = 1 - taxRate / 100;
+
+  const tickers = Object.keys(phaseWeights);
+  const stockMap = Object.fromEntries(stocks.map(s => [s.ticker, s]));
+  const holdMap  = Object.fromEntries(currentHoldings.map(h => [h.ticker, h]));
+
+  const weightedYieldGross = tickers.reduce((sum, t) => {
+    const w = phaseWeights[t] / 100;
+    const y = (stockMap[t]?.yield || 0) / 100;
+    return sum + w * y;
+  }, 0);
+  const weightedYieldNet = weightedYieldGross * taxMul;
+
+  const currentValue = tickers.reduce((sum, t) => {
+    const h = holdMap[t];
+    const s = stockMap[t];
+    if (!h || !s) return sum;
+    return sum + h.qty * s.price;
+  }, 0);
+  const currentDivGross = tickers.reduce((sum, t) => {
+    const h = holdMap[t];
+    const s = stockMap[t];
+    if (!h || !s) return sum;
+    return sum + h.qty * s.price * (s.yield / 100);
+  }, 0);
+
+  return targets.map(target => {
+    const requiredCapital = weightedYieldNet > 0 ? Math.round(target / weightedYieldNet) : 0;
+    const additionalCapital = Math.max(0, requiredCapital - currentValue);
+    const yearsNeeded = dcaMonthly > 0 ? additionalCapital / (dcaMonthly * 12) : Infinity;
+    const fullYears = Math.floor(yearsNeeded);
+    const remainingMonths = Math.round((yearsNeeded - fullYears) * 12);
+
+    const breakdown = tickers.map(t => {
+      const s = stockMap[t];
+      const h = holdMap[t] || { qty: 0 };
+      const w = phaseWeights[t] / 100;
+      const capitalForTicker = requiredCapital * w;
+      const sharesNeeded = s ? Math.ceil(capitalForTicker / s.price) : 0;
+      const toBuy = Math.max(0, sharesNeeded - h.qty);
+      const divPerShare = s ? s.price * (s.yield / 100) : 0;
+      const annualDivNet = Math.round(sharesNeeded * divPerShare * taxMul);
+      return {
+        ticker: t,
+        name: s?.name || t,
+        weight: phaseWeights[t],
+        capitalTarget: Math.round(capitalForTicker),
+        sharesNeeded,
+        sharesHeld: h.qty,
+        toBuy,
+        annualDivNet,
+      };
+    });
+
+    return {
+      target,
+      monthlyEquiv: Math.round(target / 12),
+      requiredCapital,
+      currentValue,
+      additionalCapital,
+      fullYears,
+      remainingMonths,
+      progressPct: requiredCapital > 0 ? Math.min(100, Math.round((currentValue / requiredCapital) * 100)) : 0,
+      breakdown,
+      weightedYieldGross: +(weightedYieldGross * 100).toFixed(2),
+      weightedYieldNet: +(weightedYieldNet * 100).toFixed(2),
+      currentDivGross: Math.round(currentDivGross),
+      currentDivNet: Math.round(currentDivGross * taxMul),
+    };
+  });
+}
+
 export function projectDRIP({
   initial,
   monthly,
