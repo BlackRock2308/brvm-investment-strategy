@@ -5,7 +5,7 @@ import {
 } from "recharts";
 import { Coins, TrendingUp, Briefcase, Target, ChevronDown, ChevronUp } from "lucide-react";
 import { T, FONT_SANS, FONT_MONO } from "../../theme";
-import { STOCKS, SECTOR_COLORS, PHASE_CONFIG, CURRENT_HOLDINGS } from "../../data/stocks";
+import { STOCKS, PHASE_CONFIG, CURRENT_HOLDINGS } from "../../data/stocks";
 import { fmtFCFA, fmtFCFAfull, fmtEUR } from "../../utils/format";
 import { projectDRIP, computeDividendTargets } from "../../utils/projections";
 import useResponsive from "../../hooks/useResponsive";
@@ -52,8 +52,6 @@ export default function DividendTab() {
 
   const finalDiv = dripData[dripData.length - 1];
   const passiveMonthly = finalDiv?.dividendsMonthly || 0;
-  const topDiv = [...STOCKS].sort((a, b) => b.yield - a.yield).slice(0, 6);
-
   return (
     <div>
       <PageHeader
@@ -131,47 +129,6 @@ export default function DividendTab() {
           </Card>
         </div>
       </div>
-
-      <Card title="Top 6 signatures dividende BRVM" subtitle="Tri par yield · avril 2026" icon={Coins}>
-        <div style={{
-          display: "grid",
-          gridTemplateColumns: cols("1fr", "repeat(2, 1fr)", "repeat(3, 1fr)"),
-          gap: 14,
-        }}>
-          {topDiv.map(s => (
-            <div key={s.ticker} style={{
-              padding: isMobile ? 16 : 20, background: T.bgSubtle,
-              border: `1px solid ${T.borderSoft}`, borderRadius: 12,
-              position: "relative", overflow: "hidden",
-            }}>
-              <div style={{
-                position: "absolute", top: 16, right: 16,
-                padding: "3px 10px",
-                background: `${SECTOR_COLORS[s.sector]}18`,
-                borderRadius: 999,
-                fontFamily: FONT_MONO, fontSize: 10, color: SECTOR_COLORS[s.sector], fontWeight: 600,
-              }}>{s.sector}</div>
-              <div style={{ fontSize: 20, marginBottom: 8 }}>{s.flag}</div>
-              <div style={{ fontFamily: FONT_SANS, fontSize: 13, color: T.inkMuted, fontWeight: 500, marginBottom: 2 }}>{s.ticker}</div>
-              <div style={{ fontFamily: FONT_SANS, fontSize: isMobile ? 16 : 18, color: T.ink, fontWeight: 700, letterSpacing: "-0.015em", marginBottom: 14 }}>{s.name}</div>
-              <div style={{
-                display: "flex", alignItems: "baseline", gap: 4,
-                padding: "10px 12px", background: T.bgCard, borderRadius: 8, marginBottom: 10,
-              }}>
-                <div style={{ fontFamily: FONT_SANS, fontSize: isMobile ? 22 : 28, fontWeight: 700, color: T.green, letterSpacing: "-0.025em", lineHeight: 1 }}>{s.yield}</div>
-                <div style={{ fontFamily: FONT_SANS, fontSize: 13, color: T.inkMuted }}>% yield</div>
-              </div>
-              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                <Pill color={T.inkSoft} bg={T.bgSoft}>P/E {s.pe}</Pill>
-                <Pill color={s.moat === "Fort" ? T.green : T.blue} bg={s.moat === "Fort" ? T.greenSoft : T.blueSoft}>{s.moat}</Pill>
-                <Pill color={s.risk > 5 ? T.red : s.risk > 3 ? T.amber : T.green} bg={s.risk > 5 ? T.redSoft : s.risk > 3 ? T.amberSoft : T.greenSoft}>
-                  Risque {s.risk}
-                </Pill>
-              </div>
-            </div>
-          ))}
-        </div>
-      </Card>
 
       {/* ── Objectifs Dividendes ── */}
       <div style={{ marginTop: 32 }}>

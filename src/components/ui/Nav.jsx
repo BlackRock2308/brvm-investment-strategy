@@ -1,21 +1,16 @@
 import React, { useState, useEffect } from "react";
 import {
-  TrendingUp, Target, Coins, Briefcase, ShieldAlert,
-  Sparkles, BookOpen, Gauge, CalendarDays, Layers,
+  Coins, Sparkles, BookOpen, Gauge, CalendarDays, Shield,
 } from "lucide-react";
 import { T, FONT_SANS, FONT_MONO } from "../../theme";
 import useResponsive from "../../hooks/useResponsive";
 
 const TABS = [
-  { id: "overview",  label: "Aperçu",        icon: Gauge },
-  { id: "dca",       label: "DCA",            icon: TrendingUp },
-  { id: "target",    label: "Cible",          icon: Target },
+  { id: "overview",  label: "Dashboard",      icon: Gauge },
+  { id: "strategy",  label: "Playbook",       icon: BookOpen },
   { id: "dividends", label: "Dividendes",     icon: Coins },
   { id: "calendar",  label: "Calendrier",     icon: CalendarDays },
-  { id: "portfolio", label: "Allocation",     icon: Briefcase },
-  { id: "concentration", label: "Concentration", icon: Layers },
-  { id: "strategy",  label: "Playbook",       icon: BookOpen },
-  { id: "risks",     label: "Risques",        icon: ShieldAlert },
+  { id: "advice",    label: "Advice",         icon: Shield },
 ];
 
 // BRVM official hours (UTC) — source: brvm.org/en/trading-hours

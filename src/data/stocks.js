@@ -1,11 +1,11 @@
 import { T } from "../theme";
 
 export const STOCKS = [
-  { ticker: "SNTS",  name: "Sonatel",       sector: "Télécoms",      country: "Sénégal",     flag: "🇸🇳", price: 28950, pe: 7.0,  yield: 5.8, risk: 4, conviction: 25, moat: "Fort",   fcpOverlap: "Complém.", change: 9.1,   phaseEntry: 1 },
-  { ticker: "ORAC",  name: "Orange CI",     sector: "Télécoms",      country: "Côte d'Iv.",  flag: "🇨🇮", price: 15000, pe: 9.5,  yield: 3.9, risk: 4, conviction: 20, moat: "Fort",   fcpOverlap: "Complém.", change: 9.1,   phaseEntry: 1 },
-  { ticker: "CIEC",  name: "CIE",           sector: "Utilities",     country: "Côte d'Iv.",  flag: "🇨🇮", price: 3300,  pe: 11.0, yield: 7.7, risk: 3, conviction: 15, moat: "Fort",   fcpOverlap: "Complém.", change: -3.4,  phaseEntry: 1 },
+  { ticker: "SNTS",  name: "Sonatel",       sector: "Télécoms",      country: "Sénégal",     flag: "🇸🇳", price: 28450, pe: 7.0,  yield: 5.8, risk: 4, conviction: 25, moat: "Fort",   fcpOverlap: "Complém.", change: -1.7,  phaseEntry: 1 },
+  { ticker: "ORAC",  name: "Orange CI",     sector: "Télécoms",      country: "Côte d'Iv.",  flag: "🇨🇮", price: 16000, pe: 9.5,  yield: 3.9, risk: 4, conviction: 20, moat: "Fort",   fcpOverlap: "Complém.", change: 6.7,   phaseEntry: 1 },
+  { ticker: "CIEC",  name: "CIE",           sector: "Utilities",     country: "Côte d'Iv.",  flag: "🇨🇮", price: 4150,  pe: 11.0, yield: 7.7, risk: 3, conviction: 15, moat: "Fort",   fcpOverlap: "Complém.", change: 25.8,  phaseEntry: 1 },
   { ticker: "SDCC",  name: "SODECI",        sector: "Utilities",     country: "Côte d'Iv.",  flag: "🇨🇮", price: 7300,  pe: 10.0, yield: 6.6, risk: 3, conviction: 7,  moat: "Fort",   fcpOverlap: "Complém.", change: 1.4,   phaseEntry: 3 },
-  { ticker: "BOAB",  name: "BOA Bénin",     sector: "Banque",        country: "Bénin",       flag: "🇧🇯", price: 9410,  pe: 5.0,  yield: 5.76,risk: 4, conviction: 18, moat: "Modéré", fcpOverlap: "Partiel",  change: 36.3,  phaseEntry: 1 },
+  { ticker: "BOAB",  name: "BOA Bénin",     sector: "Banque",        country: "Bénin",       flag: "🇧🇯", price: 8900,  pe: 5.0,  yield: 5.76,risk: 4, conviction: 18, moat: "Modéré", fcpOverlap: "Partiel",  change: -5.4,  phaseEntry: 1 },
   { ticker: "BOAS",  name: "BOA Sénégal",   sector: "Banque",        country: "Sénégal",     flag: "🇸🇳", price: 6850,  pe: 5.5,  yield: 9.5, risk: 5, conviction: 8,  moat: "Modéré", fcpOverlap: "Partiel",  change: 12.4,  phaseEntry: 2 },
   { ticker: "SGBC",  name: "SGBCI",         sector: "Banque",        country: "Côte d'Iv.",  flag: "🇨🇮", price: 34500, pe: 9.0,  yield: 6.3, risk: 4, conviction: 12, moat: "Modéré", fcpOverlap: "Partiel",  change: 11.3,  phaseEntry: 1 },
   { ticker: "ETIT",  name: "Ecobank ETI",   sector: "Banque pan-AF", country: "Togo",        flag: "🇹🇬", price: 29,    pe: 6.5,  yield: 0.6, risk: 6, conviction: 6,  moat: "Modéré", fcpOverlap: "Partiel",  change: 93.3,  phaseEntry: 4 },
@@ -37,10 +37,10 @@ export const PHASE_CONFIG = [
 ];
 
 export const CURRENT_HOLDINGS = [
-  { ticker: "SNTS", qty: 2,  invested: 58244,  avgPrice: 29122 },
-  { ticker: "CIEC", qty: 17, invested: 54864,  avgPrice: 3227  },
+  { ticker: "SNTS", qty: 3,  invested: 86694,  avgPrice: 28898 },
+  { ticker: "CIEC", qty: 21, invested: 71419,  avgPrice: 3401  },
   { ticker: "BOAB", qty: 3,  invested: 25875,  avgPrice: 8625  },
-  { ticker: "ORAC", qty: 1,  invested: 15476,  avgPrice: 15476 },
+  { ticker: "ORAC", qty: 3,  invested: 47476,  avgPrice: 15825 },
   { ticker: "SGBC", qty: 0,  invested: 0,      avgPrice: 0     },
 ];
 
@@ -61,8 +61,8 @@ export const FCP_BENCHMARK = {
   shares: 11,
   costPerShare: 16928,
   invested: 200000,
-  navPerShare: 17149,
-  value: 202606,
-  snapshotDate: "2026-05-15",
+  navPerShare: 19499,
+  value: 214492,
+  snapshotDate: "2026-06-01",
   frozen: true,
 };

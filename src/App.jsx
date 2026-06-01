@@ -4,25 +4,17 @@ import useResponsive from "./hooks/useResponsive";
 
 import Nav from "./components/ui/Nav";
 import OverviewTab from "./components/tabs/OverviewTab";
-import DCATab from "./components/tabs/DCATab";
-import TargetTab from "./components/tabs/TargetTab";
 import DividendTab from "./components/tabs/DividendTab";
 import CalendarTab from "./components/tabs/CalendarTab";
-import PortfolioTab from "./components/tabs/PortfolioTab";
-import ConcentrationTab from "./components/tabs/ConcentrationTab";
 import StrategyTab from "./components/tabs/StrategyTab";
-import RisksTab from "./components/tabs/RisksTab";
+import AdviceTab from "./components/tabs/AdviceTab";
 
 const TAB_MAP = {
   overview:  OverviewTab,
-  dca:       DCATab,
-  target:    TargetTab,
   dividends: DividendTab,
   calendar:  CalendarTab,
-  portfolio: PortfolioTab,
-  concentration: ConcentrationTab,
   strategy:  StrategyTab,
-  risks:     RisksTab,
+  advice:    AdviceTab,
 };
 
 export default function App() {
