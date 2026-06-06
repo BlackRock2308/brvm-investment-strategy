@@ -67,18 +67,18 @@ const fcpHolding = {
   name: "FCP BAM WURUS",
   qty: 11,
   invested: 200000,
-  navPerShare: 19499,
-  value: 214492,
+  navPerShare: 18320,
+  value: 216436,
   costPerShare: 16928,
   get pnl() { return this.value - this.invested; },
   get pnlPct() { return ((this.value - this.invested) / this.invested * 100).toFixed(1); },
 };
 
 const directValues = {
-  SNTS: 85350,
-  CIEC: 87150,
-  BOAB: 26700,
-  ORAC: 48000,
+  SNTS: 85500,
+  CIEC: 111720,
+  BOAB: 26340,
+  ORAC: 49815,
 };
 const directValue = Object.values(directValues).reduce((a, b) => a + b, 0);
 const directPnl = directValue - situationTotal;

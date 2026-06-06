@@ -10,7 +10,7 @@ import {
   Calculator, Gauge,
 } from "lucide-react";
 import { T, FONT_SANS, FONT_MONO } from "../../theme";
-import { STOCKS, SECTOR_COLORS, PHASE_CONFIG, CURRENT_HOLDINGS, CURRENT_HOLDINGS_TOTAL } from "../../data/stocks";
+import { STOCKS, SECTOR_COLORS, PHASE_CONFIG, CURRENT_HOLDINGS, CURRENT_HOLDINGS_TOTAL, CASH, FCP_BENCHMARK } from "../../data/stocks";
 import { fmtFCFA, fmtFCFAfull } from "../../utils/format";
 import { projectDCA } from "../../utils/projections";
 import useResponsive from "../../hooks/useResponsive";
@@ -71,6 +71,23 @@ function computePortfolioMetrics() {
 
 const portfolio = computePortfolioMetrics();
 
+// Patrimoine global — réplique le relevé courtier (Espèces / Actions / OPCVM).
+const patrimoine = (() => {
+  const actions = portfolio.totalValue;
+  const opcvm = FCP_BENCHMARK.value;
+  const especes = CASH;
+  const total = actions + opcvm + especes;
+  const pct = (v) => (total > 0 ? Math.round((v / total) * 1000) / 10 : 0);
+  return {
+    total,
+    buckets: [
+      { key: "Espèces", value: especes, pct: pct(especes), color: T.blue },
+      { key: "Actions", value: actions, pct: pct(actions), color: T.green },
+      { key: "OPCVM",   value: opcvm,   pct: pct(opcvm),   color: T.amber },
+    ],
+  };
+})();
+
 const dcaProjection = projectDCA({ monthly: 75000, years: 7, annualRate: 9 });
 const dcaFinal = dcaProjection[dcaProjection.length - 1];
 
@@ -110,11 +127,53 @@ export default function OverviewTab() {
         </div>
       </div>
 
+      {/* Patrimoine global — Espèces / Actions / OPCVM */}
+      <Card title="Patrimoine global" subtitle={`Total ${fmtFCFAfull(patrimoine.total)} F · relevé ${FCP_BENCHMARK.snapshotDate}`} icon={Wallet}>
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: isMobile ? "1fr" : "180px 1fr",
+          gap: isMobile ? 12 : 24, alignItems: "center",
+        }}>
+          <ResponsiveContainer width="100%" height={isMobile ? 160 : 180}>
+            <PieChart>
+              <Pie data={patrimoine.buckets} dataKey="value" nameKey="key" cx="50%" cy="50%"
+                innerRadius={isMobile ? 45 : 52} outerRadius={isMobile ? 70 : 80} paddingAngle={3}
+                label={({ pct }) => `${pct}%`} labelLine={false}
+                style={{ fontFamily: FONT_MONO, fontSize: 10, fontWeight: 700 }}
+              >
+                {patrimoine.buckets.map((b, i) => (
+                  <Cell key={i} fill={b.color} stroke={T.bgCard} strokeWidth={2} />
+                ))}
+              </Pie>
+              <Tooltip content={<ChartTooltip />} />
+            </PieChart>
+          </ResponsiveContainer>
+          <div>
+            {patrimoine.buckets.map((b, i) => (
+              <div key={b.key} style={{
+                display: "flex", justifyContent: "space-between", alignItems: "center",
+                padding: "10px 0",
+                borderBottom: i < patrimoine.buckets.length - 1 ? `1px solid ${T.borderSoft}` : "none",
+              }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <span style={{ width: 10, height: 10, borderRadius: 3, background: b.color, flexShrink: 0 }} />
+                  <span style={{ fontFamily: FONT_SANS, fontSize: 13, fontWeight: 600, color: T.ink }}>{b.key}</span>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <span style={{ fontFamily: FONT_MONO, fontSize: 13, fontWeight: 600, color: T.ink }}>{fmtFCFAfull(b.value)} F</span>
+                  <Pill color={b.color} bg={T.bgSoft}>{b.pct}%</Pill>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </Card>
+
       {/* Top metrics */}
       <div style={{
         display: "grid",
         gridTemplateColumns: cols("1fr", "repeat(2, 1fr)", "repeat(4, 1fr)"),
-        gap: isMobile ? 10 : 16, marginBottom: isMobile ? 20 : 28,
+        gap: isMobile ? 10 : 16, marginTop: isMobile ? 16 : 24, marginBottom: isMobile ? 20 : 28,
       }}>
         <MetricCard label="Capital direct" value={fmtFCFA(portfolio.totalValue)} unit="F" deltaLabel={`investi ${fmtFCFA(CURRENT_HOLDINGS_TOTAL)}`} icon={Activity} color={T.blue} />
         <MetricCard label="Yield pondéré" value={portfolio.yield} unit="%" icon={Coins} color={T.green} />
