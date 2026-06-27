@@ -70,7 +70,7 @@ const BRVM_RULES = [
   },
   {
     title: "La saisonnalité des dividendes est ta boussole",
-    desc: "80% des détachements BRVM ont lieu entre avril et juillet. Achète 6-8 semaines AVANT le détachement pour capturer le dividende complet. Évite d'acheter dans les 14 jours précédant le détachement (prix déjà gonflé, risque de post-détachement).",
+    desc: "L'essentiel des détachements BRVM a lieu entre avril et septembre. Achète 6-8 semaines AVANT le détachement pour capturer le dividende complet. Évite d'acheter dans les 14 jours précédant le détachement (prix déjà gonflé, risque de post-détachement).",
     icon: TrendingUp,
   },
   {

@@ -4,10 +4,10 @@ import {
   Tooltip, ResponsiveContainer, Cell, Legend, ZAxis,
 } from "recharts";
 import {
-  Clock, AlertTriangle, Target, Compass, CalendarDays,
+  Clock, AlertTriangle, Target, Compass, CalendarDays, Coins, Building2, Ban,
 } from "lucide-react";
 import { T, FONT_SANS, FONT_MONO } from "../../theme";
-import { DIVIDEND_CALENDAR, QUALITY_META } from "../../data/dividendCalendar";
+import { DIVIDEND_CALENDAR, QUALITY_META, STATUS_META, DIVIDEND_SUMMARY, NON_PAYERS } from "../../data/dividendCalendar";
 import { fmtFCFAfull } from "../../utils/format";
 import useResponsive from "../../hooks/useResponsive";
 
@@ -123,7 +123,7 @@ export default function CalendarTab() {
     }));
     const undated = UPCOMING.filter(d => !d.date).map((d, i) => ({
       ...d,
-      x: new Date("2026-07-15").getTime() + i * 86400000,
+      x: new Date("2026-10-20").getTime() + i * 86400000,
       y: d.yield,
       z: Math.max(d.amount, 80),
     }));
@@ -138,7 +138,7 @@ export default function CalendarTab() {
       <PageHeader
         eyebrow="Optimisation · saisonnalité dividendes"
         title="Calendrier 2026 des détachements BRVM"
-        description="18 sociétés cotées versent leurs dividendes entre avril et juillet 2026. Achetez 6 à 8 semaines avant chaque détachement pour maximiser votre yield d'entrée et capter le dividende complet dès le premier exercice."
+        description={`${DIVIDEND_SUMMARY.payingCompanies} sociétés sur ${DIVIDEND_SUMMARY.totalCompanies} versent un dividende en 2026 (rendement moyen ${DIVIDEND_SUMMARY.averageYield.toString().replace(".", ",")}%). Achetez 6 à 8 semaines avant chaque détachement pour maximiser votre yield d'entrée et capter le dividende complet dès le premier exercice. ${DIVIDEND_SUMMARY.weekLabel}.`}
       />
 
       {/* 2. Metrics */}
@@ -147,9 +147,9 @@ export default function CalendarTab() {
         gridTemplateColumns: cols("1fr", "repeat(3, 1fr)", "repeat(3, 1fr)"),
         gap: isMobile ? 10 : 16, marginBottom: isMobile ? 20 : 28,
       }}>
-        <MetricCard label="Fenêtre d'achat optimale" value="6-8 sem." unit="" deltaLabel="avant détachement" icon={Clock} color={T.blue} />
-        <MetricCard label="Zone à éviter" value="±14 jours" unit="" deltaLabel="autour du détachement" icon={AlertTriangle} color={T.amber} />
-        <MetricCard label="Détachements core ciblés" value={coreCount} unit="lignes prioritaires" icon={Target} color={T.green} />
+        <MetricCard label="Sociétés payeuses 2026" value={`${DIVIDEND_SUMMARY.payingCompanies} / ${DIVIDEND_SUMMARY.totalCompanies}`} unit="" deltaLabel="versent un dividende" icon={Building2} color={T.blue} />
+        <MetricCard label="Rendement moyen" value={DIVIDEND_SUMMARY.averageYield.toString().replace(".", ",")} unit="%" deltaLabel="yield moyen marché" icon={Coins} color={T.green} />
+        <MetricCard label="Détachements core ciblés" value={coreCount} unit="lignes prioritaires" icon={Target} color={T.chart3} />
       </div>
 
       {/* 3. Scatter timeline */}
@@ -165,7 +165,7 @@ export default function CalendarTab() {
             <XAxis
               type="number"
               dataKey="x"
-              domain={[new Date("2026-04-10").getTime(), new Date("2026-08-10").getTime()]}
+              domain={[new Date("2026-06-20").getTime(), new Date("2026-11-15").getTime()]}
               tickFormatter={(v) => {
                 const d = new Date(v);
                 return d.toLocaleDateString("fr-FR", { month: "short" });
@@ -207,7 +207,7 @@ export default function CalendarTab() {
           borderRadius: 8, fontFamily: FONT_MONO, fontSize: 10, color: T.inkMuted,
           textAlign: "center",
         }}>
-          Avr — Mai — Juin — Jul : dates confirmées &nbsp;│&nbsp; Zone droite : dates à confirmer
+          Juin → Sept. : dates confirmées ou annoncées &nbsp;│&nbsp; Zone droite : dates à préciser
         </div>
       </Card>
 
@@ -239,10 +239,10 @@ export default function CalendarTab() {
         }
       >
         <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
-          <table style={{ width: "100%", minWidth: 820, borderCollapse: "collapse", fontFamily: FONT_SANS, fontSize: 12 }}>
+          <table style={{ width: "100%", minWidth: 940, borderCollapse: "collapse", fontFamily: FONT_SANS, fontSize: 12 }}>
             <thead>
               <tr>
-                {["Date", "Ticker", "Société", "Pays", "Secteur", "Montant net", "Yield", "Fenêtre achat", "Action"].map(h => (
+                {["Date", "Statut", "Ticker", "Société", "Pays", "Secteur", "Montant net", "Yield", "Fenêtre achat", "Action"].map(h => (
                   <th key={h} style={{
                     padding: "10px 10px", textAlign: "left",
                     fontFamily: FONT_SANS, fontSize: 11, color: T.inkMuted,
@@ -255,6 +255,7 @@ export default function CalendarTab() {
             <tbody>
               {filtered.map((d) => {
                 const meta = QUALITY_META[d.quality];
+                const statusMeta = STATUS_META[d.status] || STATUS_META.proposed;
                 return (
                   <tr key={d.ticker} style={{ transition: "background 0.15s" }}
                     onMouseEnter={e => e.currentTarget.style.background = T.bgSubtle}
@@ -262,6 +263,9 @@ export default function CalendarTab() {
                   >
                     <td style={{ padding: "12px 10px", fontFamily: FONT_MONO, color: d.date ? T.ink : T.inkDim, fontWeight: 600, borderBottom: `1px solid ${T.borderSoft}`, whiteSpace: "nowrap" }}>
                       {fmtDateShort(d.date)}
+                    </td>
+                    <td style={{ padding: "12px 10px", borderBottom: `1px solid ${T.borderSoft}` }}>
+                      <Pill color={statusMeta.color} bg={statusMeta.bg}>{statusMeta.label}</Pill>
                     </td>
                     <td style={{ padding: "12px 10px", borderBottom: `1px solid ${T.borderSoft}` }}>
                       <Pill color={meta.color} bg={meta.bg}>{d.ticker}</Pill>
@@ -316,6 +320,33 @@ export default function CalendarTab() {
         ))}
       </Card>
 
+      {/* 5b. Sociétés sans dividende 2026 */}
+      <Card
+        title="Sociétés sans dividende en 2026"
+        subtitle="Ont décidé de ne pas distribuer cette année"
+        icon={Ban}
+        style={{ marginBottom: 16 }}
+      >
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+          {NON_PAYERS.map(n => (
+            <span key={n} style={{
+              display: "inline-flex", alignItems: "center", gap: 6,
+              padding: "6px 12px", borderRadius: 999,
+              background: T.red + "12", color: T.red,
+              fontFamily: FONT_SANS, fontSize: 12, fontWeight: 600,
+            }}>
+              <Ban size={12} strokeWidth={2.4} /> {n}
+            </span>
+          ))}
+        </div>
+        <div style={{
+          marginTop: 12, fontFamily: FONT_SANS, fontSize: 11,
+          color: T.inkMuted, lineHeight: 1.6, fontStyle: "italic",
+        }}>
+          Hors titres marqués « Confirmé » ou « Payé », les montants ne sont pas encore officiellement publiés par la BRVM. Source : BRVM, Daba Intelligence.
+        </div>
+      </Card>
+
       {/* 6. Traps to avoid */}
       <Card
         title="Pièges à éviter"
@@ -324,8 +355,8 @@ export default function CalendarTab() {
       >
         {[
           {
-            title: "Yield trap NEI-CEDA (8,89%)",
-            desc: "Liquidité très faible, sortie difficile. Le yield élevé masque un titre quasi-illiquide.",
+            title: "Yield trap NEI-CEDA (5,85%)",
+            desc: "Liquidité très faible, sortie difficile. Le yield reste un piège — titre quasi-illiquide malgré un rendement affiché correct.",
             color: T.amber,
           },
           {

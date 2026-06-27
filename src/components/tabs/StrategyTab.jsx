@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { Clock, Compass, Gauge, Briefcase, Target, AlertCircle, Activity, Coins, CheckSquare, TrendingUp } from "lucide-react";
 import { T, FONT_SANS, FONT_MONO } from "../../theme";
 import { fmtFCFA, fmtFCFAfull, fmtEUR } from "../../utils/format";
-import { CURRENT_HOLDINGS, STOCKS, PHASE_CONFIG } from "../../data/stocks";
+import { CURRENT_HOLDINGS, STOCKS, PHASE_CONFIG, FCP_BENCHMARK } from "../../data/stocks";
 import { computeDividendTargets } from "../../utils/projections";
 import useResponsive from "../../hooks/useResponsive";
 
@@ -46,6 +46,16 @@ const journal = [
     text: "Premier DRIP réel. Budget 80k FCFA dont 4 450 F de dividendes SNTS+BOAB réinvestis. Ordres passés : 1 SNTS à 28 450 F + 2 ORAC à 16 000 F + 4 CIEC à 4 140 F = 77 010 F hors frais (78 144 F avec frais courtier). CIEC réduit de 5 à 4 actions car cours en rallye (+28% vs CMP). Portefeuille direct : SNTS ×3, ORAC ×3, CIEC ×21, BOAB ×3 — total investi 231 464 F, valorisation 247 200 F (+6.8%). FCP BAM WURUS : 214 492 F (+7%).",
     color: T.green,
   },
+  {
+    date: "8 juin 2026",
+    text: "Dividende Orange CI détaché : 704 F brut/action (4 actions). ORAC renforcée à 4 lignes (CMP 16 007 F) après un dernier achat à 16 700 F. Le coupon ORAC vient nourrir le prochain DRIP.",
+    color: T.green,
+  },
+  {
+    date: "27 juin 2026 (snapshot courtier)",
+    text: "Relevé courtier complet. Direct : SNTS ×3 (clôture 29 000), CIEC ×21 (5 200), BOAB ×3 (9 025), ORAC ×4 (16 700) — investi 248 687 F, valorisation 290 075 F (+41 387 F, +16,6%). CIE tire la performance (+52% vs CMP). FCP BAM WURUS : 11 parts à 19 214 F, valorisation 226 998 F (+26 998 F, +13%). Patrimoine global 517 073 F (+68 386 F).",
+    color: T.chart5,
+  },
 ];
 
 const BADGE_MAP = {
@@ -64,21 +74,22 @@ const situationLines = CURRENT_HOLDINGS.map(h => ({
 const situationTotal = CURRENT_HOLDINGS.reduce((s, h) => s + h.invested, 0);
 
 const fcpHolding = {
-  name: "FCP BAM WURUS",
-  qty: 11,
-  invested: 200000,
-  navPerShare: 18320,
-  value: 216436,
-  costPerShare: 16928,
+  name: FCP_BENCHMARK.name,
+  qty: FCP_BENCHMARK.shares,
+  invested: FCP_BENCHMARK.invested,
+  navPerShare: FCP_BENCHMARK.navPerShare,
+  value: FCP_BENCHMARK.value,
+  costPerShare: FCP_BENCHMARK.costPerShare,
   get pnl() { return this.value - this.invested; },
   get pnlPct() { return ((this.value - this.invested) / this.invested * 100).toFixed(1); },
 };
 
+// Valorisations au cours de clôture (relevé courtier 27 juin 2026).
 const directValues = {
-  SNTS: 85500,
-  CIEC: 111720,
-  BOAB: 26340,
-  ORAC: 49815,
+  SNTS: 87000,
+  CIEC: 109200,
+  BOAB: 27075,
+  ORAC: 66800,
 };
 const directValue = Object.values(directValues).reduce((a, b) => a + b, 0);
 const directPnl = directValue - situationTotal;
@@ -88,21 +99,35 @@ const STORAGE_KEY = "omaad-calendar-done";
 
 const calendar = [
   { m: "M3",  month: "juin 26",  main: "SNTS", units: "1 × 28 450",  second: "ORAC", second2: "2 × 16 000", third: "CIEC", third2: "4 × 4 140",  total: 77010,  logic: "SNTS mensuel initié + ORAC renforcée + CIEC réduit de 5 à 4 (cours en rallye +28% vs CMP). BOAB reporté à juillet post-détachement. Premier DRIP : dividendes SNTS+BOAB réinvestis." },
-  { m: "M4",  month: "juil. 26", main: "SGBC", units: "1 × 34 500",  second: "CIEC", second2: "4 × 4 140",  third: "BOAB", third2: "3 × 8 900",  total: 77760,  logic: "Initier SGBC enfin (5e ligne cœur). BOAB renforcé post-détachement + CIEC lissage." },
-  { m: "M5",  month: "août 26",  main: "SNTS", units: "1 × 28 450",  second: "ORAC", second2: "2 × 16 000", third: "BOAB", third2: "2 × 8 900",  total: 78250,  logic: "SNTS mensuel + ORAC plein + BOAB convergence." },
-  { m: "M6",  month: "sept. 26", main: "SNTS", units: "1 × 28 450",  second: "BOAB", second2: "3 × 8 900",  third: "CIEC", third2: "6 × 4 140",  total: 79990,  logic: "SNTS mensuel + BOAB + CIEC pré-détachement utility automne." },
-  { m: "M7",  month: "oct. 26",  main: "SNTS", units: "1 × 28 450",  second: "ORAC", second2: "2 × 16 000", third: "CIEC", third2: "5 × 4 140",  total: 81150,  logic: "SNTS mensuel + ORAC continue + CIEC pré-détachement nov." },
-  { m: "M8",  month: "nov. 26",  main: "SGBC", units: "1 × 34 500",  second: "BOAB", second2: "3 × 8 900",  third: "ORAC", third2: "1 × 16 000", total: 77200,  logic: "SGBC 2e achat (cible 2 unités atteinte) + BOAB + ORAC." },
-  { m: "M9",  month: "déc. 26",  main: "SNTS", units: "1 × 28 450",  second: "BOAB", second2: "3 × 8 900",  third: "ORAC", third2: "1 × 16 000", total: 71150,  logic: "Boucler 2026 — SNTS final + BOAB convergence + ORAC. Solde 2026 fermé." },
+  { m: "M4",  month: "juil. 26", main: "SGBC", units: "1 × 39 000",  second: "BOAB", second2: "4 × 9 025",  third: "—", third2: "",  total: 75100,  logic: "Initiation SGBC (5e ligne cœur enfin) + comblement BOAB, la ligne la plus sous-pondérée. Aucun achat CIE — déjà surpondérée (+20pp) après le rallye." },
+  { m: "M5",  month: "août 26",  main: "BOAB", units: "5 × 9 025",   second: "ORAC", second2: "2 × 16 700", third: "—", third2: "",  total: 78525,  logic: "Rattrapage BOAB + renforcement ORAC. Convergence des deux lignes les plus en retard." },
+  { m: "M6",  month: "sept. 26", main: "BOAB", units: "4 × 9 025",   second: "SNTS", second2: "1 × 29 000", third: "—", third2: "",  total: 65100,  logic: "Fin du rattrapage BOAB (cible 16 atteinte) + 1 SNTS mensuel." },
+  { m: "M7",  month: "oct. 26",  main: "ORAC", units: "2 × 16 700",  second: "SNTS", second2: "1 × 29 000", third: "—", third2: "",  total: 62400,  logic: "Renforcement ORAC vers 22% + SNTS mensuel." },
+  { m: "M8",  month: "nov. 26",  main: "ORAC", units: "2 × 16 700",  second: "SNTS", second2: "1 × 29 000", third: "—", third2: "",  total: 62400,  logic: "ORAC atteint sa cible (10 actions) + SNTS." },
+  { m: "M9",  month: "déc. 26",  main: "SGBC", units: "1 × 39 000",  second: "SNTS", second2: "1 × 29 000", third: "—", third2: "",  total: 68000,  logic: "2e ligne SGBC + SNTS final. Bouclage 2026 : convergence Phase 1 à ±2pp. Solde non déployé → réserve cash tactique." },
 ];
 
-const projected = [
-  { ticker: "SNTS", qty: 7,  invested: 200494, value: 199150, pct: 28, target: 28 },
-  { ticker: "ORAC", qty: 9,  invested: 143476, value: 144000, pct: 20, target: 22 },
-  { ticker: "BOAB", qty: 17, invested: 150475, value: 151300, pct: 21, target: 20 },
-  { ticker: "CIEC", qty: 36, invested: 133519, value: 149400, pct: 21, target: 17 },
-  { ticker: "SGBC", qty: 2,  invested: 69000,  value: 69000,  pct: 10, target: 13 },
+// Composition cible fin 2026 (quantités du plan DCA reconstruit aux cours du 27/06/2026) — valorisée aux cours courants.
+const projectedRaw = [
+  { ticker: "SNTS", qty: 7,  invested: 203113, target: 28 },
+  { ticker: "ORAC", qty: 10, invested: 164230, target: 22 },
+  { ticker: "BOAB", qty: 16, invested: 143200, target: 20 },
+  { ticker: "CIEC", qty: 21, invested: 71669,  target: 17 },
+  { ticker: "SGBC", qty: 2,  invested: 78000,  target: 13 },
 ];
+const projectedValueTotal = projectedRaw.reduce((s, p) => {
+  const st = STOCKS.find(x => x.ticker === p.ticker);
+  return s + (st ? p.qty * st.price : 0);
+}, 0);
+const projected = projectedRaw.map(p => {
+  const st = STOCKS.find(x => x.ticker === p.ticker);
+  const value = st ? p.qty * st.price : 0;
+  return {
+    ...p,
+    value,
+    pct: projectedValueTotal > 0 ? Math.round((value / projectedValueTotal) * 100) : 0,
+  };
+});
 const projectedTotal = projected.reduce((s, p) => s + p.value, 0);
 
 const rules = [
@@ -361,7 +386,7 @@ export default function StrategyTab() {
       </Card>
 
       {/* --- Card 1: Point de situation --- */}
-      <Card title="Point de situation — 1 juin 2026 (M1→M3 exécutés)" subtitle="État réel du portefeuille après 3 mois de DCA" icon={Briefcase} style={{ marginBottom: 16 }}>
+      <Card title="Point de situation — 27 juin 2026" subtitle="État réel du portefeuille · relevé courtier" icon={Briefcase} style={{ marginBottom: 16 }}>
         <div style={{
           display: "grid",
           gridTemplateColumns: cols("1fr", "repeat(3, 1fr)", "repeat(5, 1fr)"),
@@ -465,7 +490,7 @@ export default function StrategyTab() {
       </Card>
 
       {/* --- Card 1b: Direct vs FCP performance comparison --- */}
-      <Card title="Direct vs FCP BAM WURUS — Performance comparée" subtitle="Snapshot courtier · 1 juin 2026" icon={TrendingUp} style={{ marginBottom: 16 }}>
+      <Card title="Direct vs FCP BAM WURUS — Performance comparée" subtitle="Snapshot courtier · 27 juin 2026" icon={TrendingUp} style={{ marginBottom: 16 }}>
         <div style={{
           display: "grid",
           gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
@@ -741,7 +766,7 @@ export default function StrategyTab() {
         }}>
           <AlertCircle size={14} color={T.blue} style={{ flexShrink: 0, marginTop: 2 }} />
           <div style={{ fontFamily: FONT_SANS, fontSize: 12, color: T.inkMuted, lineHeight: 1.6 }}>
-            DCA ~78k FCFA/mois (75k + dividendes DRIP). SNTS converge parfaitement à 28% (cible 28%). CIEC et BOAB surpondérées vs cible à cause du rallye CIEC (+28%) et du renforcement BOAB post-détachement. SGBC et ORAC sous-pondérées — à surveiller pour rééquilibrage si opportunité. Aucune projection au-delà du 31/12/2026 — un nouveau plan sera défini début 2027.
+            Plan reconstruit aux cours du 27/06/2026 : DCA base 75k/mois + dividendes DRIP. Stratégie de reconvergence — <strong>aucun achat CIE</strong> (déjà surpondérée à 38% après le rallye), priorité au comblement de <strong>BOAB</strong> (+13 actions) et à l'initiation de <strong>SGBC</strong> (2 actions). Le poids de CIE se dilue naturellement vers ~16%. À fin décembre, les 5 lignes convergent à ±2pp des cibles Phase 1. Capital déployé ~411k sur 450k disponibles : le solde (~40k) + DRIP alimentent la réserve cash tactique (5-10% IPS). Aucune projection au-delà du 31/12/2026.
           </div>
         </div>
       </Card>
