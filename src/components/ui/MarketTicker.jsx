@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { TrendingUp, TrendingDown, BarChart3, RefreshCw } from "lucide-react";
-import { T, FONT_SANS, FONT_MONO } from "../../theme";
+import { T, FONT_SANS, FONT_MONO, R, alpha } from "../../theme";
 import useResponsive from "../../hooks/useResponsive";
 
 function isBrvmOpen() {
@@ -78,7 +78,7 @@ export default function MarketTicker({ endpoint }) {
         flexWrap: "wrap", gap: 8,
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <BarChart3 size={14} color={T.blue} />
+          <BarChart3 size={14} color={T.ochre} />
           <span style={{ fontFamily: FONT_SANS, fontSize: 13, fontWeight: 700 }}>BRVM-CI</span>
           <span style={{ fontFamily: FONT_MONO, fontSize: 14, fontWeight: 700, color: T.inkInv }}>
             {index?.value?.toLocaleString("fr-FR")}
@@ -99,7 +99,7 @@ export default function MarketTicker({ endpoint }) {
           {index?.ytd != null && (
             <span style={{
               fontFamily: FONT_MONO, fontSize: 10, padding: "2px 8px",
-              background: index.ytd >= 0 ? T.green + "22" : T.red + "22",
+              background: index.ytd >= 0 ? alpha(T.green, 0.13) : alpha(T.red, 0.13),
               color: index.ytd >= 0 ? T.green : T.red,
               borderRadius: 6, fontWeight: 600,
             }}>
@@ -180,7 +180,7 @@ function MoversColumn({ title, icon: Icon, items, color, bgHeader, isMobile, bor
               fontFamily: FONT_MONO, fontSize: 12, fontWeight: 700,
               color,
               padding: "2px 8px", borderRadius: 6,
-              background: color + "14",
+              background: alpha(color, 0.08),
               minWidth: 60, textAlign: "right",
             }}>
               {item.changePct >= 0 ? "+" : ""}{item.changePct?.toFixed(2)}%

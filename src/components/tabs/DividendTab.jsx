@@ -4,11 +4,12 @@ import {
   CartesianGrid, Tooltip, Legend, ResponsiveContainer,
 } from "recharts";
 import { Coins, TrendingUp, Briefcase, Target, ChevronDown, ChevronUp } from "lucide-react";
-import { T, FONT_SANS, FONT_MONO } from "../../theme";
+import { T, FONT_SANS, FONT_MONO, alpha, chartTokens } from "../../theme";
 import { STOCKS, PHASE_CONFIG, CURRENT_HOLDINGS } from "../../data/stocks";
 import { fmtFCFA, fmtFCFAfull, fmtEUR } from "../../utils/format";
 import { projectDRIP, computeDividendTargets } from "../../utils/projections";
 import useResponsive from "../../hooks/useResponsive";
+import useTheme from "../../hooks/useTheme";
 
 import PageHeader from "../ui/PageHeader";
 import Card from "../ui/Card";
@@ -34,6 +35,8 @@ export default function DividendTab() {
   const [expandedTarget, setExpandedTarget] = useState(null);
 
   const { isMobile, cols } = useResponsive();
+  const { isDark } = useTheme();
+  const ct = chartTokens(isDark);
 
   const dripData = useMemo(() => projectDRIP({
     initial: divInitial, monthly: divMonthly, years: divYears,
@@ -86,21 +89,21 @@ export default function DividendTab() {
             <div style={{
               background: T.bgDark,
               border: `1px solid ${T.bgDark}`,
-              borderRadius: 12, padding: isMobile ? 16 : 20,
-              color: T.inkInv, position: "relative", overflow: "hidden",
+              borderRadius: 16, padding: isMobile ? 16 : 20,
+              color: "#FAF8F4", position: "relative", overflow: "hidden",
             }}>
               <div style={{
                 position: "absolute", top: -40, right: -40,
                 width: 140, height: 140,
-                background: `radial-gradient(circle, ${passiveMonthly > 50000 ? T.green : T.amber}50, transparent 60%)`,
+                background: `radial-gradient(circle, ${alpha(passiveMonthly > 50000 ? T.green : T.amber, 0.31)}, transparent 60%)`,
                 borderRadius: "50%",
               }}/>
               <div style={{ position: "relative" }}>
-                <div style={{ fontFamily: FONT_SANS, fontSize: 11, color: "#9CA3AF", fontWeight: 500, letterSpacing: "0.02em", textTransform: "uppercase", marginBottom: 8 }}>Revenu mensuel passif</div>
+                <div style={{ fontFamily: FONT_SANS, fontSize: 11, color: "#9C988C", fontWeight: 500, letterSpacing: "0.02em", textTransform: "uppercase", marginBottom: 8 }}>Revenu mensuel passif</div>
                 <div style={{ fontFamily: FONT_SANS, fontSize: isMobile ? 22 : 28, fontWeight: 700, letterSpacing: "-0.025em", lineHeight: 1, color: passiveMonthly > 50000 ? T.neon : T.amber }}>
                   {fmtFCFA(passiveMonthly)}
                 </div>
-                <div style={{ fontFamily: FONT_MONO, fontSize: 11, color: "#9CA3AF", marginTop: 4 }}>
+                <div style={{ fontFamily: FONT_MONO, fontSize: 11, color: "#9C988C", marginTop: 4 }}>
                   F/mois · ≈ {fmtEUR(passiveMonthly * 12) / 12 | 0} €/mois
                 </div>
               </div>
@@ -112,18 +115,18 @@ export default function DividendTab() {
               <ComposedChart data={dripData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
                 <defs>
                   <linearGradient id="dG" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor={T.blue} stopOpacity={0.25}/>
-                    <stop offset="100%" stopColor={T.blue} stopOpacity={0}/>
+                    <stop offset="0%" stopColor={ct.primary} stopOpacity={0.25}/>
+                    <stop offset="100%" stopColor={ct.primary} stopOpacity={0}/>
                   </linearGradient>
                 </defs>
-                <CartesianGrid stroke={T.borderSoft} vertical={false} strokeDasharray="3 3"/>
-                <XAxis dataKey="year" stroke={T.inkDim} tick={{ fontSize: 11, fontFamily: FONT_MONO, fill: T.inkMuted }} axisLine={false} tickLine={false}/>
-                <YAxis yAxisId="left" stroke={T.inkDim} tick={{ fontSize: 11, fontFamily: FONT_MONO, fill: T.inkMuted }} tickFormatter={fmtFCFA} axisLine={false} tickLine={false}/>
-                <YAxis yAxisId="right" orientation="right" stroke={T.green} tick={{ fontSize: 11, fontFamily: FONT_MONO, fill: T.green }} tickFormatter={fmtFCFA} axisLine={false} tickLine={false}/>
+                <CartesianGrid stroke={ct.grid} vertical={false} strokeDasharray="3 3"/>
+                <XAxis dataKey="year" stroke={ct.grid} tick={{ fontSize: 11, fontFamily: FONT_MONO, fill: ct.textMuted }} axisLine={false} tickLine={false}/>
+                <YAxis yAxisId="left" stroke={ct.grid} tick={{ fontSize: 11, fontFamily: FONT_MONO, fill: ct.textMuted }} tickFormatter={fmtFCFA} axisLine={false} tickLine={false}/>
+                <YAxis yAxisId="right" orientation="right" stroke={ct.grid} tick={{ fontSize: 11, fontFamily: FONT_MONO, fill: ct.positive }} tickFormatter={fmtFCFA} axisLine={false} tickLine={false}/>
                 <Tooltip content={<ChartTooltip />}/>
-                <Legend wrapperStyle={{ fontFamily: FONT_SANS, fontSize: 11, paddingTop: 10 }}/>
-                <Area yAxisId="left" type="monotone" dataKey="value" stroke={T.blue} strokeWidth={2.5} fill="url(#dG)" name="Valeur portefeuille"/>
-                <Bar yAxisId="right" dataKey="dividendsNet" fill={T.green} name="Dividendes nets" radius={[4, 4, 0, 0]} opacity={0.9}/>
+                <Legend wrapperStyle={{ fontFamily: FONT_SANS, fontSize: 11, paddingTop: 10, color: ct.textMuted }}/>
+                <Area yAxisId="left" type="monotone" dataKey="value" stroke={ct.primary} strokeWidth={2.5} fill="url(#dG)" name="Valeur portefeuille" isAnimationActive={false}/>
+                <Bar yAxisId="right" dataKey="dividendsNet" fill={ct.positive} name="Dividendes nets" radius={[4, 4, 0, 0]} opacity={0.9} isAnimationActive={false}/>
               </ComposedChart>
             </ResponsiveContainer>
           </Card>

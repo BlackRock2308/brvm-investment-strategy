@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Clock, Compass, Gauge, Briefcase, Target, AlertCircle, Activity, Coins, CheckSquare, TrendingUp } from "lucide-react";
-import { T, FONT_SANS, FONT_MONO } from "../../theme";
+import { T, FONT_SANS, FONT_MONO, alpha } from "../../theme";
 import { fmtFCFA, fmtFCFAfull, fmtEUR } from "../../utils/format";
 import { CURRENT_HOLDINGS, STOCKS, PHASE_CONFIG, FCP_BENCHMARK } from "../../data/stocks";
 import { computeDividendTargets } from "../../utils/projections";
@@ -56,16 +56,25 @@ const journal = [
     text: "Relevé courtier complet. Direct : SNTS ×3 (clôture 29 000), CIEC ×21 (5 200), BOAB ×3 (9 025), ORAC ×4 (16 700) — investi 248 687 F, valorisation 290 075 F (+41 387 F, +16,6%). CIE tire la performance (+52% vs CMP). FCP BAM WURUS : 11 parts à 19 214 F, valorisation 226 998 F (+26 998 F, +13%). Patrimoine global 517 073 F (+68 386 F).",
     color: T.chart5,
   },
+  {
+    date: "2-3 juillet 2026 (M4 exécuté)",
+    text: "Écart au plan assumé : SGBC écartée (jugée trop chère à 39 000 F, potentiel d'appréciation jugé limité). À la place, renforcement de 3 lignes de conviction — 3 BOAB à 9 025 F (02/07), puis 1 ORAC à 16 750 F et 1 SNTS à 29 495 F (03/07). Total déployé 73 320 F. Portefeuille direct : SNTS ×4, ORAC ×5, BOAB ×6, CIEC ×21.",
+    color: T.green,
+  },
+  {
+    date: "6 juillet 2026 (snapshot courtier)",
+    text: "Valorisation globale 603 726 F. Direct : SNTS ×4 (29 500), CIE ×21 (5 300), BOAB ×6 (9 100), ORAC ×5 (16 900) — valorisation 368 400 F (+44 532 F, +13,8%). CIE toujours en tête (+55% vs CMP). FCP BAM WURUS 230 738 F (+30 738, +15,4%). Espèces réduites à 4 588 F après les achats de juillet.",
+    color: T.chart5,
+  },
 ];
 
 const BADGE_MAP = {
-  SNTS: "✓ Renforcée (M1→M3)",
+  SNTS: "✓ Renforcée (M1→M4)",
   CIEC: "✓ Renforcée (M1→M3)",
-  BOAB: "✓ Initiée (M2)",
-  ORAC: "✓ Renforcée (M2+M3)",
-  SGBC: "À initier (M4)",
+  BOAB: "✓ Renforcée (M2→M4)",
+  ORAC: "✓ Renforcée (M2→M4)",
 };
-const NAME_MAP = { SNTS: "Sonatel", CIEC: "CIE", BOAB: "BOA Bénin", ORAC: "Orange CI", SGBC: "SGBCI" };
+const NAME_MAP = { SNTS: "Sonatel", CIEC: "CIE", BOAB: "BOA Bénin", ORAC: "Orange CI" };
 const situationLines = CURRENT_HOLDINGS.map(h => ({
   ...h, name: NAME_MAP[h.ticker] || h.ticker,
   invested: h.invested, badge: BADGE_MAP[h.ticker] || "",
@@ -84,12 +93,12 @@ const fcpHolding = {
   get pnlPct() { return ((this.value - this.invested) / this.invested * 100).toFixed(1); },
 };
 
-// Valorisations au cours de clôture (relevé courtier 27 juin 2026).
+// Valorisations au cours de clôture (relevé courtier 6 juillet 2026).
 const directValues = {
-  SNTS: 87000,
-  CIEC: 109200,
-  BOAB: 27075,
-  ORAC: 66800,
+  SNTS: 118000,
+  CIEC: 111300,
+  BOAB: 54600,
+  ORAC: 84500,
 };
 const directValue = Object.values(directValues).reduce((a, b) => a + b, 0);
 const directPnl = directValue - situationTotal;
@@ -99,21 +108,20 @@ const STORAGE_KEY = "omaad-calendar-done";
 
 const calendar = [
   { m: "M3",  month: "juin 26",  main: "SNTS", units: "1 × 28 450",  second: "ORAC", second2: "2 × 16 000", third: "CIEC", third2: "4 × 4 140",  total: 77010,  logic: "SNTS mensuel initié + ORAC renforcée + CIEC réduit de 5 à 4 (cours en rallye +28% vs CMP). BOAB reporté à juillet post-détachement. Premier DRIP : dividendes SNTS+BOAB réinvestis." },
-  { m: "M4",  month: "juil. 26", main: "SGBC", units: "1 × 39 000",  second: "BOAB", second2: "4 × 9 025",  third: "—", third2: "",  total: 75100,  logic: "Initiation SGBC (5e ligne cœur enfin) + comblement BOAB, la ligne la plus sous-pondérée. Aucun achat CIE — déjà surpondérée (+20pp) après le rallye." },
-  { m: "M5",  month: "août 26",  main: "BOAB", units: "5 × 9 025",   second: "ORAC", second2: "2 × 16 700", third: "—", third2: "",  total: 78525,  logic: "Rattrapage BOAB + renforcement ORAC. Convergence des deux lignes les plus en retard." },
-  { m: "M6",  month: "sept. 26", main: "BOAB", units: "4 × 9 025",   second: "SNTS", second2: "1 × 29 000", third: "—", third2: "",  total: 65100,  logic: "Fin du rattrapage BOAB (cible 16 atteinte) + 1 SNTS mensuel." },
-  { m: "M7",  month: "oct. 26",  main: "ORAC", units: "2 × 16 700",  second: "SNTS", second2: "1 × 29 000", third: "—", third2: "",  total: 62400,  logic: "Renforcement ORAC vers 22% + SNTS mensuel." },
-  { m: "M8",  month: "nov. 26",  main: "ORAC", units: "2 × 16 700",  second: "SNTS", second2: "1 × 29 000", third: "—", third2: "",  total: 62400,  logic: "ORAC atteint sa cible (10 actions) + SNTS." },
-  { m: "M9",  month: "déc. 26",  main: "SGBC", units: "1 × 39 000",  second: "SNTS", second2: "1 × 29 000", third: "—", third2: "",  total: 68000,  logic: "2e ligne SGBC + SNTS final. Bouclage 2026 : convergence Phase 1 à ±2pp. Solde non déployé → réserve cash tactique." },
+  { m: "M4",  month: "juil. 26", main: "BOAB", units: "3 × 9 025",   second: "ORAC", second2: "1 × 16 750", third: "SNTS", third2: "1 × 29 495",  total: 73320,  logic: "Exécuté. SGBC écartée (jugée trop chère, potentiel limité) → renforcement de 3 lignes de conviction : BOAB (comblement), ORAC et SNTS. Aucun achat CIE (surpondérée)." },
+  { m: "M5",  month: "août 26",  main: "BOAB", units: "3 × 9 100",   second: "ORAC", second2: "2 × 16 900", third: "—", third2: "",  total: 61100,  logic: "Rattrapage BOAB, ligne la plus sous-pondérée (15% vs cible 23%), + ORAC. Aucun achat CIE (surpondérée)." },
+  { m: "M6",  month: "sept. 26", main: "BOAB", units: "3 × 9 100",   second: "ORAC", second2: "1 × 16 900", third: "SNTS", third2: "1 × 29 500",  total: 73700,  logic: "Suite du rattrapage BOAB + ORAC + 1 SNTS mensuel." },
+  { m: "M7",  month: "oct. 26",  main: "BOAB", units: "2 × 9 100",   second: "ORAC", second2: "1 × 16 900", third: "SNTS", third2: "1 × 29 500",  total: 64600,  logic: "DCA régulier BOAB + ORAC + SNTS vers les cibles 4 lignes." },
+  { m: "M8",  month: "nov. 26",  main: "BOAB", units: "2 × 9 100",   second: "ORAC", second2: "1 × 16 900", third: "SNTS", third2: "1 × 29 500",  total: 64600,  logic: "DCA régulier — convergence continue des 4 lignes." },
+  { m: "M9",  month: "déc. 26",  main: "BOAB", units: "2 × 9 100",   second: "ORAC", second2: "1 × 16 900", third: "SNTS", third2: "1 × 29 500",  total: 64600,  logic: "Bouclage 2026 : 4 lignes à ±2pp des cibles (CIE diluée à ~16%). Solde non déployé → réserve cash tactique." },
 ];
 
-// Composition cible fin 2026 (quantités du plan DCA reconstruit aux cours du 27/06/2026) — valorisée aux cours courants.
+// Composition cible fin 2026 (portefeuille 4 lignes, SGBC écartée) — valorisée aux cours courants.
 const projectedRaw = [
-  { ticker: "SNTS", qty: 7,  invested: 203113, target: 28 },
-  { ticker: "ORAC", qty: 10, invested: 164230, target: 22 },
-  { ticker: "BOAB", qty: 16, invested: 143200, target: 20 },
-  { ticker: "CIEC", qty: 21, invested: 71669,  target: 17 },
-  { ticker: "SGBC", qty: 2,  invested: 78000,  target: 13 },
+  { ticker: "SNTS", qty: 8,  invested: 235277, target: 32 },
+  { ticker: "ORAC", qty: 11, invested: 182972, target: 25 },
+  { ticker: "BOAB", qty: 18, invested: 162550, target: 23 },
+  { ticker: "CIEC", qty: 21, invested: 71669,  target: 20 },
 ];
 const projectedValueTotal = projectedRaw.reduce((s, p) => {
   const st = STOCKS.find(x => x.ticker === p.ticker);
@@ -205,20 +213,20 @@ export default function StrategyTab() {
       {/* --- Milestone Tracker --- */}
       <div style={{
         marginBottom: 20, borderRadius: 16, overflow: "hidden",
-        background: `linear-gradient(135deg, ${T.bgDark} 0%, #1a1f35 100%)`,
-        border: `1px solid ${T.bgDark}`,
+        background: T.heroGrad,
+        border: "1px solid rgba(250, 248, 244, 0.08)",
         position: "relative",
       }}>
         <div style={{
           position: "absolute", top: -60, right: -60,
           width: 240, height: 240,
-          background: `radial-gradient(circle, ${T.green}25, transparent 65%)`,
+          background: `radial-gradient(circle, ${alpha(T.green, 0.16)}, transparent 65%)`,
           borderRadius: "50%",
         }} />
         <div style={{
           position: "absolute", bottom: -40, left: -40,
           width: 180, height: 180,
-          background: `radial-gradient(circle, ${T.blue}20, transparent 65%)`,
+          background: `radial-gradient(circle, ${alpha(T.ochre, 0.16)}, transparent 65%)`,
           borderRadius: "50%",
         }} />
 
@@ -227,17 +235,17 @@ export default function StrategyTab() {
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
             <div style={{
               width: 36, height: 36, borderRadius: 10,
-              background: `linear-gradient(135deg, ${T.green}, ${T.neon})`,
+              background: `linear-gradient(135deg, ${T.green}, ${T.green400})`,
               display: "grid", placeItems: "center",
-              boxShadow: `0 4px 16px ${T.green}40`,
+              boxShadow: `0 4px 16px ${alpha(T.green, 0.28)}`,
             }}>
               <Target size={18} color="white" strokeWidth={2.2} />
             </div>
             <div>
-              <div style={{ fontFamily: FONT_SANS, fontSize: 15, fontWeight: 700, color: T.inkInv, letterSpacing: "-0.01em" }}>
+              <div style={{ fontFamily: FONT_SANS, fontSize: 15, fontWeight: 700, color: "#FAF8F4", letterSpacing: "-0.01em" }}>
                 Milestone #1
               </div>
-              <div style={{ fontFamily: FONT_MONO, fontSize: 11, color: "#9CA3AF", letterSpacing: "0.02em" }}>
+              <div style={{ fontFamily: FONT_MONO, fontSize: 11, color: "#9C988C", letterSpacing: "0.02em" }}>
                 Premier objectif dividendes
               </div>
             </div>
@@ -245,18 +253,18 @@ export default function StrategyTab() {
 
           {/* Target amount */}
           <div style={{ marginBottom: 24 }}>
-            <div style={{ fontFamily: FONT_MONO, fontSize: 11, color: "#9CA3AF", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 6 }}>
+            <div style={{ fontFamily: FONT_MONO, fontSize: 11, color: "#9C988C", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 6 }}>
               Objectif
             </div>
             <div style={{ display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap" }}>
               <span style={{ fontFamily: FONT_SANS, fontSize: isMobile ? 32 : 40, fontWeight: 700, color: T.neon, letterSpacing: "-0.03em", lineHeight: 1 }}>
                 {fmtFCFAfull(MILESTONE_TARGET)}
               </span>
-              <span style={{ fontFamily: FONT_SANS, fontSize: 16, color: "#9CA3AF", fontWeight: 500 }}>
+              <span style={{ fontFamily: FONT_SANS, fontSize: 16, color: "#9C988C", fontWeight: 500 }}>
                 F net/an
               </span>
             </div>
-            <div style={{ fontFamily: FONT_MONO, fontSize: 12, color: "#6B7280", marginTop: 4 }}>
+            <div style={{ fontFamily: FONT_MONO, fontSize: 12, color: "#6E6A60", marginTop: 4 }}>
               {fmtFCFAfull(Math.round(MILESTONE_TARGET / 12))} F/mois · ≈ {fmtEUR(MILESTONE_TARGET)} €/an
             </div>
           </div>
@@ -264,18 +272,18 @@ export default function StrategyTab() {
           {/* Progress bar */}
           <div style={{ marginBottom: 24 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 8 }}>
-              <span style={{ fontFamily: FONT_SANS, fontSize: 12, color: "#9CA3AF", fontWeight: 500 }}>Progression vers le capital requis</span>
+              <span style={{ fontFamily: FONT_SANS, fontSize: 12, color: "#9C988C", fontWeight: 500 }}>Progression vers le capital requis</span>
               <span style={{ fontFamily: FONT_MONO, fontSize: 13, color: T.neon, fontWeight: 700 }}>
                 {milestone.progressPct}%
               </span>
             </div>
-            <div style={{ height: 12, background: "#1f2937", borderRadius: 999, overflow: "hidden", position: "relative" }}>
+            <div style={{ height: 12, background: "rgba(250,248,244,0.10)", borderRadius: 999, overflow: "hidden", position: "relative" }}>
               <div style={{
                 height: "100%", borderRadius: 999,
                 width: `${milestone.progressPct}%`,
-                background: `linear-gradient(90deg, ${T.blue}, ${T.green}, ${T.neon})`,
+                background: `linear-gradient(90deg, ${T.green}, ${T.green400}, ${T.ochre})`,
                 transition: "width 0.6s ease",
-                boxShadow: `0 0 12px ${T.green}60`,
+                boxShadow: `0 0 12px ${alpha(T.green, 0.38)}`,
               }} />
               {/* End-of-2026 projected marker */}
               {projectedEndPct < 100 && (
@@ -283,15 +291,15 @@ export default function StrategyTab() {
                   position: "absolute", top: -4, bottom: -4,
                   left: `${projectedEndPct}%`, transform: "translateX(-50%)",
                   width: 3, background: T.amber, borderRadius: 999,
-                  boxShadow: `0 0 8px ${T.amber}80`,
+                  boxShadow: `0 0 8px ${alpha(T.amber, 0.5)}`,
                 }} />
               )}
             </div>
             <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6 }}>
-              <span style={{ fontFamily: FONT_MONO, fontSize: 10, color: "#6B7280" }}>
+              <span style={{ fontFamily: FONT_MONO, fontSize: 10, color: "#6E6A60" }}>
                 Aujourd'hui : {fmtFCFA(milestone.currentValue)} F
               </span>
-              <span style={{ fontFamily: FONT_MONO, fontSize: 10, color: "#6B7280" }}>
+              <span style={{ fontFamily: FONT_MONO, fontSize: 10, color: "#6E6A60" }}>
                 Cible : {fmtFCFA(milestone.requiredCapital)} F
               </span>
             </div>
@@ -312,25 +320,25 @@ export default function StrategyTab() {
             gap: isMobile ? 10 : 14,
           }}>
             <div style={{ padding: "14px 16px", background: "rgba(255,255,255,0.05)", borderRadius: 10, border: "1px solid rgba(255,255,255,0.08)" }}>
-              <div style={{ fontFamily: FONT_MONO, fontSize: 10, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: 6 }}>Capital requis</div>
+              <div style={{ fontFamily: FONT_MONO, fontSize: 10, color: "#6E6A60", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: 6 }}>Capital requis</div>
               <div style={{ fontFamily: FONT_SANS, fontSize: isMobile ? 18 : 22, fontWeight: 700, color: T.inkInv, letterSpacing: "-0.02em" }}>
                 {fmtFCFA(milestone.requiredCapital)} F
               </div>
             </div>
             <div style={{ padding: "14px 16px", background: "rgba(255,255,255,0.05)", borderRadius: 10, border: "1px solid rgba(255,255,255,0.08)" }}>
-              <div style={{ fontFamily: FONT_MONO, fontSize: 10, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: 6 }}>Reste à investir</div>
+              <div style={{ fontFamily: FONT_MONO, fontSize: 10, color: "#6E6A60", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: 6 }}>Reste à investir</div>
               <div style={{ fontFamily: FONT_SANS, fontSize: isMobile ? 18 : 22, fontWeight: 700, color: T.amber, letterSpacing: "-0.02em" }}>
                 +{fmtFCFA(milestone.additionalCapital)} F
               </div>
             </div>
             <div style={{ padding: "14px 16px", background: "rgba(255,255,255,0.05)", borderRadius: 10, border: "1px solid rgba(255,255,255,0.08)" }}>
-              <div style={{ fontFamily: FONT_MONO, fontSize: 10, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: 6 }}>Durée estimée</div>
+              <div style={{ fontFamily: FONT_MONO, fontSize: 10, color: "#6E6A60", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: 6 }}>Durée estimée</div>
               <div style={{ fontFamily: FONT_SANS, fontSize: isMobile ? 18 : 22, fontWeight: 700, color: T.inkInv, letterSpacing: "-0.02em" }}>
                 {milestone.fullYears > 0 ? `${milestone.fullYears}a ` : ""}{milestone.remainingMonths}m
               </div>
             </div>
             <div style={{ padding: "14px 16px", background: "rgba(255,255,255,0.05)", borderRadius: 10, border: "1px solid rgba(255,255,255,0.08)" }}>
-              <div style={{ fontFamily: FONT_MONO, fontSize: 10, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: 6 }}>Div. nets actuels</div>
+              <div style={{ fontFamily: FONT_MONO, fontSize: 10, color: "#6E6A60", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: 6 }}>Div. nets actuels</div>
               <div style={{ fontFamily: FONT_SANS, fontSize: isMobile ? 18 : 22, fontWeight: 700, color: T.green, letterSpacing: "-0.02em" }}>
                 {fmtFCFAfull(milestone.currentDivNet)} F/an
               </div>
@@ -345,10 +353,10 @@ export default function StrategyTab() {
             display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap",
           }}>
             <Coins size={14} color={T.amber} style={{ flexShrink: 0 }} />
-            <div style={{ fontFamily: FONT_SANS, fontSize: 12, color: "#9CA3AF", lineHeight: 1.6 }}>
+            <div style={{ fontFamily: FONT_SANS, fontSize: 12, color: "#9C988C", lineHeight: 1.6 }}>
               <strong style={{ color: T.amber }}>Projection fin 2026</strong> — avec le calendrier M3→M9 exécuté, dividendes nets estimés :
               <strong style={{ color: T.green }}> {fmtFCFAfull(projectedEndDivNet)} F/an</strong>
-              <span style={{ color: "#6B7280" }}> ({Math.round(projectedEndDivNet / MILESTONE_TARGET * 100)}% de l'objectif)</span>
+              <span style={{ color: "#6E6A60" }}> ({Math.round(projectedEndDivNet / MILESTONE_TARGET * 100)}% de l'objectif)</span>
             </div>
           </div>
         </div>
@@ -386,7 +394,7 @@ export default function StrategyTab() {
       </Card>
 
       {/* --- Card 1: Point de situation --- */}
-      <Card title="Point de situation — 27 juin 2026" subtitle="État réel du portefeuille · relevé courtier" icon={Briefcase} style={{ marginBottom: 16 }}>
+      <Card title="Point de situation — 6 juillet 2026" subtitle="État réel du portefeuille · relevé courtier" icon={Briefcase} style={{ marginBottom: 16 }}>
         <div style={{
           display: "grid",
           gridTemplateColumns: cols("1fr", "repeat(3, 1fr)", "repeat(5, 1fr)"),
@@ -396,7 +404,7 @@ export default function StrategyTab() {
             <div key={s.ticker} style={{
               padding: isMobile ? 14 : 16, borderRadius: 12,
               background: T.bgSubtle,
-              border: `1px solid ${s.held ? T.green : T.amber}30`,
+              border: `1px solid ${alpha(s.held ? T.green : T.amber, 0.19)}`,
               position: "relative",
             }}>
               <div style={{
@@ -468,13 +476,13 @@ export default function StrategyTab() {
 
         <div style={{
           display: "flex", alignItems: "center", justifyContent: "space-between",
-          padding: "12px 16px", background: `linear-gradient(135deg, ${T.blue}12, ${T.indigo}12)`,
+          padding: "12px 16px", background: `linear-gradient(135deg, ${alpha(T.blue, 0.07)}, ${alpha(T.indigo, 0.07)})`,
           borderRadius: 10, marginBottom: 10,
-          border: `1px solid ${T.blue}25`,
+          border: `1px solid ${alpha(T.blue, 0.15)}`,
         }}>
-          <span style={{ fontFamily: FONT_SANS, fontSize: 13, color: T.inkSoft, fontWeight: 600 }}>Capital total portefeuille</span>
+          <span style={{ fontFamily: FONT_SANS, fontSize: 13, color: T.inkSoft, fontWeight: 600 }}>Valorisation totale (actions + FCP)</span>
           <span style={{ fontFamily: FONT_MONO, fontSize: 18, fontWeight: 700, color: T.blue }}>
-            {fmtFCFAfull(situationTotal + fcpHolding.invested)} F
+            {fmtFCFAfull(directValue + fcpHolding.value)} F
           </span>
         </div>
 
@@ -490,7 +498,7 @@ export default function StrategyTab() {
       </Card>
 
       {/* --- Card 1b: Direct vs FCP performance comparison --- */}
-      <Card title="Direct vs FCP BAM WURUS — Performance comparée" subtitle="Snapshot courtier · 27 juin 2026" icon={TrendingUp} style={{ marginBottom: 16 }}>
+      <Card title="Direct vs FCP BAM WURUS — Performance comparée" subtitle="Snapshot courtier · 6 juillet 2026" icon={TrendingUp} style={{ marginBottom: 16 }}>
         <div style={{
           display: "grid",
           gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
@@ -499,7 +507,7 @@ export default function StrategyTab() {
           {/* Direct portfolio */}
           <div style={{
             padding: 20, borderRadius: 12,
-            background: T.bgSubtle, border: `1px solid ${T.blue}25`,
+            background: T.bgSubtle, border: `1px solid ${alpha(T.blue, 0.15)}`,
             position: "relative",
           }}>
             <div style={{
@@ -543,7 +551,7 @@ export default function StrategyTab() {
           {/* FCP BAM WURUS */}
           <div style={{
             padding: 20, borderRadius: 12,
-            background: T.bgSubtle, border: `1px solid ${T.inkMuted}25`,
+            background: T.bgSubtle, border: `1px solid ${alpha(T.inkMuted, 0.15)}`,
             position: "relative",
           }}>
             <div style={{
@@ -665,7 +673,7 @@ export default function StrategyTab() {
                       {r.second === "—" ? (
                         <span style={{ color: T.inkDim }}>—</span>
                       ) : (
-                        <span style={{ fontFamily: FONT_MONO, fontSize: 12, color: T.chart3, fontWeight: 700, background: "#EDE9FE", padding: "3px 8px", borderRadius: 6, whiteSpace: "nowrap" }}>{r.second}</span>
+                        <span style={{ fontFamily: FONT_MONO, fontSize: 12, color: T.blue, fontWeight: 700, background: alpha(T.blue, 0.08), padding: "3px 8px", borderRadius: 6, whiteSpace: "nowrap" }}>{r.second}</span>
                       )}
                     </td>
                     <td style={{ padding: "10px 10px", fontFamily: FONT_MONO, fontSize: 11, color: T.inkSoft, borderBottom: `1px solid ${T.borderSoft}`, whiteSpace: "nowrap" }}>{r.second2}</td>
@@ -729,7 +737,7 @@ export default function StrategyTab() {
                     <td style={{ padding: "12px 12px", textAlign: "right", fontFamily: FONT_MONO, fontWeight: 700, color: T.ink, borderBottom: `1px solid ${T.borderSoft}` }}>{p.pct}%</td>
                     <td style={{ padding: "12px 12px", textAlign: "right", fontFamily: FONT_MONO, color: T.inkMuted, borderBottom: `1px solid ${T.borderSoft}` }}>{p.target}%</td>
                     <td style={{ padding: "12px 12px", textAlign: "right", borderBottom: `1px solid ${T.borderSoft}` }}>
-                      <Pill color={gapColor} bg={gapColor + "18"}>
+                      <Pill color={gapColor} bg={alpha(gapColor, 0.09)}>
                         {gap >= 0 ? "+" : ""}{gap} pp {absGap <= 2 ? "✓" : ""}
                       </Pill>
                     </td>
@@ -766,7 +774,7 @@ export default function StrategyTab() {
         }}>
           <AlertCircle size={14} color={T.blue} style={{ flexShrink: 0, marginTop: 2 }} />
           <div style={{ fontFamily: FONT_SANS, fontSize: 12, color: T.inkMuted, lineHeight: 1.6 }}>
-            Plan reconstruit aux cours du 27/06/2026 : DCA base 75k/mois + dividendes DRIP. Stratégie de reconvergence — <strong>aucun achat CIE</strong> (déjà surpondérée à 38% après le rallye), priorité au comblement de <strong>BOAB</strong> (+13 actions) et à l'initiation de <strong>SGBC</strong> (2 actions). Le poids de CIE se dilue naturellement vers ~16%. À fin décembre, les 5 lignes convergent à ±2pp des cibles Phase 1. Capital déployé ~411k sur 450k disponibles : le solde (~40k) + DRIP alimentent la réserve cash tactique (5-10% IPS). Aucune projection au-delà du 31/12/2026.
+            Plan aux cours du 06/07/2026 — <strong>portefeuille 4 lignes (SGBC écartée : trop chère, potentiel jugé limité)</strong>. DCA base 75k/mois + dividendes DRIP. Reconvergence : <strong>aucun achat CIE</strong> (surpondérée après le rallye), priorité au comblement de <strong>BOAB</strong> (+12 actions), puis ORAC et SNTS. Les 13% libérés par SGBC sont redistribués sur les 4 lignes (SNTS 32%, ORAC 25%, BOAB 23%, CIE 20%). À fin décembre : SNTS/ORAC/BOAB convergent à ±2pp, CIE se dilue vers ~16%. Capital déployé ~329k sur 375k disponibles ; le solde + DRIP alimentent la réserve cash tactique (5-10% IPS). Aucune projection au-delà du 31/12/2026.
           </div>
         </div>
       </Card>
@@ -813,7 +821,7 @@ export default function StrategyTab() {
               </div>
               <div style={{
                 padding: "6px 14px",
-                background: r.color + "18", color: r.color,
+                background: alpha(r.color, 0.09), color: r.color,
                 fontFamily: FONT_SANS, fontSize: 16, fontWeight: 700,
                 borderRadius: 8, flexShrink: 0,
               }}>{r.value}</div>

@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import {
-  Coins, Sparkles, BookOpen, Gauge, CalendarDays, Shield,
+  Coins, Sparkles, BookOpen, Gauge, CalendarDays, Shield, Sun, Moon,
 } from "lucide-react";
-import { T, FONT_SANS, FONT_MONO } from "../../theme";
+import { T, FONT_SANS, FONT_MONO, R, alpha } from "../../theme";
 import useResponsive from "../../hooks/useResponsive";
+import useTheme from "../../hooks/useTheme";
 
 const TABS = [
   { id: "overview",  label: "Dashboard",      icon: Gauge },
@@ -36,6 +37,7 @@ export default function Nav({ tab, setTab }) {
   const { isMobile, isTablet } = useResponsive();
   const compact = isMobile || isTablet;
   const [status, setStatus] = useState(getBrvmStatus);
+  const { isDark, toggle } = useTheme();
 
   useEffect(() => {
     const id = setInterval(() => setStatus(getBrvmStatus()), 30_000);
@@ -45,7 +47,7 @@ export default function Nav({ tab, setTab }) {
   return (
     <nav style={{
       position: "sticky", top: 0, zIndex: 50,
-      background: "rgba(250, 250, 251, 0.85)",
+      background: "var(--nav-bg)",
       backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)",
       borderBottom: `1px solid ${T.border}`,
     }}>
@@ -60,46 +62,65 @@ export default function Nav({ tab, setTab }) {
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div style={{
             width: isMobile ? 30 : 36, height: isMobile ? 30 : 36, borderRadius: 10,
-            background: `linear-gradient(135deg, ${T.blue} 0%, ${T.indigo} 100%)`,
+            background: T.heroGrad,
             display: "grid", placeItems: "center",
-            boxShadow: `0 4px 12px rgba(37, 99, 235, 0.25)`,
+            boxShadow: `0 4px 14px ${alpha(T.blue, 0.28)}`,
           }}>
-            <Sparkles size={isMobile ? 14 : 18} color="white" strokeWidth={2.2} />
+            <Sparkles size={isMobile ? 14 : 18} color="#FAF8F4" strokeWidth={2.2} />
           </div>
           <div>
             <div style={{
-              fontFamily: FONT_SANS, fontSize: isMobile ? 14 : 17, fontWeight: 700,
+              fontFamily: FONT_SANS, fontSize: isMobile ? 14 : 17, fontWeight: 800,
               color: T.ink, letterSpacing: "-0.02em", lineHeight: 1,
             }}>Omaad Capital</div>
             {!isMobile && (
               <div style={{
                 fontFamily: FONT_MONO, fontSize: 10, color: T.inkMuted,
                 marginTop: 3, letterSpacing: "0.05em",
-              }}>Omaad Intelligence · v2026.1</div>
+              }}>Construis · Protège · Règne</div>
             )}
           </div>
         </div>
 
-        {!isMobile && (
-          <div style={{
-            display: "flex", alignItems: "center", gap: 8,
-            padding: "6px 12px",
-            background: status.bg, borderRadius: 999,
-            fontFamily: FONT_SANS, fontSize: 12, color: status.color, fontWeight: 600,
-          }}>
+        <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 8 : 12 }}>
+          {!isMobile && (
             <div style={{
-              width: 7, height: 7, borderRadius: "50%",
-              background: status.dot,
-              boxShadow: status.color === T.green ? `0 0 0 3px ${T.greenSoft}` : "none",
-              animation: status.color === T.green ? "pulse 2s infinite" : "none",
-            }} />
-            <span>{status.label}</span>
-            <span style={{
-              fontFamily: FONT_MONO, fontSize: 10, color: status.color,
-              opacity: 0.7, marginLeft: 2,
-            }}>{status.sub}</span>
-          </div>
-        )}
+              display: "flex", alignItems: "center", gap: 8,
+              padding: "6px 12px",
+              background: status.bg, borderRadius: 999,
+              fontFamily: FONT_SANS, fontSize: 12, color: status.color, fontWeight: 600,
+            }}>
+              <div style={{
+                width: 7, height: 7, borderRadius: "50%",
+                background: status.dot,
+                boxShadow: status.color === T.green ? `0 0 0 3px ${T.greenSoft}` : "none",
+                animation: status.color === T.green ? "pulse 2s infinite" : "none",
+              }} />
+              <span>{status.label}</span>
+              <span style={{
+                fontFamily: FONT_MONO, fontSize: 10, color: status.color,
+                opacity: 0.7, marginLeft: 2,
+              }}>{status.sub}</span>
+            </div>
+          )}
+          <button
+            onClick={toggle}
+            aria-label={isDark ? "Passer en clair" : "Passer en sombre"}
+            title={isDark ? "Mode clair" : "Mode sombre"}
+            style={{
+              width: 34, height: 34, borderRadius: R.input,
+              border: `1px solid ${T.border}`,
+              background: T.bgCard, color: T.inkMuted,
+              display: "grid", placeItems: "center", cursor: "pointer",
+              transition: "color 0.15s, border-color 0.15s, background 0.15s",
+              flexShrink: 0,
+            }}
+            onMouseEnter={e => { e.currentTarget.style.color = T.ink; e.currentTarget.style.borderColor = T.inkDim; }}
+            onMouseLeave={e => { e.currentTarget.style.color = T.inkMuted; e.currentTarget.style.borderColor = T.border; }}
+          >
+            {isDark ? <Sun size={16} strokeWidth={2.2} /> : <Moon size={16} strokeWidth={2.2} />}
+          </button>
+        </div>
       </div>
 
       {/* Tabs bar — scrollable on mobile */}
@@ -132,7 +153,7 @@ export default function Nav({ tab, setTab }) {
                   fontSize: compact ? 12 : 13,
                   fontWeight: active ? 600 : 500,
                   cursor: "pointer", transition: "all 0.15s",
-                  boxShadow: active ? "0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03)" : "none",
+                  boxShadow: active ? T.shadowRest : "none",
                   letterSpacing: "-0.01em",
                   whiteSpace: "nowrap",
                   flexShrink: 0,

@@ -5,8 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Omaad Capital — Plateforme d'investissement BRVM. DCA, dividendes, allocation et stratégie sur 20 ans." />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <title>Omaad Capital · Omaad Intelligence</title>
-    <meta name="theme-color" content="#2563EB" />
+    <title>Omaad Capital · Construis. Protège. Règne.</title>
+    <meta name="theme-color" content="#FAF8F4" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0F1A2E" media="(prefers-color-scheme: dark)" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <script>
+      // Apply persisted theme before paint to avoid a flash of the wrong theme.
+      // Light is the default — dark only when the user has explicitly chosen it.
+      try {
+        if (localStorage.getItem("omaad-theme") === "dark") {
+          document.documentElement.classList.add("dark");
+        }
+      } catch (e) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>

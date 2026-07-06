@@ -6,14 +6,15 @@ import {
 } from "recharts";
 import {
   Coins, Target, TrendingUp, Activity,
-  Layers, Wallet, BarChart3, PieChart as PieIcon,
+  Layers, BarChart3, PieChart as PieIcon,
   Calculator, Gauge,
 } from "lucide-react";
-import { T, FONT_SANS, FONT_MONO } from "../../theme";
-import { STOCKS, SECTOR_COLORS, PHASE_CONFIG, CURRENT_HOLDINGS, CURRENT_HOLDINGS_TOTAL, CASH, FCP_BENCHMARK } from "../../data/stocks";
+import { T, FONT_SANS, FONT_MONO, R, alpha, chartTokens } from "../../theme";
+import { STOCKS, SECTOR_COLORS, SECTOR_INDEX, PHASE_CONFIG, CURRENT_HOLDINGS, CURRENT_HOLDINGS_TOTAL } from "../../data/stocks";
 import { fmtFCFA, fmtFCFAfull } from "../../utils/format";
 import { projectDCA } from "../../utils/projections";
 import useResponsive from "../../hooks/useResponsive";
+import useTheme from "../../hooks/useTheme";
 
 import PageHeader from "../ui/PageHeader";
 import Card from "../ui/Card";
@@ -24,7 +25,6 @@ import MarketTicker from "../ui/MarketTicker";
 import { BRVM_API_URL } from "../../data/config";
 
 const phase1 = PHASE_CONFIG[0];
-const phase1Stocks = STOCKS.filter(s => s.phaseEntry === 1);
 
 function computePortfolioMetrics() {
   const holdMap = Object.fromEntries(CURRENT_HOLDINGS.map(h => [h.ticker, h]));
@@ -71,103 +71,90 @@ function computePortfolioMetrics() {
 
 const portfolio = computePortfolioMetrics();
 
-// Patrimoine global — réplique le relevé courtier (Espèces / Actions / OPCVM).
-const patrimoine = (() => {
-  const actions = portfolio.totalValue;
-  const opcvm = FCP_BENCHMARK.value;
-  const especes = CASH;
-  const total = actions + opcvm + especes;
-  const pct = (v) => (total > 0 ? Math.round((v / total) * 1000) / 10 : 0);
-  return {
-    total,
-    buckets: [
-      { key: "Espèces", value: especes, pct: pct(especes), color: T.blue },
-      { key: "Actions", value: actions, pct: pct(actions), color: T.green },
-      { key: "OPCVM",   value: opcvm,   pct: pct(opcvm),   color: T.amber },
-    ],
-  };
-})();
-
 const dcaProjection = projectDCA({ monthly: 75000, years: 7, annualRate: 9 });
 const dcaFinal = dcaProjection[dcaProjection.length - 1];
 
 export default function OverviewTab() {
   const { isMobile, isTablet, cols } = useResponsive();
+  const { isDark } = useTheme();
+  const ct = chartTokens(isDark);
+
+  const openLines = CURRENT_HOLDINGS.filter(h => h.qty > 0).length;
+  const linesPct = Math.round((openLines / phase1.maxLines) * 100);
 
   return (
     <div>
       <PageHeader
-        eyebrow="Dashboard · juin 2026"
+        eyebrow="Dashboard · juillet 2026"
         title="Votre patrimoine BRVM, piloté avec précision."
         description="Vue d'ensemble de votre portefeuille, allocation Phase 1, et projection DCA."
       />
 
       <MarketTicker endpoint={BRVM_API_URL} />
 
-      {/* Phase 1 banner */}
+      {/* Premium hero — portfolio headline (always-dark navy surface) */}
       <div style={{
-        padding: isMobile ? 14 : 18, marginBottom: isMobile ? 16 : 24,
-        background: T.bgCard, border: `1px solid ${T.border}`,
-        borderLeft: `4px solid ${T.blue}`, borderRadius: 10,
-        display: "flex", alignItems: "center", gap: 14,
+        position: "relative", overflow: "hidden",
+        marginBottom: isMobile ? 16 : 24,
+        borderRadius: R.hero,
+        background: T.heroGrad,
+        boxShadow: T.shadowElevated,
       }}>
+        {/* atmospheric ochre glow */}
         <div style={{
-          width: 36, height: 36, borderRadius: 8,
-          background: T.blueSoft, display: "grid", placeItems: "center", flexShrink: 0,
+          position: "absolute", top: -80, right: -60, width: 320, height: 320,
+          background: `radial-gradient(circle, ${alpha(T.ochre, 0.20)}, transparent 62%)`,
+          borderRadius: "50%", pointerEvents: "none",
+        }} />
+        <div style={{
+          position: "relative", padding: isMobile ? 20 : 28,
+          display: "flex", flexWrap: "wrap", gap: isMobile ? 18 : 28,
+          alignItems: isMobile ? "flex-start" : "center", justifyContent: "space-between",
         }}>
-          <Layers size={16} color={T.blue} strokeWidth={2.2} />
-        </div>
-        <div>
-          <div style={{ fontFamily: FONT_SANS, fontSize: 14, fontWeight: 700, color: T.ink }}>
-            Phase 1 — Construction en cours
+          <div style={{ minWidth: 0 }}>
+            <div style={{
+              display: "inline-flex", alignItems: "center", gap: 7,
+              padding: "4px 11px", borderRadius: 999,
+              background: alpha(T.ochre, 0.16), marginBottom: 14,
+            }}>
+              <div style={{ width: 5, height: 5, borderRadius: "50%", background: "#D8A369" }} />
+              <span style={{ fontFamily: FONT_MONO, fontSize: 10, color: "#DFB78A", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" }}>
+                Phase 1 · Construction du cœur
+              </span>
+            </div>
+            <div style={{ fontFamily: FONT_SANS, fontSize: 11, color: "#9C988C", fontWeight: 500, letterSpacing: "0.04em", textTransform: "uppercase", marginBottom: 6 }}>
+              Capital direct investi
+            </div>
+            <div className="tnum" style={{
+              fontFamily: FONT_SANS, fontSize: isMobile ? 34 : 46, fontWeight: 800,
+              color: "#FAF8F4", letterSpacing: "-0.03em", lineHeight: 1,
+            }}>
+              {fmtFCFAfull(portfolio.totalValue)} <span style={{ fontSize: isMobile ? 18 : 22, fontWeight: 600, color: "#C2BDB1" }}>F</span>
+            </div>
+            <div style={{ fontFamily: FONT_MONO, fontSize: 12, color: "#9C988C", marginTop: 8 }}>
+              {openLines} lignes ouvertes sur {phase1.maxLines} · DCA 75 000 F/mois · Yield {portfolio.yield}%
+            </div>
           </div>
-          <div style={{ fontFamily: FONT_SANS, fontSize: 12, color: T.inkMuted, marginTop: 2 }}>
-            {CURRENT_HOLDINGS.filter(h => h.qty > 0).length} lignes ouvertes sur 5 · DCA 75k · Capital direct {fmtFCFAfull(portfolio.totalValue)} F
+
+          {/* progress ring-ish bar */}
+          <div style={{ minWidth: isMobile ? "100%" : 220, flexShrink: 0 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 8 }}>
+              <span style={{ fontFamily: FONT_SANS, fontSize: 12, color: "#C2BDB1", fontWeight: 500 }}>Progression Phase 1</span>
+              <span className="tnum" style={{ fontFamily: FONT_MONO, fontSize: 14, color: "#D8A369", fontWeight: 700 }}>{linesPct}%</span>
+            </div>
+            <div style={{ height: 8, background: "rgba(250,248,244,0.12)", borderRadius: 999, overflow: "hidden" }}>
+              <div style={{
+                height: "100%", width: `${linesPct}%`, borderRadius: 999,
+                background: `linear-gradient(90deg, ${T.green400}, ${T.ochre})`,
+                transition: "width 0.6s ease",
+              }} />
+            </div>
+            <div style={{ fontFamily: FONT_MONO, fontSize: 10, color: "#6E6A60", marginTop: 8 }}>
+              Cœur : SNTS · ORAC · BOAB · CIEC
+            </div>
           </div>
         </div>
       </div>
-
-      {/* Patrimoine global — Espèces / Actions / OPCVM */}
-      <Card title="Patrimoine global" subtitle={`Total ${fmtFCFAfull(patrimoine.total)} F · relevé ${FCP_BENCHMARK.snapshotDate}`} icon={Wallet}>
-        <div style={{
-          display: "grid",
-          gridTemplateColumns: isMobile ? "1fr" : "180px 1fr",
-          gap: isMobile ? 12 : 24, alignItems: "center",
-        }}>
-          <ResponsiveContainer width="100%" height={isMobile ? 160 : 180}>
-            <PieChart>
-              <Pie data={patrimoine.buckets} dataKey="value" nameKey="key" cx="50%" cy="50%"
-                innerRadius={isMobile ? 45 : 52} outerRadius={isMobile ? 70 : 80} paddingAngle={3}
-                label={({ pct }) => `${pct}%`} labelLine={false}
-                style={{ fontFamily: FONT_MONO, fontSize: 10, fontWeight: 700 }}
-              >
-                {patrimoine.buckets.map((b, i) => (
-                  <Cell key={i} fill={b.color} stroke={T.bgCard} strokeWidth={2} />
-                ))}
-              </Pie>
-              <Tooltip content={<ChartTooltip />} />
-            </PieChart>
-          </ResponsiveContainer>
-          <div>
-            {patrimoine.buckets.map((b, i) => (
-              <div key={b.key} style={{
-                display: "flex", justifyContent: "space-between", alignItems: "center",
-                padding: "10px 0",
-                borderBottom: i < patrimoine.buckets.length - 1 ? `1px solid ${T.borderSoft}` : "none",
-              }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <span style={{ width: 10, height: 10, borderRadius: 3, background: b.color, flexShrink: 0 }} />
-                  <span style={{ fontFamily: FONT_SANS, fontSize: 13, fontWeight: 600, color: T.ink }}>{b.key}</span>
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <span style={{ fontFamily: FONT_MONO, fontSize: 13, fontWeight: 600, color: T.ink }}>{fmtFCFAfull(b.value)} F</span>
-                  <Pill color={b.color} bg={T.bgSoft}>{b.pct}%</Pill>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </Card>
 
       {/* Top metrics */}
       <div style={{
@@ -193,13 +180,14 @@ export default function OverviewTab() {
           <ResponsiveContainer width="100%" height={isMobile ? 200 : 220}>
             <PieChart>
               <Pie data={portfolio.pieData} dataKey="value" nameKey="name" cx="50%" cy="50%"
+                isAnimationActive={false}
                 innerRadius={isMobile ? 40 : 55} outerRadius={isMobile ? 70 : 90} paddingAngle={3}
                 label={isMobile ? false : ({ name, value }) => `${name} ${value}%`}
                 labelLine={false}
                 style={{ fontFamily: FONT_MONO, fontSize: 10 }}
               >
                 {portfolio.pieData.map((e, i) => (
-                  <Cell key={i} fill={SECTOR_COLORS[e.sector] || T.blue} stroke={T.bgCard} strokeWidth={2} />
+                  <Cell key={i} fill={ct.categorical[SECTOR_INDEX[e.sector] ?? 0]} stroke={ct.surface} strokeWidth={2} />
                 ))}
               </Pie>
               <Tooltip content={<ChartTooltip />} />
@@ -244,13 +232,13 @@ export default function OverviewTab() {
         <Card title="Allocation sectorielle" icon={BarChart3}>
           <ResponsiveContainer width="100%" height={isMobile ? 160 : 200}>
             <BarChart data={portfolio.sectors} layout="vertical" margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
-              <CartesianGrid stroke={T.borderSoft} horizontal={false} strokeDasharray="3 3" />
-              <XAxis type="number" stroke={T.inkDim} tick={{ fontSize: 10, fontFamily: FONT_MONO, fill: T.inkMuted }} axisLine={false} tickLine={false} />
-              <YAxis type="category" dataKey="name" stroke={T.inkDim} tick={{ fontSize: 11, fontFamily: FONT_SANS, fill: T.inkSoft, fontWeight: 500 }} width={isMobile ? 70 : 95} axisLine={false} tickLine={false} />
-              <Tooltip content={<ChartTooltip />} />
-              <Bar dataKey="value" radius={[0, 6, 6, 0]}>
+              <CartesianGrid stroke={ct.grid} horizontal={false} strokeDasharray="3 3" />
+              <XAxis type="number" stroke={ct.grid} tick={{ fontSize: 10, fontFamily: FONT_MONO, fill: ct.textMuted }} axisLine={false} tickLine={false} />
+              <YAxis type="category" dataKey="name" stroke={ct.grid} tick={{ fontSize: 11, fontFamily: FONT_SANS, fill: ct.text, fontWeight: 500 }} width={isMobile ? 70 : 95} axisLine={false} tickLine={false} />
+              <Tooltip content={<ChartTooltip />} cursor={{ fill: ct.grid }} />
+              <Bar dataKey="value" radius={[0, 6, 6, 0]} isAnimationActive={false}>
                 {portfolio.sectors.map((e, i) => (
-                  <Cell key={i} fill={SECTOR_COLORS[e.name] || T.blue} />
+                  <Cell key={i} fill={ct.categorical[SECTOR_INDEX[e.name] ?? 0]} />
                 ))}
               </Bar>
             </BarChart>
@@ -272,20 +260,20 @@ export default function OverviewTab() {
           <AreaChart data={dcaProjection} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
             <defs>
               <linearGradient id="gVal" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor={T.blue} stopOpacity={0.25} />
-                <stop offset="100%" stopColor={T.blue} stopOpacity={0} />
+                <stop offset="0%" stopColor={ct.primary} stopOpacity={0.28} />
+                <stop offset="100%" stopColor={ct.primary} stopOpacity={0} />
               </linearGradient>
               <linearGradient id="gInv" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor={T.chart3} stopOpacity={0.15} />
-                <stop offset="100%" stopColor={T.chart3} stopOpacity={0} />
+                <stop offset="0%" stopColor={ct.muted} stopOpacity={0.18} />
+                <stop offset="100%" stopColor={ct.muted} stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid stroke={T.borderSoft} vertical={false} strokeDasharray="3 3" />
-            <XAxis dataKey="year" stroke={T.inkDim} tick={{ fontSize: 11, fontFamily: FONT_MONO, fill: T.inkMuted }} axisLine={false} tickLine={false} />
-            <YAxis stroke={T.inkDim} tick={{ fontSize: 11, fontFamily: FONT_MONO, fill: T.inkMuted }} tickFormatter={fmtFCFA} axisLine={false} tickLine={false} />
+            <CartesianGrid stroke={ct.grid} vertical={false} strokeDasharray="3 3" />
+            <XAxis dataKey="year" stroke={ct.grid} tick={{ fontSize: 11, fontFamily: FONT_MONO, fill: ct.textMuted }} axisLine={false} tickLine={false} />
+            <YAxis stroke={ct.grid} tick={{ fontSize: 11, fontFamily: FONT_MONO, fill: ct.textMuted }} tickFormatter={fmtFCFA} axisLine={false} tickLine={false} />
             <Tooltip content={<ChartTooltip />} />
-            <Area type="monotone" dataKey="invested" stroke={T.chart3} strokeWidth={1.5} fill="url(#gInv)" name="Capital investi" />
-            <Area type="monotone" dataKey="value" stroke={T.blue} strokeWidth={2.5} fill="url(#gVal)" name="Valeur portefeuille" />
+            <Area type="monotone" dataKey="invested" stroke={ct.muted} strokeWidth={1.5} fill="url(#gInv)" name="Capital investi" isAnimationActive={false} />
+            <Area type="monotone" dataKey="value" stroke={ct.primary} strokeWidth={2.5} fill="url(#gVal)" name="Valeur portefeuille" isAnimationActive={false} />
           </AreaChart>
         </ResponsiveContainer>
       </Card>

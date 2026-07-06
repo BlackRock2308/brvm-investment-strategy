@@ -53,15 +53,16 @@ export const DIVIDEND_SUMMARY = {
   weekLabel: "Semaine du 22 – 26 juin 2026",
 };
 
+// Omaad palette (raw hex — safe for both SVG marks and DOM badges).
 export const QUALITY_META = {
-  core:      { label: "Core",      color: "#2563EB", bg: "#DBEAFE", action: "PRIORITAIRE" },
-  satellite: { label: "Satellite", color: "#8B5CF6", bg: "#EDE9FE", action: "OK" },
-  avoid:     { label: "À éviter",  color: "#EF4444", bg: "#FEE2E2", action: "ÉVITER" },
-  yieldTrap: { label: "Piège",     color: "#F59E0B", bg: "#FEF3C7", action: "PIÈGE" },
+  core:      { label: "Core",      color: "#1A2740", bg: "#EFF2F7", action: "PRIORITAIRE" },
+  satellite: { label: "Satellite", color: "#C77B3C", bg: "#FBF4E9", action: "OK" },
+  avoid:     { label: "À éviter",  color: "#B0463E", bg: "#F8E6E4", action: "ÉVITER" },
+  yieldTrap: { label: "Piège",     color: "#C68A2E", bg: "#FAF1DE", action: "PIÈGE" },
 };
 
 export const STATUS_META = {
-  paid:      { label: "Payé",     color: "#059669", bg: "#D1FAE5" },
-  confirmed: { label: "Confirmé", color: "#2563EB", bg: "#DBEAFE" },
-  proposed:  { label: "Annoncé",  color: "#6B7280", bg: "#F3F4F6" },
+  paid:      { label: "Payé",     color: "#2F8F6E", bg: "#EAF4EF" },
+  confirmed: { label: "Confirmé", color: "#1A2740", bg: "#EFF2F7" },
+  proposed:  { label: "Annoncé",  color: "#6E6A60", bg: "#F1EDE5" },
 };

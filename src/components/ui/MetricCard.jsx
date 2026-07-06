@@ -1,17 +1,18 @@
 import React from "react";
 import { ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { AreaChart, Area, ResponsiveContainer } from "recharts";
-import { T, FONT_SANS, FONT_MONO } from "../../theme";
+import { T, FONT_SANS, FONT_MONO, R } from "../../theme";
 import { fmtPct } from "../../utils/format";
 
 export default function MetricCard({ label, value, unit, delta, deltaLabel, icon: Icon, color = T.blue, sparklineData }) {
   const positive = delta !== undefined ? delta >= 0 : null;
   return (
-    <div style={{
+    <div className="card-hover" style={{
       background: T.bgCard,
       border: `1px solid ${T.border}`,
-      borderRadius: 12,
+      borderRadius: R.card,
       padding: 20,
+      boxShadow: T.shadowRest,
       position: "relative", overflow: "hidden",
     }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
@@ -22,7 +23,7 @@ export default function MetricCard({ label, value, unit, delta, deltaLabel, icon
         {Icon && <Icon size={14} color={T.inkDim} strokeWidth={2} />}
       </div>
       <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginBottom: 6 }}>
-        <div style={{
+        <div className="tnum" style={{
           fontFamily: FONT_SANS, fontSize: 28, fontWeight: 700,
           color: T.ink, letterSpacing: "-0.03em", lineHeight: 1,
         }}>{value}</div>

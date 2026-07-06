@@ -226,7 +226,7 @@ export default function AdviceTab() {
           <div style={{
             fontFamily: FONT_SANS, fontSize: isMobile ? 15 : 17,
             fontWeight: 600, lineHeight: 1.5, fontStyle: "italic",
-            color: "#E5E7EB",
+            color: "#DEDAD0",
           }}>
             « Construire un patrimoine qui travaille pour toi, pas l'inverse. Le marché est un outil, pas un casino. La discipline est le seul avantage compétitif durable d'un investisseur individuel. »
           </div>

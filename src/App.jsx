@@ -25,7 +25,7 @@ export default function App() {
     const link = document.createElement("link");
     link.rel = "stylesheet";
     link.href =
-      "https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap";
+      "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap";
     document.head.appendChild(link);
     return () => {
       document.head.removeChild(link);
@@ -49,7 +49,9 @@ export default function App() {
         maxWidth: 1440, margin: "0 auto",
         padding: `${isMobile ? 20 : 40}px ${px}px 80px`,
       }}>
-        <ActiveTab />
+        <div key={tab} className="page-enter">
+          <ActiveTab />
+        </div>
       </main>
       <footer style={{
         maxWidth: 1440, margin: "0 auto",

@@ -1,14 +1,14 @@
 import React from "react";
-import { T, FONT_SANS } from "../../theme";
+import { T, FONT_SANS, R } from "../../theme";
 
-export default function Card({ children, title, subtitle, icon: Icon, action, style, padding = 24 }) {
+export default function Card({ children, title, subtitle, icon: Icon, action, style, padding = 24, hover = false }) {
   return (
-    <div style={{
+    <div className={hover ? "card-hover" : undefined} style={{
       background: T.bgCard,
       border: `1px solid ${T.border}`,
-      borderRadius: 14,
+      borderRadius: R.card,
       padding,
-      boxShadow: "0 1px 2px rgba(0,0,0,0.02)",
+      boxShadow: T.shadowRest,
       ...style,
     }}>
       {(title || Icon || action) && (
@@ -19,7 +19,7 @@ export default function Card({ children, title, subtitle, icon: Icon, action, st
           <div style={{ display: "flex", alignItems: "center", gap: 12, flex: 1, minWidth: 0 }}>
             {Icon && (
               <div style={{
-                width: 32, height: 32, borderRadius: 8,
+                width: 34, height: 34, borderRadius: 9,
                 background: T.blueSoft,
                 display: "grid", placeItems: "center", flexShrink: 0,
               }}>

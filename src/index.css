@@ -1,3 +1,156 @@
+/* ═══════════════════════════════════════════════════════════════════
+   OMAAD CAPITAL — Design tokens as CSS custom properties.
+   Light = :root · Dark = :root.dark (toggled from the Nav).
+   theme.js reads these via var(--…); charts use raw hex (chartTokens).
+   ═══════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Surfaces — warm paper */
+  --bg:        #FAF8F4;
+  --bg-soft:   #F1EDE5;
+  --bg-card:   #FFFFFF;
+  --bg-subtle: #FAF8F4;
+  --bg-dark:   #0F1A2E;
+
+  /* Ink */
+  --ink:       #14130F;
+  --ink-soft:  #26241F;
+  --ink-muted: #6E6A60;
+  --ink-dim:   #9C988C;
+  --ink-inv:   #FAF8F4;  /* text on dark/colored chips — stays light in both themes */
+
+  /* Brand — Midnight Navy */
+  --brand-50:  #EFF2F7;
+  --brand-100: #D8DFEC;
+  --brand-200: #B6BFCD;
+  --brand-300: #8A98AE;
+  --brand-400: #4D5F80;
+  --brand-500: #2C3E5E;
+  --brand-600: #233356;
+  --brand:     #1A2740;   /* brand-700 (primary) */
+  --brand-800: #14203A;
+  --brand-900: #0F1A2E;
+  --brand-950: #08111E;
+
+  /* Accent — Savanna Ochre */
+  --ochre-50:  #FBF4E9;
+  --ochre-100: #F4E5D2;
+  --ochre-200: #EBD0B0;
+  --ochre-300: #DFB78A;
+  --ochre-400: #D8A369;
+  --ochre:     #C77B3C;   /* ochre-500 */
+  --ochre-600: #AB6630;
+  --ochre-700: #95541F;
+
+  /* Semantic data colors */
+  --positive:     #2F8F6E;
+  --positive-50:  #EAF4EF;
+  --positive-400: #3FA886;
+  --positive-600: #27795C;
+  --warning:      #C68A2E;
+  --warning-50:   #FAF1DE;
+  --negative:     #B0463E;
+  --negative-50:  #F8E6E4;
+  --negative-600: #933832;
+
+  /* Chart series (DOM usage; SVG uses chartTokens hex) */
+  --chart-1: #1A2740;
+  --chart-2: #C77B3C;
+  --chart-3: #4D5F80;
+  --chart-4: #D8A369;
+  --chart-5: #3D3B35;
+  --chart-6: #6E6A60;
+
+  /* Lines */
+  --border:      #DEDAD0;
+  --border-soft: #F1EDE5;
+
+  /* Elevation — restrained, warm-tinted */
+  --shadow-rest:     0 1px 3px rgba(20, 19, 15, 0.05), 0 1px 2px rgba(20, 19, 15, 0.04);
+  --shadow-hover:    0 4px 12px rgba(15, 26, 46, 0.08), 0 2px 6px rgba(20, 19, 15, 0.04);
+  --shadow-elevated: 0 8px 24px rgba(15, 26, 46, 0.10), 0 4px 12px rgba(20, 19, 15, 0.04);
+
+  /* Gradients — premium moments */
+  --hero-grad: linear-gradient(135deg, #1A2740 0%, #2C3E5E 100%);
+  --hero-glow: radial-gradient(circle at 30% 20%, rgba(199, 123, 60, 0.22) 0%, transparent 55%);
+
+  /* Nav sticky bar tint */
+  --nav-bg: rgba(250, 248, 244, 0.85);
+  color-scheme: light;
+}
+
+:root.dark {
+  /* Surfaces — warm charcoal with a real elevation ladder.
+     canvas (darkest) → soft (recessed wells/tracks) → card (lifted). */
+  --bg:        #100F0D;   /* page canvas — deepest */
+  --bg-soft:   #17150F;   /* tab bar, slider tracks, recessed chips */
+  --bg-card:   #201E19;   /* cards / metric cards — clearly lifted */
+  --bg-subtle: #191712;   /* nested wells inside cards */
+  --bg-dark:   #08111E;   /* always-dark navy chips */
+
+  /* Ink flips */
+  --ink:       #FAF8F4;
+  --ink-soft:  #DEDAD0;
+  --ink-muted: #9C988C;
+  --ink-dim:   #6E6A60;
+  /* --ink-inv stays #FAF8F4 from :root — it's text on always-dark chips */
+
+  /* Brand lightened for contrast on dark bg */
+  --brand-50:  #08111E;
+  --brand-100: #0F1A2E;
+  --brand-200: #14203A;
+  --brand-300: #4D5F80;
+  --brand-400: #8A98AE;
+  --brand-500: #B6BFCD;
+  --brand-600: #B6BFCD;
+  --brand:     #8A98AE;   /* primary on dark */
+  --brand-800: #D8DFEC;
+  --brand-900: #EFF2F7;
+  --brand-950: #FFFFFF;
+
+  /* Accent stays warm, slightly desaturated */
+  --ochre-50:  rgba(199, 123, 60, 0.14);
+  --ochre-400: #D8A369;
+  --ochre:     #D8A369;
+  --ochre-600: #C77B3C;
+
+  /* Semantic — dark variants */
+  --positive:     #3FA886;
+  --positive-50:  rgba(63, 168, 134, 0.14);
+  --positive-400: #3FA886;
+  --positive-600: #2F8F6E;
+  --warning:      #D49E45;
+  --warning-50:   rgba(212, 158, 69, 0.14);
+  --negative:     #C2554D;
+  --negative-50:  rgba(194, 85, 77, 0.16);
+  --negative-600: #B0463E;
+
+  /* Chart series (dark) */
+  --chart-1: #8A98AE;
+  --chart-2: #D8A369;
+  --chart-3: #B6BFCD;
+  --chart-4: #EBD0B0;
+  --chart-5: #C2BDB1;
+  --chart-6: #9C988C;
+
+  /* Light-tinted hairline borders — they catch light and define cards
+     far better than dark lines that disappear on a dark canvas. */
+  --border:      rgba(250, 248, 244, 0.11);
+  --border-soft: rgba(250, 248, 244, 0.06);
+
+  /* Deeper shadows + a lit top edge (inset highlight) so lifted cards read
+     as floating glass on the dark canvas. */
+  --shadow-rest:     inset 0 1px 0 rgba(250, 248, 244, 0.05), 0 1px 2px rgba(0, 0, 0, 0.40), 0 2px 6px rgba(0, 0, 0, 0.30);
+  --shadow-hover:    inset 0 1px 0 rgba(250, 248, 244, 0.07), 0 6px 16px rgba(0, 0, 0, 0.45), 0 2px 6px rgba(0, 0, 0, 0.30);
+  --shadow-elevated: inset 0 1px 0 rgba(250, 248, 244, 0.06), 0 16px 40px rgba(0, 0, 0, 0.55), 0 6px 16px rgba(0, 0, 0, 0.35);
+
+  --hero-grad: linear-gradient(135deg, #16233F 0%, #24365A 100%);
+  --hero-glow: radial-gradient(circle at 30% 20%, rgba(216, 163, 105, 0.20) 0%, transparent 55%);
+
+  --nav-bg: rgba(16, 15, 13, 0.82);
+  color-scheme: dark;
+}
+
 *, *::before, *::after {
   margin: 0;
   padding: 0;
@@ -7,6 +160,18 @@
 body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background: var(--bg);
+  transition: background-color 0.3s ease;
+}
+
+/* Dark canvas gets subtle atmospheric depth — a cool navy wash and a warm
+   ochre glow bleeding from the top, fixed so it doesn't scroll. */
+:root.dark body {
+  background:
+    radial-gradient(1100px 520px at 82% -10%, rgba(216, 163, 105, 0.06), transparent 60%),
+    radial-gradient(1000px 620px at 10% -6%, rgba(36, 54, 90, 0.28), transparent 58%),
+    var(--bg);
+  background-attachment: fixed;
 }
 
 input[type="range"] {
@@ -19,17 +184,28 @@ table {
   font-variant-numeric: tabular-nums;
 }
 
+/* Tabular numbers on monetary/numeric elements */
+.tnum {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1, "lnum" 1;
+}
+
 ::-webkit-scrollbar {
-  height: 4px;
-  width: 4px;
+  height: 6px;
+  width: 6px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #D1D5DB;
+  background: #C2BDB1;
   border-radius: 999px;
 }
+:root.dark ::-webkit-scrollbar-thumb {
+  background: #52504A;
+}
+
+/* Premium primitives ────────────────────────────────────────────── */
 
 @keyframes pulse {
   0%, 100% { opacity: 1; }
@@ -39,4 +215,28 @@ table {
 @keyframes spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
+}
+
+@keyframes page-enter {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shimmer-sweep {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(100%); }
+}
+
+.page-enter {
+  animation: page-enter 0.45s cubic-bezier(0, 0, 0.2, 1) both;
+}
+
+/* Card hover-lift — opt-in via className */
+.card-hover {
+  transition: box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.card-hover:hover {
+  box-shadow: var(--shadow-hover);
+  transform: translateY(-2px);
 }

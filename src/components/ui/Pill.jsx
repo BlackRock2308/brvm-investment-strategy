@@ -10,6 +10,7 @@ export default function Pill({ children, color = T.inkMuted, bg }) {
       color,
       borderRadius: 999,
       fontFamily: FONT_MONO, fontSize: 11, fontWeight: 600,
+      fontVariantNumeric: "tabular-nums",
     }}>{children}</span>
   );
 }

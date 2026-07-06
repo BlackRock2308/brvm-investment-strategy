@@ -6,10 +6,11 @@ import {
 import {
   Clock, AlertTriangle, Target, Compass, CalendarDays, Coins, Building2, Ban,
 } from "lucide-react";
-import { T, FONT_SANS, FONT_MONO } from "../../theme";
+import { T, FONT_SANS, FONT_MONO, alpha, chartTokens } from "../../theme";
 import { DIVIDEND_CALENDAR, QUALITY_META, STATUS_META, DIVIDEND_SUMMARY, NON_PAYERS } from "../../data/dividendCalendar";
 import { fmtFCFAfull } from "../../utils/format";
 import useResponsive from "../../hooks/useResponsive";
+import useTheme from "../../hooks/useTheme";
 
 import PageHeader from "../ui/PageHeader";
 import Card from "../ui/Card";
@@ -101,6 +102,12 @@ function ScatterTooltip({ active, payload }) {
 export default function CalendarTab() {
   const [filter, setFilter] = useState("all");
   const { isMobile, cols } = useResponsive();
+  const { isDark } = useTheme();
+  const ct = chartTokens(isDark);
+  // Theme-aware colors for the scatter marks (data hex won't adapt to dark).
+  const qualityColor = {
+    core: ct.primary, satellite: ct.accent, avoid: ct.negative, yieldTrap: ct.warning,
+  };
 
   const filtered = useMemo(() => {
     let list = UPCOMING;
@@ -161,7 +168,7 @@ export default function CalendarTab() {
       >
         <ResponsiveContainer width="100%" height={isMobile ? 280 : 380}>
           <ScatterChart margin={{ top: 20, right: 20, left: -10, bottom: 10 }}>
-            <CartesianGrid stroke={T.borderSoft} strokeDasharray="3 3" />
+            <CartesianGrid stroke={ct.grid} strokeDasharray="3 3" />
             <XAxis
               type="number"
               dataKey="x"
@@ -170,8 +177,8 @@ export default function CalendarTab() {
                 const d = new Date(v);
                 return d.toLocaleDateString("fr-FR", { month: "short" });
               }}
-              stroke={T.inkDim}
-              tick={{ fontSize: 11, fontFamily: FONT_MONO, fill: T.inkMuted }}
+              stroke={ct.grid}
+              tick={{ fontSize: 11, fontFamily: FONT_MONO, fill: ct.textMuted }}
               axisLine={false} tickLine={false}
             />
             <YAxis
@@ -180,8 +187,8 @@ export default function CalendarTab() {
               name="Yield"
               unit="%"
               domain={[2, 10]}
-              stroke={T.inkDim}
-              tick={{ fontSize: 11, fontFamily: FONT_MONO, fill: T.inkMuted }}
+              stroke={ct.grid}
+              tick={{ fontSize: 11, fontFamily: FONT_MONO, fill: ct.textMuted }}
               axisLine={false} tickLine={false}
             />
             <ZAxis type="number" dataKey="z" range={[40, 400]} />
@@ -189,15 +196,15 @@ export default function CalendarTab() {
             <Legend
               wrapperStyle={{ fontFamily: FONT_SANS, fontSize: 11, paddingTop: 10 }}
               payload={[
-                { value: "Core",      type: "circle", color: QUALITY_META.core.color },
-                { value: "Satellite", type: "circle", color: QUALITY_META.satellite.color },
-                { value: "À éviter",  type: "circle", color: QUALITY_META.avoid.color },
-                { value: "Yield trap",type: "circle", color: QUALITY_META.yieldTrap.color },
+                { value: "Core",      type: "circle", color: qualityColor.core },
+                { value: "Satellite", type: "circle", color: qualityColor.satellite },
+                { value: "À éviter",  type: "circle", color: qualityColor.avoid },
+                { value: "Yield trap",type: "circle", color: qualityColor.yieldTrap },
               ]}
             />
             <Scatter data={allScatter} isAnimationActive={false}>
               {allScatter.map((entry, i) => (
-                <Cell key={i} fill={QUALITY_META[entry.quality].color} fillOpacity={0.85} stroke={T.bgCard} strokeWidth={1.5} />
+                <Cell key={i} fill={qualityColor[entry.quality] || ct.muted} fillOpacity={0.85} stroke={ct.surface} strokeWidth={1.5} />
               ))}
             </Scatter>
           </ScatterChart>
@@ -273,7 +280,7 @@ export default function CalendarTab() {
                     <td style={{ padding: "12px 10px", color: T.ink, fontWeight: 500, borderBottom: `1px solid ${T.borderSoft}`, whiteSpace: "nowrap" }}>{d.name}</td>
                     <td style={{ padding: "12px 10px", color: T.inkSoft, borderBottom: `1px solid ${T.borderSoft}`, whiteSpace: "nowrap" }}>{d.flag} {d.country}</td>
                     <td style={{ padding: "12px 10px", borderBottom: `1px solid ${T.borderSoft}` }}>
-                      <Pill color={SECTOR_COLORS[d.sector] || T.inkMuted} bg={(SECTOR_COLORS[d.sector] || T.inkMuted) + "18"}>{d.sector}</Pill>
+                      <Pill color={SECTOR_COLORS[d.sector] || T.inkMuted} bg={alpha(SECTOR_COLORS[d.sector] || T.inkMuted, 0.09)}>{d.sector}</Pill>
                     </td>
                     <td style={{ padding: "12px 10px", fontFamily: FONT_MONO, color: T.inkSoft, borderBottom: `1px solid ${T.borderSoft}`, textAlign: "right", whiteSpace: "nowrap" }}>{fmtFCFAfull(d.amount)} F</td>
                     <td style={{ padding: "12px 10px", fontFamily: FONT_MONO, color: T.green, fontWeight: 700, borderBottom: `1px solid ${T.borderSoft}`, textAlign: "right" }}>{d.yield}%</td>
@@ -332,7 +339,7 @@ export default function CalendarTab() {
             <span key={n} style={{
               display: "inline-flex", alignItems: "center", gap: 6,
               padding: "6px 12px", borderRadius: 999,
-              background: T.red + "12", color: T.red,
+              background: alpha(T.red, 0.07), color: T.red,
               fontFamily: FONT_SANS, fontSize: 12, fontWeight: 600,
             }}>
               <Ban size={12} strokeWidth={2.4} /> {n}
@@ -351,7 +358,7 @@ export default function CalendarTab() {
       <Card
         title="Pièges à éviter"
         icon={AlertTriangle}
-        style={{ borderColor: T.red + "40" }}
+        style={{ borderColor: alpha(T.red, 0.25) }}
       >
         {[
           {
@@ -377,7 +384,7 @@ export default function CalendarTab() {
           }}>
             <div style={{
               width: 36, height: 36, flexShrink: 0, borderRadius: 10,
-              background: trap.color + "18",
+              background: alpha(trap.color, 0.09),
               display: "grid", placeItems: "center",
             }}>
               <AlertTriangle size={16} color={trap.color} strokeWidth={2.2} />
