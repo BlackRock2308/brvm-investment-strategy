@@ -1,8 +1,12 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Clock, Compass, Gauge, Briefcase, Target, AlertCircle, Activity, Coins, CheckSquare, TrendingUp } from "lucide-react";
+import { Clock, Compass, Gauge, Briefcase, Target, AlertCircle, Activity, Coins, CheckSquare, TrendingUp, Layers, Ban, Eye } from "lucide-react";
 import { T, FONT_SANS, FONT_MONO, alpha } from "../../theme";
 import { fmtFCFA, fmtFCFAfull, fmtEUR } from "../../utils/format";
-import { CURRENT_HOLDINGS, STOCKS, PHASE_CONFIG, FCP_BENCHMARK } from "../../data/stocks";
+import {
+  CURRENT_HOLDINGS, STOCKS, PHASE_CONFIG, FCP_BENCHMARK,
+  CORE_TARGETS, WATCHLIST, SATELLITE_BETS, SATELLITE_RULES,
+  ETHICAL_EXCLUSIONS, MILESTONE_LADDER,
+} from "../../data/stocks";
 import { computeDividendTargets } from "../../utils/projections";
 import useResponsive from "../../hooks/useResponsive";
 
@@ -143,13 +147,13 @@ const rules = [
   { n: "04", title: "Rotation par défaut", desc: "SNTS → ORAC → Utility → Banque hors CI → Satellite. Ordonner selon le calendrier annuel." },
 ];
 
-const caps = [
-  { label: "Par ligne individuelle", value: "20%", desc: "Max d'une position dans le portefeuille direct.", color: T.blue },
-  { label: "Par secteur direct", value: "35%", desc: "SF ≤ 30% car FCP BAM déjà à 43% SF.", color: T.chart3 },
-  { label: "Côte d'Ivoire", value: "60%", desc: "Dominante autorisée, jamais monopole.", color: T.green },
-  { label: "Zone AES combinée", value: "5%", desc: "Burkina + Mali + Niger — risque souverain.", color: T.red },
-  { label: "Cash tactique", value: "5-10%", desc: "Pour saisir corrections de -15% à -25%.", color: T.amber },
-];
+// ── Stratégie v2 — données dérivées pour les cartes core/satellite ──
+const coreRows = Object.entries(CORE_TARGETS).map(([ticker, weight]) => {
+  const s = STOCKS.find(x => x.ticker === ticker);
+  return { ticker, weight, name: s?.name || ticker, sector: s?.sector || "—", yield: s?.yield || 0 };
+});
+const coreTotal = coreRows.reduce((s, r) => s + r.weight, 0);
+const sgbcWatch = WATCHLIST[0];
 
 function loadChecked() {
   try {
@@ -203,9 +207,9 @@ export default function StrategyTab() {
   return (
     <div>
       <PageHeader
-        eyebrow="Playbook · bloc 2"
-        title="Calendrier d'exécution & règles tactiques."
-        description="Plan opérationnel DCA 75k FCFA/mois de juin à décembre 2026 (M3→M9), aligné sur le calendrier des détachements de dividendes BRVM. Clôture activité 31/12/2026."
+        eyebrow="Playbook · stratégie v2 core/satellite"
+        title="Architecture, calendrier d'exécution & règles tactiques."
+        description="Stratégie v2 (juillet 2026) : cœur 5 lignes défensives (75% en croisière), SGBC en watchlist à déclencheur prix, pool satellite filtré éthiquement (ni tabac, ni alcool). Plan opérationnel DCA 75k FCFA/mois de juin à décembre 2026 (M3→M9), aligné sur le calendrier des détachements BRVM."
       />
 
       {/* --- Milestone Tracker --- */}
@@ -357,8 +361,160 @@ export default function StrategyTab() {
               <span style={{ color: "#6E6A60" }}> ({Math.round(projectedEndDivNet / MILESTONE_TARGET * 100)}% de l'objectif)</span>
             </div>
           </div>
+
+          {/* Milestone ladder — l'horizon long terme au-delà du #1 */}
+          <div style={{
+            marginTop: 16,
+            display: "grid",
+            gridTemplateColumns: cols("1fr", "repeat(2, 1fr)", "repeat(4, 1fr)"),
+            gap: 10,
+          }}>
+            {MILESTONE_LADDER.map((m, i) => {
+              const capital = milestone.weightedYieldNet > 0
+                ? Math.round(m.target / (milestone.weightedYieldNet / 100))
+                : 0;
+              const current = i === 0;
+              return (
+                <div key={m.target} style={{
+                  padding: "12px 14px", borderRadius: 10,
+                  background: current ? alpha(T.green, 0.10) : "rgba(255,255,255,0.04)",
+                  border: `1px solid ${current ? alpha(T.green, 0.35) : "rgba(255,255,255,0.06)"}`,
+                }}>
+                  <div style={{ fontFamily: FONT_MONO, fontSize: 10, color: current ? T.neon : "#6E6A60", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: 4 }}>
+                    {m.label}{current ? " · en cours" : ""}
+                  </div>
+                  <div style={{ fontFamily: FONT_SANS, fontSize: 16, fontWeight: 700, color: current ? T.neon : "#DEDAD0", letterSpacing: "-0.02em" }}>
+                    {fmtFCFA(m.target)} F/an
+                  </div>
+                  <div style={{ fontFamily: FONT_MONO, fontSize: 10, color: "#6E6A60", marginTop: 4 }}>
+                    ≈ {fmtFCFA(capital)} F de capital · {m.note}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
+
+      {/* --- Card A: Architecture v2 core/satellite --- */}
+      <Card
+        title="Architecture v2 — Core / Satellite"
+        subtitle="Le cœur porte le rendement, les satellites saisissent les fenêtres · juillet 2026"
+        icon={Layers}
+        style={{ marginBottom: 16 }}
+      >
+        {/* Core croisière */}
+        <div style={{ fontFamily: FONT_SANS, fontSize: 13, fontWeight: 700, color: T.ink, marginBottom: 10 }}>
+          Le cœur ({coreTotal}% en croisière) — jamais vendu, rééquilibrage par dilution uniquement
+        </div>
+        <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch", marginBottom: 18 }}>
+          <table style={{ width: "100%", minWidth: 560, borderCollapse: "collapse", fontFamily: FONT_SANS, fontSize: 12 }}>
+            <thead>
+              <tr>
+                {["Ligne", "Société", "Secteur", "Yield", "Poids croisière"].map((h, i) => (
+                  <th key={h} style={{
+                    padding: "8px 10px", textAlign: i >= 3 ? "right" : "left",
+                    fontFamily: FONT_SANS, fontSize: 11, color: T.inkMuted, fontWeight: 600,
+                    letterSpacing: "0.02em", textTransform: "uppercase",
+                    borderBottom: `1px solid ${T.border}`, whiteSpace: "nowrap",
+                  }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {coreRows.map(r => (
+                <tr key={r.ticker}>
+                  <td style={{ padding: "10px 10px", borderBottom: `1px solid ${T.borderSoft}` }}>
+                    <span style={{
+                      fontFamily: FONT_MONO, fontSize: 12, fontWeight: 700, color: T.blue,
+                      background: T.blueSoft, padding: "3px 8px", borderRadius: 6,
+                    }}>{r.ticker}</span>
+                  </td>
+                  <td style={{ padding: "10px 10px", color: T.inkSoft, borderBottom: `1px solid ${T.borderSoft}` }}>{r.name}</td>
+                  <td style={{ padding: "10px 10px", color: T.inkMuted, borderBottom: `1px solid ${T.borderSoft}` }}>{r.sector}</td>
+                  <td style={{ padding: "10px 10px", textAlign: "right", fontFamily: FONT_MONO, color: T.green, fontWeight: 600, borderBottom: `1px solid ${T.borderSoft}` }}>
+                    {r.yield.toString().replace(".", ",")}%
+                  </td>
+                  <td style={{ padding: "10px 10px", textAlign: "right", fontFamily: FONT_MONO, fontWeight: 700, color: T.ink, borderBottom: `1px solid ${T.borderSoft}` }}>{r.weight}%</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Watchlist SGBC */}
+        <div style={{
+          padding: "14px 16px", borderRadius: 10, marginBottom: 14,
+          background: T.bgSubtle, border: `1px solid ${alpha(T.blue, 0.18)}`,
+          display: "flex", alignItems: "flex-start", gap: 12,
+        }}>
+          <Eye size={15} color={T.blue} style={{ flexShrink: 0, marginTop: 2 }} />
+          <div style={{ fontFamily: FONT_SANS, fontSize: 12, color: T.inkMuted, lineHeight: 1.6 }}>
+            <strong style={{ color: T.ink }}>Watchlist — {sgbcWatch.ticker} ({sgbcWatch.name}), {sgbcWatch.targetWeight}% si déclenchée.</strong>{" "}
+            Déclencheur : <strong style={{ color: T.blue }}>{sgbcWatch.trigger}</strong> ({sgbcWatch.triggerPrice}).{" "}
+            {sgbcWatch.note} Le prix vient à toi, pas l'inverse.
+          </div>
+        </div>
+
+        {/* Satellite bets */}
+        <div style={{ fontFamily: FONT_SANS, fontSize: 13, fontWeight: 700, color: T.ink, marginBottom: 10 }}>
+          Le pool satellite (jusqu'à 25% en croisière) — 6 candidats, 3 paris réels
+        </div>
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: cols("1fr", "1fr", "repeat(3, 1fr)"),
+          gap: 10, marginBottom: 14,
+        }}>
+          {SATELLITE_BETS.map(bet => (
+            <div key={bet.id} style={{
+              padding: "14px 16px", borderRadius: 12,
+              background: T.bgSubtle, border: `1px solid ${T.borderSoft}`,
+            }}>
+              <div style={{ fontFamily: FONT_SANS, fontSize: 12, fontWeight: 700, color: T.ink, marginBottom: 8 }}>{bet.label}</div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 8 }}>
+                {bet.candidates.map(c => (
+                  <span key={c.ticker} style={{
+                    fontFamily: FONT_MONO, fontSize: 11, fontWeight: 700, color: T.chart3,
+                    background: alpha(T.chart3, 0.10), padding: "3px 8px", borderRadius: 6,
+                    whiteSpace: "nowrap",
+                  }}>{c.ticker} · {c.yield.toString().replace(".", ",")}%</span>
+                ))}
+              </div>
+              <div style={{ fontFamily: FONT_SANS, fontSize: 11, color: T.inkMuted, lineHeight: 1.5 }}>{bet.note}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Satellite rules */}
+        <div style={{
+          padding: "14px 16px", borderRadius: 10, marginBottom: 14,
+          background: T.bgSubtle, border: `1px solid ${T.borderSoft}`,
+        }}>
+          <div style={{ fontFamily: FONT_SANS, fontSize: 12, fontWeight: 700, color: T.ink, marginBottom: 8 }}>
+            Règles satellites — max {SATELLITE_RULES.maxPerLine}% par ligne · {SATELLITE_RULES.maxSimultaneous} simultanés max · aucun avant la Phase 2 (&gt; 5M)
+          </div>
+          <div style={{ fontFamily: FONT_SANS, fontSize: 12, color: T.inkMuted, lineHeight: 1.6, marginBottom: 8 }}>
+            <strong style={{ color: T.green }}>Entrée</strong> — {SATELLITE_RULES.entry}
+          </div>
+          <div style={{ fontFamily: FONT_SANS, fontSize: 12, color: T.inkMuted, lineHeight: 1.6 }}>
+            <strong style={{ color: T.red }}>Sortie</strong> (critère écrit avant l'achat) — {SATELLITE_RULES.exit.join(" · ")}.
+          </div>
+        </div>
+
+        {/* Ethical exclusions */}
+        <div style={{
+          padding: "12px 16px", borderRadius: 10,
+          background: alpha(T.red, 0.06), border: `1px solid ${alpha(T.red, 0.18)}`,
+          display: "flex", alignItems: "flex-start", gap: 12,
+        }}>
+          <Ban size={15} color={T.red} style={{ flexShrink: 0, marginTop: 2 }} />
+          <div style={{ fontFamily: FONT_SANS, fontSize: 12, color: T.inkMuted, lineHeight: 1.6 }}>
+            <strong style={{ color: T.red }}>Exclusions éthiques — jamais achetables, quel que soit le rendement :</strong>{" "}
+            {ETHICAL_EXCLUSIONS.map(e => `${e.name} (${e.reason}, ${e.yield.toString().replace(".", ",")}%)`).join(" · ")}.
+            {" "}Coût assumé du filtre : les deux plus gros yields du pool initial. Également hors plan : ETIT (yield 2,4%, gouvernance) et BOAS (doublon bancaire de BOAB).
+          </div>
+        </div>
+      </Card>
 
       {/* --- Card 0: Journal de bord --- */}
       <Card title="Journal de bord — Décisions clés" subtitle="Historique chronologique des ordres exécutés" icon={Activity} style={{ marginBottom: 16 }}>
@@ -772,7 +928,7 @@ export default function StrategyTab() {
         }}>
           <AlertCircle size={14} color={T.blue} style={{ flexShrink: 0, marginTop: 2 }} />
           <div style={{ fontFamily: FONT_SANS, fontSize: 12, color: T.inkMuted, lineHeight: 1.6 }}>
-            Plan aux cours du 06/07/2026 — <strong>portefeuille 4 lignes (SGBC écartée : trop chère, potentiel jugé limité)</strong>. DCA base 75k/mois + dividendes DRIP. Reconvergence : <strong>aucun achat CIE</strong> (surpondérée après le rallye), priorité au comblement de <strong>BOAB</strong> (+12 actions), puis ORAC et SNTS. Les 13% libérés par SGBC sont redistribués sur les 4 lignes (SNTS 32%, ORAC 25%, BOAB 23%, CIE 20%). À fin décembre : SNTS/ORAC/BOAB convergent à ±2pp, CIE se dilue vers ~16%. Capital déployé ~329k sur 375k disponibles ; le solde + DRIP alimentent la réserve cash tactique (5-10% IPS). Aucune projection au-delà du 31/12/2026.
+            Plan aux cours du 06/07/2026 — <strong>portefeuille 4 lignes (SGBC écartée : trop chère, potentiel jugé limité)</strong>. DCA base 75k/mois + dividendes DRIP. Reconvergence : <strong>aucun achat CIE</strong> (surpondérée après le rallye), priorité au comblement de <strong>BOAB</strong> (+12 actions), puis ORAC et SNTS. Les 13% libérés par SGBC sont redistribués sur les 4 lignes (SNTS 32%, ORAC 25%, BOAB 23%, CIE 20%). À fin décembre : SNTS/ORAC/BOAB convergent à ±2pp, CIE se dilue vers ~16%. Capital déployé ~329k sur 375k disponibles ; le solde + DRIP s'accumulent en réserve cash (reliquat mécanique du DCA, déployable via les règles 01/02). Aucune projection au-delà du 31/12/2026.
           </div>
         </div>
       </Card>
@@ -805,26 +961,47 @@ export default function StrategyTab() {
           ))}
         </Card>
 
-        <Card title="Plafonds de rééquilibrage" subtitle="Revue semestrielle · juin & décembre" icon={Gauge}>
-          {caps.map((r, i, arr) => (
-            <div key={r.label} style={{
-              display: "flex", justifyContent: "space-between", alignItems: "flex-start",
-              padding: "16px 0",
-              borderBottom: i < arr.length - 1 ? `1px solid ${T.borderSoft}` : "none",
-              gap: 12,
-            }}>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontFamily: FONT_SANS, fontSize: 13, color: T.ink, fontWeight: 600, marginBottom: 3 }}>{r.label}</div>
-                <div style={{ fontFamily: FONT_SANS, fontSize: 12, color: T.inkMuted, lineHeight: 1.5 }}>{r.desc}</div>
-              </div>
-              <div style={{
-                padding: "6px 14px",
-                background: alpha(r.color, 0.09), color: r.color,
-                fontFamily: FONT_SANS, fontSize: 16, fontWeight: 700,
-                borderRadius: 8, flexShrink: 0,
-              }}>{r.value}</div>
-            </div>
-          ))}
+        <Card title="Plafonds indexés par phase" subtitle="Les caps se resserrent à mesure que le capital grandit" icon={Gauge}>
+          <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
+            <table style={{ width: "100%", minWidth: 480, borderCollapse: "collapse", fontFamily: FONT_SANS, fontSize: 12 }}>
+              <thead>
+                <tr>
+                  {["Phase", "Core / Sat", "Par ligne", "Télécoms", "CI", "AES"].map((h, i) => (
+                    <th key={h} style={{
+                      padding: "8px 10px", textAlign: i === 0 ? "left" : "right",
+                      fontFamily: FONT_SANS, fontSize: 11, color: T.inkMuted, fontWeight: 600,
+                      letterSpacing: "0.02em", textTransform: "uppercase",
+                      borderBottom: `1px solid ${T.border}`, whiteSpace: "nowrap",
+                    }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {PHASE_CONFIG.map(ph => (
+                  <tr key={ph.phase}>
+                    <td style={{ padding: "10px 10px", borderBottom: `1px solid ${T.borderSoft}`, whiteSpace: "nowrap" }}>
+                      <span style={{ fontFamily: FONT_MONO, fontSize: 12, fontWeight: 700, color: T.blue }}>P{ph.phase}</span>
+                      <span style={{ fontFamily: FONT_MONO, fontSize: 10, color: T.inkDim, marginLeft: 6 }}>{ph.capitalRange}</span>
+                    </td>
+                    <td style={{ padding: "10px 10px", textAlign: "right", fontFamily: FONT_MONO, fontWeight: 600, color: T.chart3, borderBottom: `1px solid ${T.borderSoft}`, whiteSpace: "nowrap" }}>
+                      {ph.coreRatio} / {ph.satelliteRatio}
+                    </td>
+                    <td style={{ padding: "10px 10px", textAlign: "right", fontFamily: FONT_MONO, color: T.inkSoft, borderBottom: `1px solid ${T.borderSoft}` }}>{ph.caps.line}%</td>
+                    <td style={{ padding: "10px 10px", textAlign: "right", fontFamily: FONT_MONO, color: T.inkSoft, borderBottom: `1px solid ${T.borderSoft}` }}>{ph.caps.telecom}%</td>
+                    <td style={{ padding: "10px 10px", textAlign: "right", fontFamily: FONT_MONO, color: T.inkSoft, borderBottom: `1px solid ${T.borderSoft}` }}>{ph.caps.ci}%</td>
+                    <td style={{ padding: "10px 10px", textAlign: "right", fontFamily: FONT_MONO, color: ph.caps.aes === 0 ? T.red : T.inkSoft, borderBottom: `1px solid ${T.borderSoft}` }}>{ph.caps.aes}%</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div style={{
+            marginTop: 12, padding: "10px 14px",
+            background: T.bgSubtle, borderRadius: 8,
+            fontFamily: FONT_SANS, fontSize: 11, color: T.inkMuted, lineHeight: 1.6,
+          }}>
+            La Phase 1 tolère des poids concentrés (SNTS 32%, télécoms 57%) — c'est l'exception documentée d'un portefeuille en construction. Les caps convergent vers le régime de croisière (20% / 35%) à partir de la Phase 3. Le cash tactique n'est pas un objectif : c'est le reliquat mécanique du DCA mensuel, déployable via les règles 01/02. Revue semestrielle : juin &amp; décembre.
+          </div>
         </Card>
       </div>
     </div>

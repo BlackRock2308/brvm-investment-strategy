@@ -106,12 +106,13 @@ export default function CalendarTab() {
   const ct = chartTokens(isDark);
   // Theme-aware colors for the scatter marks (data hex won't adapt to dark).
   const qualityColor = {
-    core: ct.primary, satellite: ct.accent, avoid: ct.negative, yieldTrap: ct.warning,
+    core: ct.primary, watchlist: ct.categorical[2], satellite: ct.accent,
+    avoid: ct.negative, yieldTrap: ct.warning, excluded: ct.muted,
   };
 
   const filtered = useMemo(() => {
     let list = UPCOMING;
-    if (filter === "avoid") list = list.filter(d => d.quality === "avoid" || d.quality === "yieldTrap");
+    if (filter === "avoid") list = list.filter(d => d.quality === "avoid" || d.quality === "yieldTrap" || d.quality === "excluded");
     else if (filter !== "all") list = list.filter(d => d.quality === filter);
     return [...list].sort((a, b) => {
       if (a.date && b.date) return new Date(a.date) - new Date(b.date);
@@ -197,9 +198,11 @@ export default function CalendarTab() {
               wrapperStyle={{ fontFamily: FONT_SANS, fontSize: 11, paddingTop: 10 }}
               payload={[
                 { value: "Core",      type: "circle", color: qualityColor.core },
+                { value: "Watchlist", type: "circle", color: qualityColor.watchlist },
                 { value: "Satellite", type: "circle", color: qualityColor.satellite },
                 { value: "À éviter",  type: "circle", color: qualityColor.avoid },
                 { value: "Yield trap",type: "circle", color: qualityColor.yieldTrap },
+                { value: "Exclu (éthique)", type: "circle", color: qualityColor.excluded },
               ]}
             />
             <Scatter data={allScatter} isAnimationActive={false}>

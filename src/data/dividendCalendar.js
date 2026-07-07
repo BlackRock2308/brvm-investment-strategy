@@ -7,7 +7,7 @@ export const DIVIDEND_CALENDAR = [
   { date: "2026-05-26", ticker: "SNTS",  name: "Sonatel",                      amount: 1740.00,  yield: 6.00, country: "SN", flag: "🇸🇳", sector: "Télécoms",      quality: "core",      status: "paid" },
   { date: "2026-05-26", ticker: "BOAB",  name: "BOA Bénin",                    amount: 585.00,   yield: 6.48, country: "BJ", flag: "🇧🇯", sector: "Banque",        quality: "core",      status: "paid" },
   { date: "2026-05-26", ticker: "ECEC",  name: "Ecobank CI",                   amount: 781.00,   yield: 4.55, country: "CI", flag: "🇨🇮", sector: "Banque",        quality: "satellite", status: "paid" },
-  { date: "2026-06-01", ticker: "BOAS",  name: "BOA Sénégal",                  amount: 450.00,   yield: 6.17, country: "SN", flag: "🇸🇳", sector: "Banque",        quality: "core",      status: "paid" },
+  { date: "2026-06-01", ticker: "BOAS",  name: "BOA Sénégal",                  amount: 450.00,   yield: 6.17, country: "SN", flag: "🇸🇳", sector: "Banque",        quality: "satellite", status: "paid" },
   { date: "2026-06-01", ticker: "SCBC",  name: "SICABLE CI",                   amount: 152.02,   yield: 3.90, country: "CI", flag: "🇨🇮", sector: "Industrie",     quality: "satellite", status: "paid" },
   { date: "2026-06-03", ticker: "BOAM",  name: "BOA Mali",                     amount: 305.04,   yield: 6.28, country: "ML", flag: "🇲🇱", sector: "Banque",        quality: "avoid",     status: "paid" },
   { date: "2026-06-08", ticker: "ORAC",  name: "Orange CI",                    amount: 704.00,   yield: 4.22, country: "CI", flag: "🇨🇮", sector: "Télécoms",      quality: "core",      status: "paid" },
@@ -16,14 +16,14 @@ export const DIVIDEND_CALENDAR = [
 
   // ── Dates confirmées / annoncées à venir ──
   { date: "2026-06-29", ticker: "PALC",  name: "PALMCI",                       amount: 441.40,   yield: 5.02, country: "CI", flag: "🇨🇮", sector: "Agro",          quality: "satellite", status: "confirmed" },
-  { date: "2026-06-30", ticker: "ETIT",  name: "Ecobank ETI",                  amount: 0.90,     yield: 2.43, country: "TG", flag: "🇹🇬", sector: "Banque pan-AF", quality: "satellite", status: "confirmed" },
+  { date: "2026-06-30", ticker: "ETIT",  name: "Ecobank ETI",                  amount: 0.90,     yield: 2.43, country: "TG", flag: "🇹🇬", sector: "Banque pan-AF", quality: "avoid",     status: "confirmed" },
   { date: "2026-07-06", ticker: "BICC",  name: "BICICI",                       amount: 1157.20,  yield: 3.99, country: "CI", flag: "🇨🇮", sector: "Banque",        quality: "satellite", status: "confirmed" },
   { date: "2026-07-09", ticker: "CIEC",  name: "CIE CI",                       amount: 205.92,   yield: 3.96, country: "CI", flag: "🇨🇮", sector: "Utilities",     quality: "core",      status: "proposed" },
   { date: "2026-07-15", ticker: "BIIC",  name: "BIIC",                         amount: 254.60,   yield: 4.43, country: "CI", flag: "🇨🇮", sector: "Banque",        quality: "satellite", status: "proposed" },
   { date: "2026-07-17", ticker: "TTLS",  name: "Total Sénégal",                amount: 176.65,   yield: 5.05, country: "SN", flag: "🇸🇳", sector: "Distribution",  quality: "satellite", status: "confirmed" },
   { date: "2026-07-31", ticker: "SIBC",  name: "Société Ivoirienne de Banque", amount: 374.00,   yield: 4.21, country: "CI", flag: "🇨🇮", sector: "Banque",        quality: "satellite", status: "confirmed" },
   { date: "2026-08-03", ticker: "LNBJ",  name: "Loterie Nationale du Bénin",   amount: 164.00,   yield: 4.00, country: "BJ", flag: "🇧🇯", sector: "Services",      quality: "satellite", status: "proposed" },
-  { date: "2026-08-28", ticker: "STBC",  name: "SITAB",                        amount: 1707.00,  yield: 7.12, country: "CI", flag: "🇨🇮", sector: "Industrie",     quality: "satellite", status: "proposed" },
+  { date: "2026-08-28", ticker: "STBC",  name: "SITAB",                        amount: 1707.00,  yield: 7.12, country: "CI", flag: "🇨🇮", sector: "Industrie",     quality: "excluded",  status: "proposed" },
   { date: "2026-09-15", ticker: "SMBC",  name: "SMB CI",                       amount: 704.00,   yield: 4.29, country: "CI", flag: "🇨🇮", sector: "Industrie",     quality: "satellite", status: "proposed" },
   { date: "2026-09-30", ticker: "SOGC",  name: "SOGB CI",                      amount: 501.60,   yield: 5.97, country: "CI", flag: "🇨🇮", sector: "Agro",          quality: "satellite", status: "proposed" },
   { date: "2026-09-30", ticker: "TTLC",  name: "Total CI",                     amount: 139.7677, yield: 4.90, country: "CI", flag: "🇨🇮", sector: "Distribution",  quality: "satellite", status: "proposed" },
@@ -35,11 +35,11 @@ export const DIVIDEND_CALENDAR = [
   { date: null,         ticker: "TMCI",  name: "Tractafric Motors CI",         amount: 183.92,   yield: 4.00, country: "CI", flag: "🇨🇮", sector: "Distribution",  quality: "satellite", status: "proposed" },
   { date: null,         ticker: "CFAC",  name: "CFAO Motors CI",               amount: 55.44,    yield: 3.12, country: "CI", flag: "🇨🇮", sector: "Distribution",  quality: "satellite", status: "proposed" },
   { date: null,         ticker: "NTLC",  name: "Nestlé CI",                    amount: 369.60,   yield: 2.50, country: "CI", flag: "🇨🇮", sector: "Agro",          quality: "satellite", status: "proposed" },
-  { date: null,         ticker: "SGBC",  name: "SGBCI",                        amount: 2293.28,  yield: 5.88, country: "CI", flag: "🇨🇮", sector: "Banque",        quality: "core",      status: "proposed" },
+  { date: null,         ticker: "SGBC",  name: "SGBCI",                        amount: 2293.28,  yield: 5.88, country: "CI", flag: "🇨🇮", sector: "Banque",        quality: "watchlist", status: "proposed" },
   { date: null,         ticker: "SPHC",  name: "SAPH",                         amount: 430.32,   yield: 5.61, country: "CI", flag: "🇨🇮", sector: "Agro",          quality: "satellite", status: "proposed" },
   { date: null,         ticker: "NEIC",  name: "NEI CEDA CI",                  amount: 140.39,   yield: 5.85, country: "CI", flag: "🇨🇮", sector: "Distribution",  quality: "yieldTrap", status: "proposed" },
   { date: null,         ticker: "NSBC",  name: "NSIA Banque CI",               amount: 675.98,   yield: 3.42, country: "CI", flag: "🇨🇮", sector: "Banque",        quality: "satellite", status: "proposed" },
-  { date: null,         ticker: "SLBC",  name: "SOLIBRA",                      amount: 1871.76,  yield: 4.88, country: "CI", flag: "🇨🇮", sector: "Industrie",     quality: "satellite", status: "proposed" },
+  { date: null,         ticker: "SLBC",  name: "SOLIBRA",                      amount: 1871.76,  yield: 4.88, country: "CI", flag: "🇨🇮", sector: "Industrie",     quality: "excluded",  status: "proposed" },
 ];
 
 // Sociétés ayant décidé de ne pas distribuer de dividende en 2026.
@@ -56,9 +56,11 @@ export const DIVIDEND_SUMMARY = {
 // Omaad palette (raw hex — safe for both SVG marks and DOM badges).
 export const QUALITY_META = {
   core:      { label: "Core",      color: "#1A2740", bg: "#EFF2F7", action: "PRIORITAIRE" },
+  watchlist: { label: "Watchlist", color: "#4D5F80", bg: "#EFF2F7", action: "SI PRIX" },
   satellite: { label: "Satellite", color: "#C77B3C", bg: "#FBF4E9", action: "OK" },
   avoid:     { label: "À éviter",  color: "#B0463E", bg: "#F8E6E4", action: "ÉVITER" },
   yieldTrap: { label: "Piège",     color: "#C68A2E", bg: "#FAF1DE", action: "PIÈGE" },
+  excluded:  { label: "Exclu (éthique)", color: "#3D3B35", bg: "#F1EDE5", action: "JAMAIS" },
 };
 
 export const STATUS_META = {
