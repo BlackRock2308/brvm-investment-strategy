@@ -93,14 +93,12 @@ const fcpHolding = {
   get pnlPct() { return ((this.value - this.invested) / this.invested * 100).toFixed(1); },
 };
 
-// Valorisations au cours de clôture (relevé courtier 6 juillet 2026).
-const directValues = {
-  SNTS: 118000,
-  CIEC: 111300,
-  BOAB: 54600,
-  ORAC: 84500,
-};
-const directValue = Object.values(directValues).reduce((a, b) => a + b, 0);
+// Valorisation directe au cours de clôture courant — dérivée des positions
+// (qty × prix STOCKS) pour rester synchronisée avec le relevé courtier.
+const directValue = CURRENT_HOLDINGS.reduce((s, h) => {
+  const st = STOCKS.find(x => x.ticker === h.ticker);
+  return s + (st ? h.qty * st.price : 0);
+}, 0);
 const directPnl = directValue - situationTotal;
 const directPnlPct = ((directPnl / situationTotal) * 100).toFixed(1);
 
