@@ -15,6 +15,7 @@ import { fmtFCFA, fmtFCFAfull } from "../../utils/format";
 import { projectDCA } from "../../utils/projections";
 import useResponsive from "../../hooks/useResponsive";
 import useTheme from "../../hooks/useTheme";
+import usePrivacy from "../../hooks/usePrivacy";
 
 import PageHeader from "../ui/PageHeader";
 import Card from "../ui/Card";
@@ -74,10 +75,16 @@ const portfolio = computePortfolioMetrics();
 const dcaProjection = projectDCA({ monthly: 75000, years: 7, annualRate: 9 });
 const dcaFinal = dcaProjection[dcaProjection.length - 1];
 
+const PRIVATE_MASK = "••••••";
+const pctTooltipFormatter = (v) => `${v}%`;
+
 export default function OverviewTab() {
   const { isMobile, isTablet, cols } = useResponsive();
   const { isDark } = useTheme();
+  const { isPrivate } = usePrivacy();
   const ct = chartTokens(isDark);
+
+  const prv = (formatted) => isPrivate ? PRIVATE_MASK : formatted;
 
   const openLines = CURRENT_HOLDINGS.filter(h => h.qty > 0).length;
   const linesPct = Math.round((openLines / phase1.maxLines) * 100);
@@ -85,7 +92,7 @@ export default function OverviewTab() {
   return (
     <div>
       <PageHeader
-        eyebrow="Dashboard · juillet 2026"
+        eyebrow="Dashboard · août 2026"
         title="Votre patrimoine BRVM, piloté avec précision."
         description="Vue d'ensemble de votre portefeuille, allocation Phase 1, et projection DCA."
       />
@@ -129,10 +136,10 @@ export default function OverviewTab() {
               fontFamily: FONT_SANS, fontSize: isMobile ? 34 : 46, fontWeight: 800,
               color: "#FAF8F4", letterSpacing: "-0.03em", lineHeight: 1,
             }}>
-              {fmtFCFAfull(portfolio.totalValue)} <span style={{ fontSize: isMobile ? 18 : 22, fontWeight: 600, color: "#C2BDB1" }}>F</span>
+              {prv(fmtFCFAfull(portfolio.totalValue))} <span style={{ fontSize: isMobile ? 18 : 22, fontWeight: 600, color: "#C2BDB1" }}>F</span>
             </div>
             <div style={{ fontFamily: FONT_MONO, fontSize: 12, color: "#9C988C", marginTop: 8 }}>
-              {openLines} lignes ouvertes sur {phase1.maxLines} · DCA 75 000 F/mois · Yield {portfolio.yield}%
+              {openLines} lignes ouvertes sur {phase1.maxLines} · DCA 75 000 F CFA/mois · Yield {portfolio.yield}%
             </div>
           </div>
 
@@ -162,7 +169,7 @@ export default function OverviewTab() {
         gridTemplateColumns: cols("1fr", "repeat(2, 1fr)", "repeat(4, 1fr)"),
         gap: isMobile ? 10 : 16, marginTop: isMobile ? 16 : 24, marginBottom: isMobile ? 20 : 28,
       }}>
-        <MetricCard label="Capital direct" value={fmtFCFA(portfolio.totalValue)} unit="F" deltaLabel={`investi ${fmtFCFA(CURRENT_HOLDINGS_TOTAL)}`} icon={Activity} color={T.blue} />
+        <MetricCard label="Capital direct" value={prv(fmtFCFA(portfolio.totalValue))} unit={isPrivate ? "" : "F"} deltaLabel={isPrivate ? undefined : `investi ${fmtFCFA(CURRENT_HOLDINGS_TOTAL)}`} icon={Activity} color={T.blue} />
         <MetricCard label="Yield pondéré" value={portfolio.yield} unit="%" icon={Coins} color={T.green} />
         <MetricCard label="P/E pondéré" value={portfolio.pe} icon={Calculator} color={T.chart3} />
         <MetricCard label="Risque moyen" value={portfolio.risk} unit="/10" icon={Gauge}
@@ -190,7 +197,7 @@ export default function OverviewTab() {
                   <Cell key={i} fill={ct.categorical[SECTOR_INDEX[e.sector] ?? 0]} stroke={ct.surface} strokeWidth={2} />
                 ))}
               </Pie>
-              <Tooltip content={<ChartTooltip />} />
+              <Tooltip content={<ChartTooltip formatter={pctTooltipFormatter} />} />
             </PieChart>
           </ResponsiveContainer>
           <div style={{ marginTop: 8 }}>
@@ -207,7 +214,7 @@ export default function OverviewTab() {
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                     <span style={{ fontSize: 14 }}>{e.stock.flag}</span>
                     <span style={{ fontFamily: FONT_MONO, fontSize: 12, fontWeight: 600, color: T.ink }}>{e.ticker}</span>
-                    <span style={{ fontFamily: FONT_SANS, fontSize: 11, color: T.inkMuted }}>{e.qty} act.</span>
+                    {!isPrivate && <span style={{ fontFamily: FONT_SANS, fontSize: 11, color: T.inkMuted }}>{e.qty} act.</span>}
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                     <span style={{ fontFamily: FONT_MONO, fontSize: 12, color: T.ink, fontWeight: 600 }}>
@@ -233,9 +240,9 @@ export default function OverviewTab() {
           <ResponsiveContainer width="100%" height={isMobile ? 160 : 200}>
             <BarChart data={portfolio.sectors} layout="vertical" margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
               <CartesianGrid stroke={ct.grid} horizontal={false} strokeDasharray="3 3" />
-              <XAxis type="number" stroke={ct.grid} tick={{ fontSize: 10, fontFamily: FONT_MONO, fill: ct.textMuted }} axisLine={false} tickLine={false} />
+              <XAxis type="number" stroke={ct.grid} tick={{ fontSize: 10, fontFamily: FONT_MONO, fill: ct.textMuted }} axisLine={false} tickLine={false} tickFormatter={v => `${v}%`} />
               <YAxis type="category" dataKey="name" stroke={ct.grid} tick={{ fontSize: 11, fontFamily: FONT_SANS, fill: ct.text, fontWeight: 500 }} width={isMobile ? 70 : 95} axisLine={false} tickLine={false} />
-              <Tooltip content={<ChartTooltip />} cursor={{ fill: ct.grid }} />
+              <Tooltip content={<ChartTooltip formatter={pctTooltipFormatter} />} cursor={{ fill: ct.grid }} />
               <Bar dataKey="value" radius={[0, 6, 6, 0]} isAnimationActive={false}>
                 {portfolio.sectors.map((e, i) => (
                   <Cell key={i} fill={ct.categorical[SECTOR_INDEX[e.name] ?? 0]} />
@@ -247,7 +254,7 @@ export default function OverviewTab() {
       </div>
 
       {/* Compact DCA projection */}
-      <Card title="Projection DCA 7 ans" subtitle="75 000 F/mois · rendement 9%" icon={TrendingUp}
+      <Card title="Projection DCA 7 ans" subtitle="75 000 F CFA/mois · rendement 9%" icon={TrendingUp}
         action={
           <div style={{ display: "flex", gap: 8 }}>
             <Pill color={T.ink} bg={T.bgSoft}>Investi {fmtFCFA(dcaFinal.invested)}</Pill>

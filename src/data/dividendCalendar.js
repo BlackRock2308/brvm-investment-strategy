@@ -1,4 +1,4 @@
-// Calendrier 2026 des dividendes BRVM — source : BRVM / Daba Intelligence (semaine du 22-26 juin 2026).
+// Calendrier 2026 des dividendes BRVM — source : BRVM / Daba Intelligence (semaine du 13-17 juillet 2026).
 // status : "paid" (détaché + payé) · "confirmed" (date confirmée) · "proposed" (annoncé, non publié officiellement BRVM).
 export const DIVIDEND_CALENDAR = [
   // ── Déjà détachés & payés ──
@@ -15,14 +15,14 @@ export const DIVIDEND_CALENDAR = [
   { date: "2026-06-19", ticker: "CBIBF", name: "Coris Bank International BF",   amount: 900.00,   yield: 4.09, country: "BF", flag: "🇧🇫", sector: "Banque",        quality: "avoid",     status: "paid" },
 
   // ── Dates confirmées / annoncées à venir ──
-  { date: "2026-06-29", ticker: "PALC",  name: "PALMCI",                       amount: 441.40,   yield: 5.02, country: "CI", flag: "🇨🇮", sector: "Agro",          quality: "satellite", status: "confirmed" },
-  { date: "2026-06-30", ticker: "ETIT",  name: "Ecobank ETI",                  amount: 0.90,     yield: 2.43, country: "TG", flag: "🇹🇬", sector: "Banque pan-AF", quality: "avoid",     status: "confirmed" },
-  { date: "2026-07-06", ticker: "BICC",  name: "BICICI",                       amount: 1157.20,  yield: 3.99, country: "CI", flag: "🇨🇮", sector: "Banque",        quality: "satellite", status: "confirmed" },
-  { date: "2026-07-09", ticker: "CIEC",  name: "CIE CI",                       amount: 205.92,   yield: 3.96, country: "CI", flag: "🇨🇮", sector: "Utilities",     quality: "core",      status: "proposed" },
-  { date: "2026-07-15", ticker: "BIIC",  name: "BIIC",                         amount: 254.60,   yield: 4.43, country: "CI", flag: "🇨🇮", sector: "Banque",        quality: "satellite", status: "proposed" },
-  { date: "2026-07-17", ticker: "TTLS",  name: "Total Sénégal",                amount: 176.65,   yield: 5.05, country: "SN", flag: "🇸🇳", sector: "Distribution",  quality: "satellite", status: "confirmed" },
-  { date: "2026-07-31", ticker: "SIBC",  name: "Société Ivoirienne de Banque", amount: 374.00,   yield: 4.21, country: "CI", flag: "🇨🇮", sector: "Banque",        quality: "satellite", status: "confirmed" },
-  { date: "2026-08-03", ticker: "LNBJ",  name: "Loterie Nationale du Bénin",   amount: 164.00,   yield: 4.00, country: "BJ", flag: "🇧🇯", sector: "Services",      quality: "satellite", status: "proposed" },
+  { date: "2026-06-29", ticker: "PALC",  name: "PALMCI",                       amount: 441.40,   yield: 5.00, country: "CI", flag: "🇨🇮", sector: "Agro",          quality: "satellite", status: "paid" },
+  { date: "2026-06-30", ticker: "ETIT",  name: "Ecobank ETI",                  amount: 0.9184,   yield: 1.44, country: "TG", flag: "🇹🇬", sector: "Banque pan-AF", quality: "avoid",     status: "paid" },
+  { date: "2026-07-06", ticker: "BICC",  name: "BICICI",                       amount: 1157.20,  yield: 4.02, country: "CI", flag: "🇨🇮", sector: "Banque",        quality: "satellite", status: "paid" },
+  { date: "2026-07-28", ticker: "CIEC",  name: "CIE CI",                       amount: 205.92,   yield: 3.96, country: "CI", flag: "🇨🇮", sector: "Utilities",     quality: "core",      status: "paid" },
+  { date: "2026-07-31", ticker: "BIIC",  name: "BIIC",                         amount: 254.60,   yield: 4.01, country: "CI", flag: "🇨🇮", sector: "Banque",        quality: "satellite", status: "paid" },
+  { date: "2026-07-17", ticker: "TTLS",  name: "Total Sénégal",                amount: 176.65,   yield: 4.42, country: "SN", flag: "🇸🇳", sector: "Distribution",  quality: "satellite", status: "paid" },
+  { date: "2026-07-31", ticker: "SIBC",  name: "Société Ivoirienne de Banque", amount: 374.00,   yield: 4.21, country: "CI", flag: "🇨🇮", sector: "Banque",        quality: "satellite", status: "paid" },
+  { date: "2026-08-03", ticker: "LNBJ",  name: "Loterie Nationale du Bénin",   amount: 164.00,   yield: 4.00, country: "BJ", flag: "🇧🇯", sector: "Services",      quality: "satellite", status: "paid" },
   { date: "2026-08-28", ticker: "STBC",  name: "SITAB",                        amount: 1707.00,  yield: 7.12, country: "CI", flag: "🇨🇮", sector: "Industrie",     quality: "excluded",  status: "proposed" },
   { date: "2026-09-15", ticker: "SMBC",  name: "SMB CI",                       amount: 704.00,   yield: 4.29, country: "CI", flag: "🇨🇮", sector: "Industrie",     quality: "satellite", status: "proposed" },
   { date: "2026-09-30", ticker: "SOGC",  name: "SOGB CI",                      amount: 501.60,   yield: 5.97, country: "CI", flag: "🇨🇮", sector: "Agro",          quality: "satellite", status: "proposed" },
@@ -30,7 +30,7 @@ export const DIVIDEND_CALENDAR = [
 
   // ── Dates à préciser (annoncé, non encore publié par la BRVM) ──
   { date: null,         ticker: "SHEC",  name: "Vivo Energy CI",               amount: 85.07,    yield: 4.04, country: "CI", flag: "🇨🇮", sector: "Distribution",  quality: "satellite", status: "proposed" },
-  { date: null,         ticker: "SVAC",  name: "Servair Abidjan CI",           amount: 201.608,  yield: 6.16, country: "CI", flag: "🇨🇮", sector: "Services",      quality: "satellite", status: "proposed" },
+  { date: "2026-09-30", ticker: "SVAC",  name: "Servair Abidjan CI",           amount: 124.00,   yield: 3.94, country: "CI", flag: "🇨🇮", sector: "Services",      quality: "satellite", status: "confirmed" },
   { date: null,         ticker: "SDCC",  name: "SODECI",                       amount: 462.00,   yield: 3.88, country: "CI", flag: "🇨🇮", sector: "Utilities",     quality: "core",      status: "proposed" },
   { date: null,         ticker: "TMCI",  name: "Tractafric Motors CI",         amount: 183.92,   yield: 4.00, country: "CI", flag: "🇨🇮", sector: "Distribution",  quality: "satellite", status: "proposed" },
   { date: null,         ticker: "CFAC",  name: "CFAO Motors CI",               amount: 55.44,    yield: 3.12, country: "CI", flag: "🇨🇮", sector: "Distribution",  quality: "satellite", status: "proposed" },
@@ -39,18 +39,18 @@ export const DIVIDEND_CALENDAR = [
   { date: null,         ticker: "SPHC",  name: "SAPH",                         amount: 430.32,   yield: 5.61, country: "CI", flag: "🇨🇮", sector: "Agro",          quality: "satellite", status: "proposed" },
   { date: null,         ticker: "NEIC",  name: "NEI CEDA CI",                  amount: 140.39,   yield: 5.85, country: "CI", flag: "🇨🇮", sector: "Distribution",  quality: "yieldTrap", status: "proposed" },
   { date: null,         ticker: "NSBC",  name: "NSIA Banque CI",               amount: 675.98,   yield: 3.42, country: "CI", flag: "🇨🇮", sector: "Banque",        quality: "satellite", status: "proposed" },
-  { date: null,         ticker: "SLBC",  name: "SOLIBRA",                      amount: 1871.76,  yield: 4.88, country: "CI", flag: "🇨🇮", sector: "Industrie",     quality: "excluded",  status: "proposed" },
+  { date: "2026-07-30", ticker: "SLBC",  name: "SOLIBRA",                      amount: 1871.76,  yield: 4.78, country: "CI", flag: "🇨🇮", sector: "Industrie",     quality: "excluded",  status: "paid" },
 ];
 
 // Sociétés ayant décidé de ne pas distribuer de dividende en 2026.
-export const NON_PAYERS = ["BOA Niger", "SETAO", "SUCRIVOIRE", "BERNABE", "ORAGROUP", "FILTISAC"];
+export const NON_PAYERS = ["BOA Niger", "SETAO", "SUCRIVOIRE", "BERNABE", "ORAGROUP", "FILTISAC", "UNIWAX"];
 
-// Statistiques de synthèse (Daba Intelligence — semaine du 22-26 juin 2026).
+// Statistiques de synthèse (Daba Intelligence — semaine du 13-17 juillet 2026).
 export const DIVIDEND_SUMMARY = {
   payingCompanies: 34,
   totalCompanies: 47,
-  averageYield: 4.85,
-  weekLabel: "Semaine du 22 – 26 juin 2026",
+  averageYield: 4.66,
+  weekLabel: "Semaine du 13 – 17 juillet 2026",
 };
 
 // Omaad palette (raw hex — safe for both SVG marks and DOM badges).

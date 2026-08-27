@@ -2,8 +2,12 @@ import React from "react";
 import { T, FONT_SANS, FONT_MONO } from "../../theme";
 import { fmtFCFAfull } from "../../utils/format";
 
-export default function ChartTooltip({ active, payload, label }) {
+const defaultFormatter = (v) =>
+  typeof v === "number" ? fmtFCFAfull(v) + " FCFA" : v;
+
+export default function ChartTooltip({ active, payload, label, formatter }) {
   if (!active || !payload?.length) return null;
+  const fmt = formatter ?? defaultFormatter;
   return (
     <div style={{
       background: "rgba(20, 19, 15, 0.96)",
@@ -25,7 +29,7 @@ export default function ChartTooltip({ active, payload, label }) {
           <div style={{ width: 8, height: 8, borderRadius: 2, background: p.color, flexShrink: 0 }} />
           <span>{p.name}:</span>
           <span className="tnum" style={{ color: "#FAF8F4", fontWeight: 600, fontFamily: FONT_MONO, marginLeft: "auto" }}>
-            {typeof p.value === "number" ? fmtFCFAfull(p.value) + " FCFA" : p.value}
+            {fmt(p.value)}
           </span>
         </div>
       ))}

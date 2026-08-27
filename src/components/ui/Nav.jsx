@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import {
-  Coins, Sparkles, BookOpen, Gauge, CalendarDays, Shield, Sun, Moon,
+  Coins, Sparkles, BookOpen, Gauge, CalendarDays, Shield, Sun, Moon, Eye, EyeOff,
 } from "lucide-react";
 import { T, FONT_SANS, FONT_MONO, R, alpha } from "../../theme";
 import useResponsive from "../../hooks/useResponsive";
 import useTheme from "../../hooks/useTheme";
+import usePrivacy from "../../hooks/usePrivacy";
 
 const TABS = [
   { id: "overview",  label: "Dashboard",      icon: Gauge },
@@ -38,6 +39,7 @@ export default function Nav({ tab, setTab }) {
   const compact = isMobile || isTablet;
   const [status, setStatus] = useState(getBrvmStatus);
   const { isDark, toggle } = useTheme();
+  const { isPrivate, toggle: togglePrivacy } = usePrivacy();
 
   useEffect(() => {
     const id = setInterval(() => setStatus(getBrvmStatus()), 30_000);
@@ -103,6 +105,24 @@ export default function Nav({ tab, setTab }) {
               }}>{status.sub}</span>
             </div>
           )}
+          <button
+            onClick={togglePrivacy}
+            aria-label={isPrivate ? "Afficher les montants" : "Masquer les montants"}
+            title={isPrivate ? "Afficher les montants" : "Masquer les montants (mode vidéo)"}
+            style={{
+              width: 34, height: 34, borderRadius: R.input,
+              border: `1px solid ${isPrivate ? T.amber : T.border}`,
+              background: isPrivate ? T.amberSoft : T.bgCard,
+              color: isPrivate ? T.amber : T.inkMuted,
+              display: "grid", placeItems: "center", cursor: "pointer",
+              transition: "color 0.15s, border-color 0.15s, background 0.15s",
+              flexShrink: 0,
+            }}
+            onMouseEnter={e => { if (!isPrivate) { e.currentTarget.style.color = T.ink; e.currentTarget.style.borderColor = T.inkDim; } }}
+            onMouseLeave={e => { if (!isPrivate) { e.currentTarget.style.color = T.inkMuted; e.currentTarget.style.borderColor = T.border; } }}
+          >
+            {isPrivate ? <EyeOff size={16} strokeWidth={2.2} /> : <Eye size={16} strokeWidth={2.2} />}
+          </button>
           <button
             onClick={toggle}
             aria-label={isDark ? "Passer en clair" : "Passer en sombre"}

@@ -1,11 +1,11 @@
 // role : "core" (jamais vendu, dilution only) · "watchlist" (entrée conditionnelle prix)
 //        "satellite" (pool opportuniste, critère de sortie écrit) · "horsPlan" (écartée de la v2)
 export const STOCKS = [
-  { ticker: "SNTS",  name: "Sonatel",       sector: "Télécoms",      country: "Sénégal",     flag: "🇸🇳", price: 29500, pe: 7.0,  yield: 5.9, risk: 4, conviction: 25, moat: "Fort",   fcpOverlap: "Complém.", change: -1.7,  phaseEntry: 1, role: "core" },
-  { ticker: "ORAC",  name: "Orange CI",     sector: "Télécoms",      country: "Côte d'Iv.",  flag: "🇨🇮", price: 16300, pe: 9.5,  yield: 4.2, risk: 4, conviction: 20, moat: "Fort",   fcpOverlap: "Complém.", change: 6.7,   phaseEntry: 1, role: "core" },
-  { ticker: "CIEC",  name: "CIE",           sector: "Utilities",     country: "Côte d'Iv.",  flag: "🇨🇮", price: 5485,  pe: 11.0, yield: 3.9, risk: 3, conviction: 15, moat: "Fort",   fcpOverlap: "Complém.", change: 25.8,  phaseEntry: 1, role: "core" },
+  { ticker: "SNTS",  name: "Sonatel",       sector: "Télécoms",      country: "Sénégal",     flag: "🇸🇳", price: 34600, pe: 7.6,  yield: 5.03, risk: 4, conviction: 25, moat: "Fort",   fcpOverlap: "Complém.", change: 18.3,  phaseEntry: 1, role: "core" },
+  { ticker: "ORAC",  name: "Orange CI",     sector: "Télécoms",      country: "Côte d'Iv.",  flag: "🇨🇮", price: 20795, pe: 12.2, yield: 3.39, risk: 4, conviction: 20, moat: "Fort",   fcpOverlap: "Complém.", change: 26.6,  phaseEntry: 1, role: "core" },
+  { ticker: "CIEC",  name: "CIE",           sector: "Utilities",     country: "Côte d'Iv.",  flag: "🇨🇮", price: 6970,  pe: 14.8, yield: 2.95, risk: 3, conviction: 15, moat: "Fort",   fcpOverlap: "Complém.", change: 104.3, phaseEntry: 1, role: "core" },
   { ticker: "SDCC",  name: "SODECI",        sector: "Utilities",     country: "Côte d'Iv.",  flag: "🇨🇮", price: 11900, pe: 10.0, yield: 3.88, risk: 3, conviction: 7,  moat: "Fort",   fcpOverlap: "Complém.", change: 1.4,   phaseEntry: 2, role: "core" },
-  { ticker: "BOAB",  name: "BOA Bénin",     sector: "Banque",        country: "Bénin",       flag: "🇧🇯", price: 9050,  pe: 5.0,  yield: 6.43,risk: 4, conviction: 18, moat: "Modéré", fcpOverlap: "Partiel",  change: -5.4,  phaseEntry: 1, role: "core" },
+  { ticker: "BOAB",  name: "BOA Bénin",     sector: "Banque",        country: "Bénin",       flag: "🇧🇯", price: 10350, pe: 5.9,  yield: 5.65, risk: 4, conviction: 18, moat: "Modéré", fcpOverlap: "Partiel",  change: 15.4,  phaseEntry: 1, role: "core" },
   { ticker: "BOAS",  name: "BOA Sénégal",   sector: "Banque",        country: "Sénégal",     flag: "🇸🇳", price: 7290,  pe: 5.5,  yield: 6.17, risk: 5, conviction: 8,  moat: "Modéré", fcpOverlap: "Partiel",  change: 12.4,  phaseEntry: 2, role: "horsPlan", roleNote: "Hors plan v2 — le pilier bancaire du cœur est BOAB ; doublonner une BOA n'apporte pas de diversification réelle." },
   { ticker: "SGBC",  name: "SGBCI",         sector: "Banque",        country: "Côte d'Iv.",  flag: "🇨🇮", price: 39000, pe: 9.0,  yield: 5.88, risk: 4, conviction: 12, moat: "Modéré", fcpOverlap: "Partiel",  change: 11.3,  phaseEntry: 2, role: "watchlist", roleNote: "Écartée en juillet 2026 à 39 000 F (trop chère). Entrée uniquement si PE ≤ 8 ou yield ≥ 6,5%." },
   { ticker: "ETIT",  name: "Ecobank ETI",   sector: "Banque pan-AF", country: "Togo",        flag: "🇹🇬", price: 37,    pe: 6.5,  yield: 2.43, risk: 6, conviction: 6,  moat: "Modéré", fcpOverlap: "Partiel",  change: 93.3,  phaseEntry: 4, role: "horsPlan", roleNote: "Écartée de la v2 — yield 2,4%, +93% déjà fait, gouvernance fragile : ne sert ni le rendement ni la qualité." },
@@ -118,27 +118,27 @@ export const PHASE_CONFIG = [
   },
 ];
 
-// Échelle de milestones dividendes (nets d'IRVM 15%). Capital requis
-// calculé au yield net du cœur (~4,4%) — recalculé dynamiquement dans
-// l'app via computeDividendTargets.
+// Échelle de milestones dividendes (nets d'IRVM 15%). Valeurs en F/mois.
+// Capital requis calculé dynamiquement via weightedYieldNet × 12 dans
+// l'app (StrategyTab).
 export const MILESTONE_LADDER = [
   { target: 100_000,   label: "Milestone #1", note: "Le premier vrai revenu passif" },
-  { target: 300_000,   label: "Milestone #2", note: "Les dividendes paient un mois de DCA" },
-  { target: 600_000,   label: "Milestone #3", note: "Le DRIP devient un 13e mois complet" },
-  { target: 1_200_000, label: "Milestone #4", note: "100k F/mois — revenu passif significatif" },
+  { target: 250_000,   label: "Milestone #2", note: "Les dividendes paient 3 mois de DCA" },
+  { target: 500_000,   label: "Milestone #3", note: "Revenu passif = 6 mois de DCA couverts" },
+  { target: 1_000_000, label: "Milestone #4", note: "Liberté financière — 1M F/mois" },
 ];
 
 export const CURRENT_HOLDINGS = [
   { ticker: "SNTS", qty: 4,  invested: 117042, avgPrice: 29260 },
   { ticker: "CIEC", qty: 21, invested: 71669,  avgPrice: 3412  },
-  { ticker: "BOAB", qty: 6,  invested: 53350,  avgPrice: 8891  },
-  { ticker: "ORAC", qty: 5,  invested: 81028,  avgPrice: 16205 },
+  { ticker: "BOAB", qty: 11, invested: 98680,  avgPrice: 8970  },
+  { ticker: "ORAC", qty: 7,  invested: 115021, avgPrice: 16431 },
 ];
 
 export const CURRENT_HOLDINGS_TOTAL = CURRENT_HOLDINGS.reduce((s, h) => s + h.invested, 0);
 
-// Espèces disponibles sur le compte titres (snapshot relevé courtier).
-export const CASH = 4479;
+// Espèces : non visibles sur le relevé titres du 27/08/2026.
+export const CASH = 0;
 
 // Stable order of sectors → index into the Omaad chart categorical palette
 // (see chartTokens().categorical). Charts read this so donut/bar slices
@@ -165,11 +165,11 @@ export const FCP_BENCHMARK = {
   name: "FCP BAM WURUS",
   type: "OPCVM",
   manager: "BAM (Banque Atlantique Asset Management)",
-  shares: 11.81,
+  shares: 11.81, // le relevé affiche 11 (entier) ; 258 680 / 21 895 ≈ 11,81 parts
   costPerShare: 16928,
   invested: 200000,
-  navPerShare: 19669,
-  value: 232375,
-  snapshotDate: "2026-07-07",
+  navPerShare: 21895,
+  value: 258680,
+  snapshotDate: "2026-08-27",
   frozen: true,
 };

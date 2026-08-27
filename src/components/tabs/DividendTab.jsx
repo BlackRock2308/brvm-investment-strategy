@@ -44,8 +44,26 @@ export default function DividendTab() {
   }), [divInitial, divMonthly, divYears, divYield, divGrowth, dripYears, taxRate]);
 
   const phase1 = PHASE_CONFIG[0];
+
+  const yieldBreakdown = useMemo(() => {
+    const stockMap = Object.fromEntries(STOCKS.map(s => [s.ticker, s]));
+    return phase1.tickers.map(ticker => {
+      const s = stockMap[ticker];
+      const weight = phase1.weights[ticker];
+      const contribution = s ? (weight / 100) * s.yield : 0;
+      return {
+        ticker,
+        name: s?.name || ticker,
+        yieldGross: s?.yield || 0,
+        weight,
+        contribution: +contribution.toFixed(3),
+      };
+    });
+  }, []);
+
+  // Targets are monthly — multiply by 12 so the engine (annual-based) calculates the right capital
   const milestones = useMemo(() => computeDividendTargets({
-    targets: DIVIDEND_TARGETS,
+    targets: DIVIDEND_TARGETS.map(t => t * 12),
     stocks: STOCKS,
     phaseWeights: phase1.weights,
     currentHoldings: CURRENT_HOLDINGS,
@@ -69,13 +87,20 @@ export default function DividendTab() {
         gap: 16, marginBottom: 16,
       }}>
         <Card title="Paramètres" icon={Coins}>
-          <Slider label="Capital initial" value={divInitial} setValue={setDivInitial} min={0} max={5_000_000} step={50000} suffix=" F" accent={T.blue}/>
-          <Slider label="DCA mensuel" value={divMonthly} setValue={setDivMonthly} min={25000} max={250000} step={5000} suffix=" F" accent={T.blue}/>
-          <Slider label="Horizon" value={divYears} setValue={setDivYears} min={5} max={25} step={1} suffix=" ans" accent={T.chart3}/>
-          <Slider label="Yield initial moyen" value={divYield} setValue={setDivYield} min={4} max={12} step={0.5} suffix=" %" accent={T.green}/>
-          <Slider label="Croissance div./an" value={divGrowth} setValue={setDivGrowth} min={0} max={15} step={1} suffix=" %" accent={T.green}/>
-          <Slider label="Années DRIP actif" value={dripYears} setValue={setDripYears} min={0} max={divYears} step={1} suffix=" ans" accent={T.chart3}/>
-          <Slider label="Fiscalité totale" value={taxRate} setValue={setTaxRate} min={10} max={40} step={1} suffix=" %" accent={T.red}/>
+          <Slider label="Capital initial" value={divInitial} setValue={setDivInitial} min={0} max={5_000_000} step={50000} suffix=" F CFA" accent={T.blue}
+            hint="Montant déjà investi au départ. Si tu pars de zéro, laisse à 0. Si tu as un portefeuille existant, saisis sa valeur actuelle."/>
+          <Slider label="DCA mensuel" value={divMonthly} setValue={setDivMonthly} min={25000} max={250000} step={5000} suffix=" F CFA" accent={T.blue}
+            hint="Montant fixe versé chaque mois (Dollar-Cost Averaging). Plus il est élevé, plus ton capital croît vite indépendamment des dividendes."/>
+          <Slider label="Horizon" value={divYears} setValue={setDivYears} min={5} max={25} step={1} suffix=" ans" accent={T.chart3}
+            hint="Durée totale de la simulation. Le graphique affiche l'évolution de la valeur du portefeuille et des dividendes nets sur cette période."/>
+          <Slider label="Yield initial moyen" value={divYield} setValue={setDivYield} min={4} max={12} step={0.5} suffix=" %" accent={T.green}
+            hint="Rendement dividende brut annuel moyen (dividende versé ÷ prix). À la BRVM, les blue chips défensives se situent entre 4 % et 8 %."/>
+          <Slider label="Croissance div./an" value={divGrowth} setValue={setDivGrowth} min={0} max={15} step={1} suffix=" %" accent={T.green}
+            hint="Hausse annuelle du yield au fil du temps. 0 % = dividendes stables. 5 % = dividendes qui doublent en ~14 ans. Reflète la croissance des sociétés."/>
+          <Slider label="Années DRIP actif" value={dripYears} setValue={setDripYears} min={0} max={divYears} step={1} suffix=" ans" accent={T.chart3}
+            hint="Nombre d'années où les dividendes perçus sont réinvestis automatiquement (DRIP). Au-delà, ils deviennent un revenu passif conservé. Effet composé maximal quand DRIP = Horizon."/>
+          <Slider label="Fiscalité totale" value={taxRate} setValue={setTaxRate} min={10} max={40} step={1} suffix=" %" accent={T.red}
+            hint="Taux d'imposition sur les dividendes. À la BRVM, l'IRVM est de 15 %. Ajuste si tu anticipes d'autres charges fiscales dans ton pays de résidence."/>
         </Card>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
@@ -84,8 +109,8 @@ export default function DividendTab() {
             gridTemplateColumns: cols("1fr", "repeat(3, 1fr)", "repeat(3, 1fr)"),
             gap: isMobile ? 10 : 14,
           }}>
-            <MetricCard label="Valeur portefeuille" value={fmtFCFA(finalDiv?.value || 0)} unit="F" deltaLabel={`à ${divYears} ans`} icon={Briefcase} color={T.blue}/>
-            <MetricCard label="Dividendes nets/an" value={fmtFCFA(finalDiv?.dividendsNet || 0)} unit="F" deltaLabel={`fisc. ${taxRate}%`} icon={Coins} color={T.green}/>
+            <MetricCard label="Valeur portefeuille" value={fmtFCFA(finalDiv?.value || 0)} unit="F CFA" deltaLabel={`à ${divYears} ans`} icon={Briefcase} color={T.blue}/>
+            <MetricCard label="Dividendes nets/an" value={fmtFCFA(finalDiv?.dividendsNet || 0)} unit="F CFA" deltaLabel={`fisc. ${taxRate}%`} icon={Coins} color={T.green}/>
             <div style={{
               background: T.bgDark,
               border: `1px solid ${T.bgDark}`,
@@ -104,7 +129,7 @@ export default function DividendTab() {
                   {fmtFCFA(passiveMonthly)}
                 </div>
                 <div style={{ fontFamily: FONT_MONO, fontSize: 11, color: "#9C988C", marginTop: 4 }}>
-                  F/mois · ≈ {fmtEUR(passiveMonthly * 12) / 12 | 0} €/mois
+                  F CFA/mois · ≈ {fmtEUR(passiveMonthly * 12) / 12 | 0} €/mois
                 </div>
               </div>
             </div>
@@ -138,7 +163,7 @@ export default function DividendTab() {
         <PageHeader
           eyebrow="Objectifs · dividendes"
           title="Quel capital pour vos objectifs de revenus passifs ?"
-          description="Simulation basée sur l'allocation Phase 1, les rendements actuels et votre portefeuille existant."
+          description="Simulation basée sur l'allocation Phase 1, les rendements actuels et votre portefeuille existant. Les objectifs sont exprimés en revenus nets par mois."
         />
 
         {/* Current position banner */}
@@ -154,21 +179,21 @@ export default function DividendTab() {
               padding: isMobile ? 14 : 18,
             }}>
               <div style={{ fontFamily: FONT_SANS, fontSize: 11, color: T.inkMuted, fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.02em", marginBottom: 6 }}>Position actuelle</div>
-              <div style={{ fontFamily: FONT_SANS, fontSize: isMobile ? 20 : 24, fontWeight: 700, color: T.ink, letterSpacing: "-0.02em" }}>{fmtFCFAfull(milestones[0].currentValue)} F</div>
+              <div style={{ fontFamily: FONT_SANS, fontSize: isMobile ? 20 : 24, fontWeight: 700, color: T.ink, letterSpacing: "-0.02em" }}>{fmtFCFAfull(milestones[0].currentValue)} F CFA</div>
             </div>
             <div style={{
               background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 12,
               padding: isMobile ? 14 : 18,
             }}>
-              <div style={{ fontFamily: FONT_SANS, fontSize: 11, color: T.inkMuted, fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.02em", marginBottom: 6 }}>Dividendes bruts/an</div>
-              <div style={{ fontFamily: FONT_SANS, fontSize: isMobile ? 20 : 24, fontWeight: 700, color: T.chart3, letterSpacing: "-0.02em" }}>{fmtFCFAfull(milestones[0].currentDivGross)} F</div>
+              <div style={{ fontFamily: FONT_SANS, fontSize: 11, color: T.inkMuted, fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.02em", marginBottom: 6 }}>Dividendes bruts/mois</div>
+              <div style={{ fontFamily: FONT_SANS, fontSize: isMobile ? 20 : 24, fontWeight: 700, color: T.chart3, letterSpacing: "-0.02em" }}>{fmtFCFAfull(Math.round(milestones[0].currentDivGross / 12))} F CFA</div>
             </div>
             <div style={{
               background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 12,
               padding: isMobile ? 14 : 18,
             }}>
-              <div style={{ fontFamily: FONT_SANS, fontSize: 11, color: T.inkMuted, fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.02em", marginBottom: 6 }}>Dividendes nets/an</div>
-              <div style={{ fontFamily: FONT_SANS, fontSize: isMobile ? 20 : 24, fontWeight: 700, color: T.green, letterSpacing: "-0.02em" }}>{fmtFCFAfull(milestones[0].currentDivNet)} F</div>
+              <div style={{ fontFamily: FONT_SANS, fontSize: 11, color: T.inkMuted, fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.02em", marginBottom: 6 }}>Dividendes nets/mois</div>
+              <div style={{ fontFamily: FONT_SANS, fontSize: isMobile ? 20 : 24, fontWeight: 700, color: T.green, letterSpacing: "-0.02em" }}>{fmtFCFAfull(Math.round(milestones[0].currentDivNet / 12))} F CFA</div>
             </div>
             <div style={{
               background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 12,
@@ -188,9 +213,116 @@ export default function DividendTab() {
         }}>
           <Card title="Paramètres objectifs" icon={Target} padding={20}>
             <Slider label="Fiscalité IRVM" value={objTaxRate} setValue={setObjTaxRate} min={10} max={30} step={1} suffix=" %" accent={T.red}/>
-            <Slider label="DCA mensuel" value={objDca} setValue={setObjDca} min={25000} max={500000} step={5000} suffix=" F" accent={T.blue}/>
+            <Slider label="DCA mensuel" value={objDca} setValue={setObjDca} min={25000} max={500000} step={5000} suffix=" F CFA" accent={T.blue}/>
           </Card>
         </div>
+
+        {/* ── Méthodologie ── */}
+        {milestones[0] && (() => {
+          const grossTotal = yieldBreakdown.reduce((s, r) => s + r.contribution, 0);
+          const netTotal = milestones[0].weightedYieldNet;
+          const exampleTarget = DIVIDEND_TARGETS[0]; // 100 000 F CFA/mois
+          const exampleCapital = milestones[0].requiredCapital;
+          return (
+            <Card title="Méthodologie du calcul" icon={Target} style={{ marginBottom: 24 }}>
+              {/* Formula */}
+              <div style={{
+                padding: "14px 16px", borderRadius: 10, marginBottom: 16,
+                background: T.bgSubtle, border: `1px solid ${T.border}`,
+              }}>
+                <div style={{ fontFamily: FONT_SANS, fontSize: 12, fontWeight: 700, color: T.ink, marginBottom: 8 }}>
+                  Formule
+                </div>
+                <div style={{
+                  fontFamily: FONT_MONO, fontSize: isMobile ? 11 : 13, color: T.blue,
+                  lineHeight: 1.8, letterSpacing: "0.01em",
+                }}>
+                  Capital requis = (Objectif mensuel × 12) ÷ Yield net pondéré Phase 1
+                </div>
+                <div style={{ fontFamily: FONT_MONO, fontSize: 11, color: T.inkMuted, marginTop: 6 }}>
+                  Exemple : ({fmtFCFAfull(exampleTarget)} F × 12) ÷ {netTotal}%
+                  {" = "}<strong style={{ color: T.ink }}>{fmtFCFAfull(Math.round(exampleCapital))} F CFA</strong>
+                </div>
+              </div>
+
+              {/* Yield breakdown table */}
+              <div style={{ fontFamily: FONT_SANS, fontSize: 12, fontWeight: 700, color: T.ink, marginBottom: 10 }}>
+                Yield pondéré — allocation Phase 1 (fiscalité IRVM {objTaxRate}%)
+              </div>
+              <div style={{ overflowX: "auto" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", fontFamily: FONT_SANS, fontSize: 12 }}>
+                  <thead>
+                    <tr>
+                      {["Ligne", "Société", "Yield brut", "Poids Phase 1", "Contribution brute"].map((h, i) => (
+                        <th key={h} style={{
+                          padding: "8px 12px",
+                          textAlign: i >= 2 ? "right" : "left",
+                          fontFamily: FONT_SANS, fontSize: 11, color: T.inkMuted,
+                          fontWeight: 600, letterSpacing: "0.02em", textTransform: "uppercase",
+                          borderBottom: `1px solid ${T.border}`, whiteSpace: "nowrap",
+                        }}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {yieldBreakdown.map(r => (
+                      <tr key={r.ticker}>
+                        <td style={{ padding: "9px 12px", borderBottom: `1px solid ${T.borderSoft}` }}>
+                          <span style={{
+                            fontFamily: FONT_MONO, fontSize: 12, fontWeight: 700, color: T.blue,
+                            background: T.blueSoft, padding: "2px 7px", borderRadius: 5,
+                          }}>{r.ticker}</span>
+                        </td>
+                        <td style={{ padding: "9px 12px", color: T.inkSoft, borderBottom: `1px solid ${T.borderSoft}` }}>{r.name}</td>
+                        <td style={{ padding: "9px 12px", textAlign: "right", fontFamily: FONT_MONO, color: T.green, fontWeight: 600, borderBottom: `1px solid ${T.borderSoft}` }}>
+                          {r.yieldGross.toString().replace(".", ",")}%
+                        </td>
+                        <td style={{ padding: "9px 12px", textAlign: "right", fontFamily: FONT_MONO, color: T.inkSoft, borderBottom: `1px solid ${T.borderSoft}` }}>
+                          {r.weight}%
+                        </td>
+                        <td style={{ padding: "9px 12px", textAlign: "right", fontFamily: FONT_MONO, fontWeight: 600, color: T.ink, borderBottom: `1px solid ${T.borderSoft}` }}>
+                          {(r.weight / 100 * r.yieldGross).toFixed(3).replace(".", ",")}%
+                        </td>
+                      </tr>
+                    ))}
+                    {/* Gross total */}
+                    <tr style={{ background: T.bgSubtle }}>
+                      <td colSpan={4} style={{ padding: "9px 12px", fontFamily: FONT_SANS, fontWeight: 700, color: T.ink }}>
+                        Yield brut pondéré
+                      </td>
+                      <td style={{ padding: "9px 12px", textAlign: "right", fontFamily: FONT_MONO, fontWeight: 700, color: T.chart3 }}>
+                        {grossTotal.toFixed(3).replace(".", ",")}%
+                      </td>
+                    </tr>
+                    {/* Net total */}
+                    <tr style={{ background: T.bgSubtle }}>
+                      <td colSpan={4} style={{ padding: "9px 12px", fontFamily: FONT_SANS, fontWeight: 700, color: T.ink }}>
+                        Yield net pondéré (après IRVM {objTaxRate}%)
+                      </td>
+                      <td style={{ padding: "9px 12px", textAlign: "right", fontFamily: FONT_MONO, fontWeight: 700, color: T.green, fontSize: 14 }}>
+                        {netTotal.toString().replace(".", ",")}%
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Hypothèses */}
+              <div style={{
+                marginTop: 14, padding: "12px 16px", borderRadius: 10,
+                background: T.bgSubtle, border: `1px solid ${T.borderSoft}`,
+                fontFamily: FONT_SANS, fontSize: 11, color: T.inkMuted, lineHeight: 1.65,
+              }}>
+                <strong style={{ color: T.ink }}>Hypothèses :</strong>
+                {" "}Les cours et yields utilisés sont ceux du snapshot courant dans{" "}
+                <span style={{ fontFamily: FONT_MONO, fontSize: 10 }}>stocks.js</span>.
+                Le capital requis suppose que le portefeuille est déjà composé à 100% selon les poids Phase 1.
+                La progression réelle est calculée sur la valorisation actuelle de tes 4 lignes (SNTS, ORAC, BOAB, CIEC).
+                Modifier la fiscalité IRVM via le slider met à jour tous les chiffres dynamiquement.
+              </div>
+            </Card>
+          );
+        })()}
 
         {/* Milestone cards */}
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
@@ -206,18 +338,17 @@ export default function DividendTab() {
                 >
                   <div style={{
                     display: "grid",
-                    gridTemplateColumns: isMobile ? "1fr" : "200px 1fr 1fr 1fr auto",
+                    gridTemplateColumns: isMobile ? "1fr" : "200px 1fr 1fr auto",
                     gap: isMobile ? 12 : 20,
                     alignItems: "center",
                   }}>
                     {/* Target */}
                     <div>
-                      <div style={{ fontFamily: FONT_SANS, fontSize: 11, color: T.inkMuted, fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.02em", marginBottom: 4 }}>Objectif net/an</div>
+                      <div style={{ fontFamily: FONT_SANS, fontSize: 11, color: T.inkMuted, fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.02em", marginBottom: 4 }}>Objectif net/mois</div>
                       <div style={{ fontFamily: FONT_SANS, fontSize: isMobile ? 22 : 26, fontWeight: 700, color, letterSpacing: "-0.03em", lineHeight: 1 }}>
-                        {fmtFCFAfull(m.target)} F
-                      </div>
+                        {fmtFCFAfull(m.monthlyEquiv)} F CFA                      </div>
                       <div style={{ fontFamily: FONT_MONO, fontSize: 11, color: T.inkMuted, marginTop: 4 }}>
-                        {fmtFCFAfull(m.monthlyEquiv)} F/mois · ≈ {fmtEUR(m.target)} €/an
+                        {fmtFCFAfull(m.target)} F CFA/an · ≈ {fmtEUR(m.monthlyEquiv)} €/mois
                       </div>
                     </div>
 
@@ -225,24 +356,9 @@ export default function DividendTab() {
                     <div>
                       <div style={{ fontFamily: FONT_SANS, fontSize: 11, color: T.inkMuted, fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.02em", marginBottom: 4 }}>Capital requis</div>
                       <div style={{ fontFamily: FONT_SANS, fontSize: isMobile ? 18 : 22, fontWeight: 700, color: T.ink, letterSpacing: "-0.02em" }}>
-                        {fmtFCFA(m.requiredCapital)} F
-                      </div>
+                        {fmtFCFA(m.requiredCapital)} F CFA                      </div>
                       <div style={{ fontFamily: FONT_MONO, fontSize: 11, color: T.amber, marginTop: 4 }}>
                         +{fmtFCFAfull(m.additionalCapital)} F à investir
-                      </div>
-                    </div>
-
-                    {/* Time estimate */}
-                    <div>
-                      <div style={{ fontFamily: FONT_SANS, fontSize: 11, color: T.inkMuted, fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.02em", marginBottom: 4 }}>Durée estimée</div>
-                      <div style={{ fontFamily: FONT_SANS, fontSize: isMobile ? 18 : 22, fontWeight: 700, color: T.ink, letterSpacing: "-0.02em" }}>
-                        {m.fullYears > 0 ? `${m.fullYears} an${m.fullYears > 1 ? "s" : ""}` : ""}
-                        {m.fullYears > 0 && m.remainingMonths > 0 ? " " : ""}
-                        {m.remainingMonths > 0 ? `${m.remainingMonths} mois` : ""}
-                        {m.fullYears === 0 && m.remainingMonths === 0 ? "< 1 mois" : ""}
-                      </div>
-                      <div style={{ fontFamily: FONT_MONO, fontSize: 11, color: T.inkMuted, marginTop: 4 }}>
-                        DCA {fmtFCFAfull(objDca)} F/mois
                       </div>
                     </div>
 
@@ -286,7 +402,7 @@ export default function DividendTab() {
                       }}>
                         <thead>
                           <tr style={{ borderBottom: `2px solid ${T.border}` }}>
-                            {["Ticker", "Poids", "Actions cible", "Détenues", "À acheter", "Capital", "Div. net/an"].map(h => (
+                            {["Ticker", "Poids", "Actions cible", "Détenues", "À acheter", "Capital", "Div. net/mois"].map(h => (
                               <th key={h} style={{
                                 padding: "10px 12px", textAlign: "left",
                                 fontWeight: 600, color: T.inkMuted, fontSize: 11,
@@ -314,11 +430,9 @@ export default function DividendTab() {
                                 {b.toBuy > 0 ? `+${b.toBuy}` : "✓"}
                               </td>
                               <td style={{ padding: "10px 12px", fontFamily: FONT_MONO, fontSize: 12 }}>
-                                {fmtFCFAfull(b.capitalTarget)} F
-                              </td>
+                                {fmtFCFAfull(b.capitalTarget)} F CFA                              </td>
                               <td style={{ padding: "10px 12px", fontFamily: FONT_MONO, fontSize: 12, color: T.green, fontWeight: 600 }}>
-                                {fmtFCFAfull(b.annualDivNet)} F
-                              </td>
+                                {fmtFCFAfull(Math.round(b.annualDivNet / 12))} F CFA                              </td>
                             </tr>
                           ))}
                           <tr style={{ background: T.bgSubtle }}>
@@ -333,11 +447,9 @@ export default function DividendTab() {
                               +{m.breakdown.reduce((s, b) => s + b.toBuy, 0)}
                             </td>
                             <td style={{ padding: "10px 12px", fontFamily: FONT_MONO, fontWeight: 700 }}>
-                              {fmtFCFAfull(m.requiredCapital)} F
-                            </td>
+                              {fmtFCFAfull(m.requiredCapital)} F CFA                            </td>
                             <td style={{ padding: "10px 12px", fontFamily: FONT_MONO, fontWeight: 700, color: T.green }}>
-                              {fmtFCFAfull(m.breakdown.reduce((s, b) => s + b.annualDivNet, 0))} F
-                            </td>
+                              {fmtFCFAfull(Math.round(m.breakdown.reduce((s, b) => s + b.annualDivNet, 0) / 12))} F CFA                            </td>
                           </tr>
                         </tbody>
                       </table>

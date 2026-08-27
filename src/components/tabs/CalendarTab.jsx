@@ -87,7 +87,7 @@ function ScatterTooltip({ active, payload }) {
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, fontSize: 11 }}>
         <div><span style={{ color: T.inkMuted }}>Date :</span> <strong>{fmtDateShort(d.date)}</strong></div>
         <div><span style={{ color: T.inkMuted }}>Yield :</span> <strong style={{ color: T.green }}>{d.yield}%</strong></div>
-        <div><span style={{ color: T.inkMuted }}>Montant :</span> <strong>{fmtFCFAfull(d.amount)} F</strong></div>
+        <div><span style={{ color: T.inkMuted }}>Montant :</span> <strong>{fmtFCFAfull(d.amount)} F CFA</strong></div>
         <div><span style={{ color: T.inkMuted }}>Qualité :</span> <Pill color={meta.color} bg={meta.bg}>{meta.label}</Pill></div>
       </div>
       {d.date && (
@@ -285,7 +285,7 @@ export default function CalendarTab() {
                     <td style={{ padding: "12px 10px", borderBottom: `1px solid ${T.borderSoft}` }}>
                       <Pill color={SECTOR_COLORS[d.sector] || T.inkMuted} bg={alpha(SECTOR_COLORS[d.sector] || T.inkMuted, 0.09)}>{d.sector}</Pill>
                     </td>
-                    <td style={{ padding: "12px 10px", fontFamily: FONT_MONO, color: T.inkSoft, borderBottom: `1px solid ${T.borderSoft}`, textAlign: "right", whiteSpace: "nowrap" }}>{fmtFCFAfull(d.amount)} F</td>
+                    <td style={{ padding: "12px 10px", fontFamily: FONT_MONO, color: T.inkSoft, borderBottom: `1px solid ${T.borderSoft}`, textAlign: "right", whiteSpace: "nowrap" }}>{fmtFCFAfull(d.amount)} F CFA</td>
                     <td style={{ padding: "12px 10px", fontFamily: FONT_MONO, color: T.green, fontWeight: 700, borderBottom: `1px solid ${T.borderSoft}`, textAlign: "right" }}>{d.yield}%</td>
                     <td style={{ padding: "12px 10px", fontFamily: FONT_MONO, fontSize: 11, color: d.date ? T.inkSoft : T.inkDim, borderBottom: `1px solid ${T.borderSoft}`, whiteSpace: "nowrap" }}>{fmtWindow(d.date)}</td>
                     <td style={{ padding: "12px 10px", borderBottom: `1px solid ${T.borderSoft}` }}>

@@ -1,15 +1,57 @@
-import React from "react";
+import React, { useState } from "react";
 import { T, FONT_SANS, FONT_MONO } from "../../theme";
 import { fmtFCFAfull } from "../../utils/format";
 
-export default function Slider({ label, value, setValue, min, max, step = 1, suffix, accent = T.blue, format }) {
+export default function Slider({ label, value, setValue, min, max, step = 1, suffix, accent = T.blue, format, hint }) {
+  const [showHint, setShowHint] = useState(false);
   const pct = ((value - min) / (max - min)) * 100;
   return (
     <div style={{ marginBottom: 20 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 8 }}>
-        <div style={{
-          fontFamily: FONT_SANS, fontSize: 13, color: T.inkSoft, fontWeight: 500,
-        }}>{label}</div>
+        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+          <div style={{
+            fontFamily: FONT_SANS, fontSize: 13, color: T.inkSoft, fontWeight: 500,
+          }}>{label}</div>
+          {hint && (
+            <div style={{ position: "relative", display: "inline-flex" }}>
+              <div
+                onMouseEnter={() => setShowHint(true)}
+                onMouseLeave={() => setShowHint(false)}
+                style={{
+                  width: 15, height: 15, borderRadius: "50%",
+                  background: T.bgSoft, border: `1px solid ${T.borderSoft}`,
+                  display: "grid", placeItems: "center", cursor: "default",
+                  fontFamily: FONT_SANS, fontSize: 9, fontWeight: 700,
+                  color: T.inkDim, lineHeight: 1, userSelect: "none",
+                }}
+              >
+                ?
+              </div>
+              {showHint && (
+                <div style={{
+                  position: "absolute", bottom: "calc(100% + 6px)", left: "50%",
+                  transform: "translateX(-50%)",
+                  width: 240, padding: "10px 12px",
+                  background: T.bgDark, borderRadius: 10,
+                  border: `1px solid rgba(255,255,255,0.10)`,
+                  boxShadow: "0 8px 24px rgba(0,0,0,0.22)",
+                  fontFamily: FONT_SANS, fontSize: 11, color: "#DEDAD0",
+                  lineHeight: 1.65, zIndex: 50, pointerEvents: "none",
+                }}>
+                  {hint}
+                  <div style={{
+                    position: "absolute", bottom: -5, left: "50%",
+                    transform: "translateX(-50%) rotate(45deg)",
+                    width: 8, height: 8,
+                    background: T.bgDark,
+                    border: `1px solid rgba(255,255,255,0.10)`,
+                    borderTop: "none", borderLeft: "none",
+                  }} />
+                </div>
+              )}
+            </div>
+          )}
+        </div>
         <div style={{
           fontFamily: FONT_MONO, fontSize: 14, fontWeight: 600, color: accent,
         }}>

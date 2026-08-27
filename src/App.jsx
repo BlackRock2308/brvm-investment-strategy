@@ -67,7 +67,7 @@ export default function App() {
           <strong style={{ color: T.ink }}>Omaad Capital</strong> · Omaad Intelligence Platform
         </div>
         <div style={{ fontFamily: FONT_MONO, fontSize: 11, color: T.inkDim }}>
-          Sources : BOC BRVM · SikaFinance · FluxBourse · UMOA-Titres · avril 2026
+          Sources : BOC BRVM · SikaFinance · FluxBourse · UMOA-Titres · août 2026
         </div>
       </footer>
     </div>
