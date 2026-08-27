@@ -91,6 +91,11 @@ const journal = [
     text: "Relevé titres. Direct : SNTS ×4 (34 600 F CFA, +18%), CIEC ×21 (6 970 F CFA, +104%), ORAC ×7 (20 795 F CFA, +26%), BOAB ×11 (10 350 F CFA, +15%) — investi 402 412 F CFA, valorisation 544 185 F CFA (+141 773 F CFA, +35,2%). FCP BAM WURUS : NAV 21 895 F CFA, valorisation 258 680 F CFA (+58 680, +29,3%). Patrimoine global 802 865 F CFA (+200 453 F CFA, +33,3%). Le direct bat le FCP (+35,2% vs +29,3%). CIE reste le moteur (+104% vs CMP) ; ORAC a rattrapé son retard de juillet.",
     color: T.chart5,
   },
+  {
+    date: "28 août 2026",
+    text: "Décision stratégique — plan 2027 arrêté. DCA porté de 75k à 100k FCFA/mois à partir de janvier 2027. Initiation SDCC (5e ligne cœur, utility défensive) dès M10 avec front-load H1 — les satellites restent conditionnés au franchissement des 5M (Phase 2), le déclencheur est le capital, pas le calendrier. CIEC réintègre le DCA en H2 2027 (diluée sous sa cible) avec garde-fou valorisation. FCP BAM WURUS maintenu gelé : il reste le benchmark du stock picking direct.",
+    color: T.amber,
+  },
 ];
 
 const BADGE_MAP = {
@@ -149,14 +154,35 @@ const calendar = [
   { m: "M3",  month: "juin 26",  main: "SNTS", units: "1 × 28 450",  second: "ORAC", second2: "2 × 16 000", third: "CIEC", third2: "4 × 4 140",  total: 77010,  logic: "SNTS mensuel initié + ORAC renforcée + CIEC réduit de 5 à 4 (cours en rallye +28% vs CMP). BOAB reporté à juillet post-détachement. Premier DRIP : dividendes SNTS+BOAB réinvestis." },
   { m: "M4",  month: "juil. 26", main: "BOAB", units: "3 × 9 025",   second: "ORAC", second2: "1 × 16 750", third: "SNTS", third2: "1 × 29 495",  total: 73320,  logic: "Exécuté. SGBC écartée (jugée trop chère, potentiel limité) → renforcement de 3 lignes de conviction : BOAB (comblement), ORAC et SNTS. Aucun achat CIE (surpondérée)." },
   { m: "M5",  month: "août 26",  main: "BOAB", units: "5 × 9 066",   second: "ORAC", second2: "2 × 16 997", third: "—", third2: "",  total: 79323,  logic: "Exécuté. Rattrapage BOAB accéléré (5 vs 3 prévues) + 2 ORAC. Aucun achat CIE (surpondérée, +104% vs CMP). Déployé 79 323 F CFA." },
-  planMonth({ m: "M6", month: "sept. 26", legs: [{ ticker: "SNTS", qty: 1 }, { ticker: "ORAC", qty: 1 }, { ticker: "BOAB", qty: 2 }], logic: "SNTS redevient prioritaire (25% vs cible 32%). BOAB réduit (déjà +2 vs plan août). Aucun achat CIE. Prix = cours marché du 27/08." }),
+  planMonth({ m: "M6", month: "sept. 26", legs: [{ ticker: "SNTS", qty: 2 }, { ticker: "BOAB", qty: 2 }], logic: "Budget exceptionnel 99 480 F CFA frais inclus (frais courtier ~1,5%, soit ~98 000 F investissables). SNTS doublée : plus gros retard vs cible (25% vs 32%) → revient à ~33% post-achat. ORAC skippée (27% vs cible 25%, au-dessus) et aucun achat CIE. 2 ordres seulement pour limiter les frais : 89 900 F hors frais ≈ 91 250 F avec frais → reliquat ~8 200 F en cash tactique reporté sur octobre. Prix = cours marché du 27/08." }),
   planMonth({ m: "M7", month: "oct. 26",  legs: [{ ticker: "SNTS", qty: 1 }, { ticker: "ORAC", qty: 1 }, { ticker: "BOAB", qty: 2 }], logic: "DCA régulier SNTS + ORAC + BOAB aux cours actuels. CIE diluée par les apports, pas d'achat." }),
   planMonth({ m: "M8", month: "nov. 26",  legs: [{ ticker: "SNTS", qty: 1 }, { ticker: "ORAC", qty: 1 }, { ticker: "BOAB", qty: 2 }], logic: "Convergence continue des 4 lignes — SNTS mensuel maintenu malgré le cours élevé." }),
-  planMonth({ m: "M9", month: "déc. 26",  legs: [{ ticker: "SNTS", qty: 1 }, { ticker: "ORAC", qty: 1 }, { ticker: "BOAB", qty: 1 }], logic: "Bouclage 2026 : SNTS ×8, ORAC ×11, BOAB ×18, CIEC ×21. Solde non déployé → réserve cash tactique." }),
+  planMonth({ m: "M9", month: "déc. 26",  legs: [{ ticker: "ORAC", qty: 1 }, { ticker: "BOAB", qty: 2 }], logic: "Bouclage 2026 : SNTS ×8, ORAC ×10, BOAB ×19, CIEC ×21. SNTS stoppée à 8 (~33%, cap ligne 35%) après le double achat de septembre. Solde non déployé → réserve cash tactique." }),
+];
+
+// ── Calendrier 2027 (M10→M21) — DCA 100k FCFA/mois, cours de
+// planification du 27/08/2026, re-pricing à la revue de juin 2027.
+// Grille cible = CORE_TARGETS normalisée à 100% (Phase 1, zéro satellite) :
+// SNTS 26,7 · ORAC 20 · CIEC 18,7 · BOAB 18,7 · SDCC 16.
+// Achats 2027 : SNTS +7, ORAC +9, CIEC +33, BOAB +17, SDCC +25
+// ≈ 1 133k hors frais (~1 150k avec frais ~1,5%) sur 1,2M de budget.
+const calendar2027 = [
+  planMonth({ m: "M10", month: "janv. 27", legs: [{ ticker: "SDCC", qty: 5 }, { ticker: "BOAB", qty: 2 }], logic: "Initiation SDCC — 5e ligne cœur (utility défensive, yield 3,9%, PE 10). Front-load H1 pour bâtir la ligne vers ~15% fin 2027. Réduit la concentration télécoms au lieu de l'aggraver. Reliquat reporté." }),
+  planMonth({ m: "M11", month: "févr. 27", legs: [{ ticker: "SDCC", qty: 5 }, { ticker: "ORAC", qty: 2 }], logic: "SDCC ×5 + ORAC ×2 (convergence vers 20%, cible grille 5 lignes). Léger dépassement couvert par le reliquat de janvier." }),
+  planMonth({ m: "M12", month: "mars 27", legs: [{ ticker: "SDCC", qty: 5 }, { ticker: "SNTS", qty: 1 }], logic: "SDCC ×5 (ligne à 15 titres) + SNTS entretenue vers sa cible normalisée 26,7%." }),
+  planMonth({ m: "M13", month: "avr. 27", legs: [{ ticker: "SDCC", qty: 5 }, { ticker: "ORAC", qty: 2 }], logic: "Dernier gros bloc SDCC (ligne à 20 titres, ~80% de la cible). ORAC ×2." }),
+  planMonth({ m: "M14", month: "mai 27", legs: [{ ticker: "SNTS", qty: 2 }, { ticker: "BOAB", qty: 3 }], logic: "Fenêtre règle 01 : SNTS et BOAB détachent fin mai — acheter avant détachement si pas de dérive de cours > +5% vs moyenne 3 mois." }),
+  planMonth({ m: "M15", month: "juin 27", legs: [{ ticker: "ORAC", qty: 2 }, { ticker: "SDCC", qty: 3 }], logic: "Fenêtre ORAC (détachement ~début juin). Revue semestrielle : re-pricer tout le plan H2 aux cours de juin 2027." }),
+  planMonth({ m: "M16", month: "juil. 27", legs: [{ ticker: "CIEC", qty: 8 }, { ticker: "SDCC", qty: 2 }], logic: "Retour de CIEC dans le DCA : diluée très en dessous de sa cible (~11% vs 18,7%) + fenêtre détachement fin juillet (règle 01). Garde-fou : si le cours a encore dérivé (yield < 3%), basculer l'enveloppe vers BOAB/SDCC (règle 03) et laisser CIEC sous cible." }),
+  planMonth({ m: "M17", month: "août 27", legs: [{ ticker: "CIEC", qty: 9 }, { ticker: "BOAB", qty: 3 }], logic: "Reconvergence H2 : CIEC ×9 + BOAB ×3. Même garde-fou valorisation CIEC qu'en juillet." }),
+  planMonth({ m: "M18", month: "sept. 27", legs: [{ ticker: "CIEC", qty: 8 }, { ticker: "SNTS", qty: 1 }], logic: "CIEC ×8 + SNTS ×1 — maintien des poids télécoms pendant la reconvergence utilities." }),
+  planMonth({ m: "M19", month: "oct. 27", legs: [{ ticker: "CIEC", qty: 8 }, { ticker: "BOAB", qty: 4 }], logic: "CIEC ×8 + BOAB ×4 — les deux lignes reviennent vers ~19% chacune." }),
+  planMonth({ m: "M20", month: "nov. 27", legs: [{ ticker: "SNTS", qty: 2 }, { ticker: "ORAC", qty: 2 }], logic: "Les télécoms complètent leur cible (SNTS 26,7%, ORAC 20%). Dépassement du mois couvert par les reliquats accumulés depuis janvier." }),
+  planMonth({ m: "M21", month: "déc. 27", legs: [{ ticker: "SNTS", qty: 1 }, { ticker: "ORAC", qty: 1 }, { ticker: "BOAB", qty: 5 }], logic: "Bouclage 2027 : SNTS ×15, ORAC ×19, CIEC ×54, BOAB ×36, SDCC ×25 — grille 5 lignes à ±1pp. Solde + coupons DRIP → réserve tactique (~90k) pour les fenêtres 2028." }),
 ];
 
 // Achats restants M6→M9 — valorisés aux cours marché courants.
-const END_2026_ADDS = { SNTS: 4, ORAC: 4, BOAB: 7, CIEC: 0 };
+const END_2026_ADDS = { SNTS: 4, ORAC: 3, BOAB: 8, CIEC: 0 };
 const projectedRaw = ["SNTS", "ORAC", "BOAB", "CIEC"].map(ticker => {
   const h = CURRENT_HOLDINGS.find(x => x.ticker === ticker);
   const add = END_2026_ADDS[ticker] || 0;
@@ -237,6 +263,97 @@ const projectedEndPct = milestone.requiredCapital > 0
 
 const PRIVATE_MASK = "••••••";
 
+function CalendarTable({ rows, checked, onToggle }) {
+  return (
+    <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
+      <table style={{ width: "100%", minWidth: 1020, borderCollapse: "collapse", fontFamily: FONT_SANS, fontSize: 12 }}>
+        <thead>
+          <tr>
+            {["✓", "Mois", "Principal", "Qty × Prix", "Compl.", "Qty × Prix", "Compl. 2", "Qty × Prix", "Total", "Logique"].map((h, i) => (
+              <th key={i} style={{
+                padding: "10px 10px", textAlign: i === 0 ? "center" : "left",
+                fontFamily: FONT_SANS, fontSize: 11, color: T.inkMuted, fontWeight: 600,
+                letterSpacing: "0.02em", textTransform: "uppercase",
+                borderBottom: `1px solid ${T.border}`, whiteSpace: "nowrap",
+                width: i === 0 ? 36 : undefined,
+              }}>{h}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((r, i) => {
+            const done = checked.includes(r.m);
+            return (
+              <tr key={i} style={{ opacity: done ? 0.55 : 1, transition: "opacity 0.15s" }}>
+                <td style={{ padding: "10px 6px", borderBottom: `1px solid ${T.borderSoft}`, textAlign: "center" }}>
+                  <div
+                    onClick={() => onToggle(r.m)}
+                    style={{
+                      width: 22, height: 22, borderRadius: 6, cursor: "pointer",
+                      display: "grid", placeItems: "center", margin: "0 auto",
+                      background: done ? T.green : T.bgSoft,
+                      border: `1.5px solid ${done ? T.green : T.border}`,
+                      transition: "all 0.15s",
+                    }}
+                  >
+                    {done && (
+                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                        <path d="M2.5 6L5 8.5L9.5 3.5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    )}
+                  </div>
+                </td>
+                <td style={{ padding: "10px 10px", borderBottom: `1px solid ${T.borderSoft}` }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <div style={{
+                      width: 28, height: 28, borderRadius: 8,
+                      background: done ? T.green : T.bgDark, color: T.inkInv,
+                      display: "grid", placeItems: "center",
+                      fontFamily: FONT_MONO, fontSize: 10, fontWeight: 700, flexShrink: 0,
+                      transition: "background 0.15s",
+                    }}>{r.m}</div>
+                    <span style={{
+                      fontFamily: FONT_SANS, fontSize: 12, fontWeight: 500, whiteSpace: "nowrap",
+                      color: done ? T.green : T.inkMuted,
+                      textDecoration: done ? "line-through" : "none",
+                    }}>{r.month}</span>
+                  </div>
+                </td>
+                <td style={{ padding: "10px 10px", borderBottom: `1px solid ${T.borderSoft}` }}>
+                  <span style={{
+                    fontFamily: FONT_MONO, fontSize: 12, color: T.blue, fontWeight: 700,
+                    background: T.blueSoft, padding: "3px 8px", borderRadius: 6, whiteSpace: "nowrap",
+                  }}>{r.main}</span>
+                </td>
+                <td style={{ padding: "10px 10px", fontFamily: FONT_MONO, fontSize: 11, color: T.inkSoft, borderBottom: `1px solid ${T.borderSoft}`, whiteSpace: "nowrap" }}>{r.units}</td>
+                <td style={{ padding: "10px 10px", borderBottom: `1px solid ${T.borderSoft}` }}>
+                  {r.second === "—" ? (
+                    <span style={{ color: T.inkDim }}>—</span>
+                  ) : (
+                    <span style={{ fontFamily: FONT_MONO, fontSize: 12, color: T.blue, fontWeight: 700, background: alpha(T.blue, 0.08), padding: "3px 8px", borderRadius: 6, whiteSpace: "nowrap" }}>{r.second}</span>
+                  )}
+                </td>
+                <td style={{ padding: "10px 10px", fontFamily: FONT_MONO, fontSize: 11, color: T.inkSoft, borderBottom: `1px solid ${T.borderSoft}`, whiteSpace: "nowrap" }}>{r.second2}</td>
+                <td style={{ padding: "10px 10px", borderBottom: `1px solid ${T.borderSoft}` }}>
+                  {!r.third || r.third === "—" ? (
+                    <span style={{ color: T.inkDim }}>—</span>
+                  ) : (
+                    <span style={{ fontFamily: FONT_MONO, fontSize: 12, color: T.green, fontWeight: 700, background: T.greenSoft, padding: "3px 8px", borderRadius: 6, whiteSpace: "nowrap" }}>{r.third}</span>
+                  )}
+                </td>
+                <td style={{ padding: "10px 10px", fontFamily: FONT_MONO, fontSize: 11, color: T.inkSoft, borderBottom: `1px solid ${T.borderSoft}`, whiteSpace: "nowrap" }}>{r.third2 || "—"}</td>
+                <td style={{ padding: "10px 10px", fontFamily: FONT_MONO, fontSize: 12, fontWeight: 600, color: T.ink, borderBottom: `1px solid ${T.borderSoft}`, whiteSpace: "nowrap" }}>
+                  {fmtFCFAfull(r.total)} F CFA                </td>
+                <td style={{ padding: "10px 10px", color: T.inkMuted, fontStyle: "italic", borderBottom: `1px solid ${T.borderSoft}`, minWidth: 200 }}>{r.logic}</td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 export default function StrategyTab() {
   const { isMobile, cols } = useResponsive();
   const { isPrivate } = usePrivacy();
@@ -256,7 +373,7 @@ export default function StrategyTab() {
       <PageHeader
         eyebrow="Playbook · stratégie v2 core/satellite"
         title="Architecture, calendrier d'exécution & règles tactiques."
-        description="Stratégie v2 (juillet 2026) : cœur 5 lignes défensives (75% en croisière), SGBC en watchlist à déclencheur prix, pool satellite filtré éthiquement (ni tabac, ni alcool). Plan opérationnel DCA 75k FCFA/mois de juin à décembre 2026 (M3→M9), aligné sur le calendrier des détachements BRVM."
+        description="Stratégie v2 (juillet 2026) : cœur 5 lignes défensives (75% en croisière), SGBC en watchlist à déclencheur prix, pool satellite filtré éthiquement (ni tabac, ni alcool). Plan opérationnel DCA 75k FCFA/mois de juin à décembre 2026 (M3→M9), puis 100k/mois en 2027 (M10→M21, initiation SDCC), aligné sur le calendrier des détachements BRVM."
       />
 
       {/* --- Milestone Tracker --- */}
@@ -566,91 +683,22 @@ export default function StrategyTab() {
 
       {/* --- Card 2: Calendrier Phase 1 DCA (moved up for video flow) --- */}
       <Card title="Calendrier Phase 1 — DCA 75k juin → décembre 2026" subtitle={`M3–M5 : cours d'exécution · M6–M9 : cours marché ${fmtFCFAfull(marketPrice("SNTS"))} / ${fmtFCFAfull(marketPrice("ORAC"))} / ${fmtFCFAfull(marketPrice("BOAB"))} F (SNTS · ORAC · BOAB) · 27 août 2026`} icon={Clock} style={{ marginBottom: 16 }}>
-        <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
-          <table style={{ width: "100%", minWidth: 1020, borderCollapse: "collapse", fontFamily: FONT_SANS, fontSize: 12 }}>
-            <thead>
-              <tr>
-                {["✓", "Mois", "Principal", "Qty × Prix", "Compl.", "Qty × Prix", "Compl. 2", "Qty × Prix", "Total", "Logique"].map((h, i) => (
-                  <th key={i} style={{
-                    padding: "10px 10px", textAlign: i === 0 ? "center" : "left",
-                    fontFamily: FONT_SANS, fontSize: 11, color: T.inkMuted, fontWeight: 600,
-                    letterSpacing: "0.02em", textTransform: "uppercase",
-                    borderBottom: `1px solid ${T.border}`, whiteSpace: "nowrap",
-                    width: i === 0 ? 36 : undefined,
-                  }}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {calendar.map((r, i) => {
-                const done = checked.includes(r.m);
-                return (
-                  <tr key={i} style={{ opacity: done ? 0.55 : 1, transition: "opacity 0.15s" }}>
-                    <td style={{ padding: "10px 6px", borderBottom: `1px solid ${T.borderSoft}`, textAlign: "center" }}>
-                      <div
-                        onClick={() => toggleMonth(r.m)}
-                        style={{
-                          width: 22, height: 22, borderRadius: 6, cursor: "pointer",
-                          display: "grid", placeItems: "center", margin: "0 auto",
-                          background: done ? T.green : T.bgSoft,
-                          border: `1.5px solid ${done ? T.green : T.border}`,
-                          transition: "all 0.15s",
-                        }}
-                      >
-                        {done && (
-                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                            <path d="M2.5 6L5 8.5L9.5 3.5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                          </svg>
-                        )}
-                      </div>
-                    </td>
-                    <td style={{ padding: "10px 10px", borderBottom: `1px solid ${T.borderSoft}` }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                        <div style={{
-                          width: 28, height: 28, borderRadius: 8,
-                          background: done ? T.green : T.bgDark, color: T.inkInv,
-                          display: "grid", placeItems: "center",
-                          fontFamily: FONT_MONO, fontSize: 10, fontWeight: 700, flexShrink: 0,
-                          transition: "background 0.15s",
-                        }}>{r.m}</div>
-                        <span style={{
-                          fontFamily: FONT_SANS, fontSize: 12, fontWeight: 500, whiteSpace: "nowrap",
-                          color: done ? T.green : T.inkMuted,
-                          textDecoration: done ? "line-through" : "none",
-                        }}>{r.month}</span>
-                      </div>
-                    </td>
-                    <td style={{ padding: "10px 10px", borderBottom: `1px solid ${T.borderSoft}` }}>
-                      <span style={{
-                        fontFamily: FONT_MONO, fontSize: 12, color: T.blue, fontWeight: 700,
-                        background: T.blueSoft, padding: "3px 8px", borderRadius: 6, whiteSpace: "nowrap",
-                      }}>{r.main}</span>
-                    </td>
-                    <td style={{ padding: "10px 10px", fontFamily: FONT_MONO, fontSize: 11, color: T.inkSoft, borderBottom: `1px solid ${T.borderSoft}`, whiteSpace: "nowrap" }}>{r.units}</td>
-                    <td style={{ padding: "10px 10px", borderBottom: `1px solid ${T.borderSoft}` }}>
-                      {r.second === "—" ? (
-                        <span style={{ color: T.inkDim }}>—</span>
-                      ) : (
-                        <span style={{ fontFamily: FONT_MONO, fontSize: 12, color: T.blue, fontWeight: 700, background: alpha(T.blue, 0.08), padding: "3px 8px", borderRadius: 6, whiteSpace: "nowrap" }}>{r.second}</span>
-                      )}
-                    </td>
-                    <td style={{ padding: "10px 10px", fontFamily: FONT_MONO, fontSize: 11, color: T.inkSoft, borderBottom: `1px solid ${T.borderSoft}`, whiteSpace: "nowrap" }}>{r.second2}</td>
-                    <td style={{ padding: "10px 10px", borderBottom: `1px solid ${T.borderSoft}` }}>
-                      {!r.third || r.third === "—" ? (
-                        <span style={{ color: T.inkDim }}>—</span>
-                      ) : (
-                        <span style={{ fontFamily: FONT_MONO, fontSize: 12, color: T.green, fontWeight: 700, background: T.greenSoft, padding: "3px 8px", borderRadius: 6, whiteSpace: "nowrap" }}>{r.third}</span>
-                      )}
-                    </td>
-                    <td style={{ padding: "10px 10px", fontFamily: FONT_MONO, fontSize: 11, color: T.inkSoft, borderBottom: `1px solid ${T.borderSoft}`, whiteSpace: "nowrap" }}>{r.third2 || "—"}</td>
-                    <td style={{ padding: "10px 10px", fontFamily: FONT_MONO, fontSize: 12, fontWeight: 600, color: T.ink, borderBottom: `1px solid ${T.borderSoft}`, whiteSpace: "nowrap" }}>
-                      {fmtFCFAfull(r.total)} F CFA                    </td>
-                    <td style={{ padding: "10px 10px", color: T.inkMuted, fontStyle: "italic", borderBottom: `1px solid ${T.borderSoft}`, minWidth: 200 }}>{r.logic}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+        <CalendarTable rows={calendar} checked={checked} onToggle={toggleMonth} />
+      </Card>
+
+      {/* --- Card 2b: Calendrier 2027 --- */}
+      <Card title="Calendrier Phase 1 — DCA 100k janvier → décembre 2027" subtitle="M10–M21 : cours de planification du 27/08/2026 · frais courtier ~1,5% par ordre · re-pricing à la revue semestrielle de juin 2027" icon={Clock} style={{ marginBottom: 16 }}>
+        <CalendarTable rows={calendar2027} checked={checked} onToggle={toggleMonth} />
+        <div style={{
+          marginTop: 16, padding: "14px 16px",
+          background: T.bgSubtle, borderRadius: 10,
+          border: `1px solid ${T.borderSoft}`,
+          display: "flex", alignItems: "flex-start", gap: 10,
+        }}>
+          <AlertCircle size={14} color={T.blue} style={{ flexShrink: 0, marginTop: 2 }} />
+          <div style={{ fontFamily: FONT_SANS, fontSize: 12, color: T.inkMuted, lineHeight: 1.6 }}>
+            <strong>Année de la 5e ligne cœur, toujours zéro satellite</strong> — le déclencheur satellite reste le capital (Phase 2, &gt; 5M), pas le calendrier. Grille cible = grille de croisière normalisée à 100% : SNTS 26,7 · ORAC 20 · CIEC 18,7 · BOAB 18,7 · <strong>SDCC 16</strong>. H1 : front-load SDCC (20 titres avant mai) + fenêtres de détachement SNTS/BOAB (mai) et ORAC (juin). H2 : reconvergence CIEC (diluée sous sa cible) autour de sa fenêtre de juillet, avec garde-fou valorisation (yield &lt; 3% → basculer vers BOAB/SDCC). Budget 1,2M (100k/mois) : ~1 133k hors frais ≈ <strong>1 150k avec frais (~17k de courtage)</strong>, reliquats roulés de mois en mois. Fin 2027 projetée aux cours du 27/08/2026 : ~1,96M en direct, 5 lignes à ±1pp des cibles, <strong>télécoms ramenées de ~58% à ~47%</strong>. <strong>FCP BAM WURUS : maintenu gelé</strong> — c'est le benchmark ; y contribuer polluerait la mesure de surperformance du direct (+35,2% vs +29,3% au 27/08) et ferait payer des frais de gestion sur des lignes déjà détenues en direct.
+          </div>
         </div>
       </Card>
 
@@ -964,7 +1012,7 @@ export default function StrategyTab() {
         }}>
           <AlertCircle size={14} color={T.blue} style={{ flexShrink: 0, marginTop: 2 }} />
           <div style={{ fontFamily: FONT_SANS, fontSize: 12, color: T.inkMuted, lineHeight: 1.6 }}>
-            Plan aux cours du 27/08/2026 — <strong>portefeuille 4 lignes (SGBC écartée)</strong>. DCA base 75k/mois + dividendes DRIP. Reconvergence : <strong>aucun achat CIE</strong> (27% vs cible 20%, +104% vs CMP), priorité à <strong>SNTS</strong> (25% vs 32%). BOAB presque à cible (−2pp) : plus que +7 actions (vs +12 au plan de juillet). À fin décembre : SNTS/ORAC/BOAB à ±2pp, CIE se dilue vers ~17%. Capital restant à déployer ~294k sur 300k (sept.–déc.) ; le solde + DRIP s'accumulent en réserve cash. Aucune projection au-delà du 31/12/2026.
+            Plan aux cours du 27/08/2026 — <strong>portefeuille 4 lignes (SGBC écartée)</strong>. DCA base 75k/mois (99 480 F exceptionnels en septembre) + dividendes DRIP, <strong>frais de courtage ~1,5% intégrés à chaque ordre</strong>. Reconvergence : <strong>aucun achat CIE</strong> (27% vs cible 20%, +104% vs CMP), priorité à <strong>SNTS</strong> (25% vs 32%, doublée en septembre puis stoppée à 8 actions). À fin décembre : SNTS ~33%, ORAC ~25%, BOAB ~24% (tous à ±1,5pp), CIE se dilue vers ~18%. Capital restant à déployer ~284k hors frais (~288k avec frais) sur ~324k de budget sept.–déc. ; le solde + DRIP s'accumulent en réserve cash. Le plan 2027 (M10→M21, DCA 100k + initiation SDCC) prend le relais en janvier.
           </div>
         </div>
       </Card>
