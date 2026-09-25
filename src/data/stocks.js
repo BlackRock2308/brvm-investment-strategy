@@ -31,15 +31,23 @@ export const WATCHLIST = [
   {
     ticker: "SGBC", name: "SGBCI", targetWeight: 8,
     trigger: "PE ≤ 8 ou yield ≥ 6,5%",
-    triggerPrice: "≈ 30 000 – 33 000 F (vs 39 000 F en juillet 2026)",
+    triggerPrice: "≈ 30 000 – 33 000 F (vs ~38 900 F fin septembre 2026)",
     note: "Si le déclencheur se produit, SGBC prend 8% en rognant CIEC / BOAB / SDCC de 2-3pp chacun (retour à la grille SNTS 20 · ORAC 15 · CIEC 12 · BOAB 12 · SGBC 8 · SDCC 8). S'il ne se produit jamais, le portefeuille est complet sans elle.",
+  },
+  {
+    ticker: "SDSC", name: "AGL (Africa Global Logistics CI)", targetWeight: 0,
+    trigger: "Repli vers ≈ 2 300 – 2 400 F sans dégradation fondamentale",
+    triggerPrice: "≈ 2 300 – 2 400 F (vs 2 900 F fin septembre 2026, +91% YTD)",
+    note: "Ajoutée le 25/09/2026 (revue split Sonatel). Logistique CI décorrélée du cœur, PER historiquement bas, mais +91% YTD et résultats annuels en retrait : la règle « jamais après un rallye » s'applique. Candidate satellite (donc verrouillée avant 5M / Phase 2) — le déclencheur ne fait qu'ouvrir l'analyse, pas l'achat.",
   },
 ];
 
-// Exclusions éthiques — jamais achetables, quel que soit le rendement.
+// Exclusions halal — jamais achetables, quel que soit le rendement.
+// Filtre religieux non négociable : tabac et alcool sont écartés d'office
+// de tout screening, pool satellite ou watchlist.
 export const ETHICAL_EXCLUSIONS = [
-  { ticker: "STBC", name: "SITAB",   reason: "Tabac",              yield: 7.12 },
-  { ticker: "SLBC", name: "SOLIBRA", reason: "Alcool (brasserie)", yield: 4.88 },
+  { ticker: "STBC", name: "SITAB",   reason: "Tabac (filtre halal)",              yield: 7.12 },
+  { ticker: "SLBC", name: "SOLIBRA", reason: "Alcool, brasserie (filtre halal)", yield: 4.88 },
 ];
 
 // Pool satellite — 6 candidats qui se lisent comme 3 paris indépendants.

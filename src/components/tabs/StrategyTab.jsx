@@ -102,9 +102,19 @@ const journal = [
     color: T.green,
   },
   {
+    date: "17 septembre 2026",
+    text: "Sonatel annonce un projet de fractionnement de son action par 10 (nominal 500 → 50 F CFA). AGE convoquée le 8 octobre 2026, effet prévu le 26 octobre 2026 : chaque action SNTS deviendra 10 actions à ~1/10e du cours (6 actions → 60, CMP 32 020 → 3 202 F CFA). Aucun impact sur la valeur du portefeuille, mais la granularité du DCA est transformée — SNTS devient achetable finement chaque mois. Attention : le titre rallye depuis l'annonce (spéculation pré-split, franchissement des 42 000 F) → pas d'achat SNTS avant le 26/10, risque de correction technique post-fractionnement.",
+    color: T.amber,
+  },
+  {
     date: "28 septembre 2026 (snapshot courtier)",
     text: "Relevé titres. Direct : SNTS ×6 (41 950 F CFA, +31%), CIEC ×23 (6 440 F CFA, +76%), ORAC ×7 (21 295 F CFA, +30%), BOAB ×13 (9 000 F CFA, −2%) — investi 510 377 F CFA, valorisation 665 885 F CFA (+155 508 F CFA, +30,5%). FCP BAM WURUS : NAV 22 284 F CFA, valorisation 263 273 F CFA (+63 273, +31,6%). Patrimoine global 929 158 F CFA (+218 781 F CFA, +30,8%). SNTS accélère (+21% sur le mois à 41 950 F) tandis que BOAB repasse sous son CMP après les achats de septembre — le FCP repasse très légèrement devant le direct (+31,6% vs +30,5%).",
     color: T.chart5,
+  },
+  {
+    date: "25 septembre 2026",
+    text: "Décision — révision du plan M7–M9 suite au rallye pré-split SNTS. Le rallye (+31% vs CMP) a fait le rattrapage de poids à la place du DCA : SNTS gelée à 6 actions (37,8% du direct > cap ligne 35%, télécoms au cap 60%). Octobre (M7) : 100% BOAB ×8 (~73 080 F avec frais) — ligne la plus en retard, cours sous CMP, yield brut 6,5%, et seul achat qui ramène les deux caps dans les clous par dilution. ORAC reprend en novembre. AGL (SDSC) ajoutée à la watchlist (déclencheur ≈ 2 300–2 400 F). Re-pricing du calendrier 2027 avancé de juin 2027 à novembre 2026 (post-split). Marché volatil fin septembre (−3,66% le 23/09, rebond ensuite) : ordres limite recommandés.",
+    color: T.amber,
   },
 ];
 
@@ -164,14 +174,17 @@ const calendar = [
   { m: "M3",  month: "juin 26",  main: "SNTS", units: "1 × 28 450",  second: "ORAC", second2: "2 × 16 000", third: "CIEC", third2: "4 × 4 140",  total: 77010,  logic: "SNTS mensuel initié + ORAC renforcée + CIEC réduit de 5 à 4 (cours en rallye +28% vs CMP). BOAB reporté à juillet post-détachement. Premier DRIP : dividendes SNTS+BOAB réinvestis." },
   { m: "M4",  month: "juil. 26", main: "BOAB", units: "3 × 9 025",   second: "ORAC", second2: "1 × 16 750", third: "SNTS", third2: "1 × 29 495",  total: 73320,  logic: "Exécuté. SGBC écartée (jugée trop chère, potentiel limité) → renforcement de 3 lignes de conviction : BOAB (comblement), ORAC et SNTS. Aucun achat CIE (surpondérée)." },
   { m: "M5",  month: "août 26",  main: "BOAB", units: "5 × 9 066",   second: "ORAC", second2: "2 × 16 997", third: "—", third2: "",  total: 79323,  logic: "Exécuté. Rattrapage BOAB accéléré (5 vs 3 prévues) + 2 ORAC. Aucun achat CIE (surpondérée, +104% vs CMP). Déployé 79 323 F CFA." },
-  planMonth({ m: "M6", month: "sept. 26", legs: [{ ticker: "SNTS", qty: 2 }, { ticker: "BOAB", qty: 2 }], logic: "Budget exceptionnel 99 480 F CFA frais inclus (frais courtier ~1,5%, soit ~98 000 F investissables). SNTS doublée : plus gros retard vs cible (25% vs 32%) → revient à ~33% post-achat. ORAC skippée (27% vs cible 25%, au-dessus) et aucun achat CIE. 2 ordres seulement pour limiter les frais : 89 900 F hors frais ≈ 91 250 F avec frais → reliquat ~8 200 F en cash tactique reporté sur octobre. Prix = cours marché du 27/08." }),
-  planMonth({ m: "M7", month: "oct. 26",  legs: [{ ticker: "SNTS", qty: 1 }, { ticker: "ORAC", qty: 1 }, { ticker: "BOAB", qty: 2 }], logic: "DCA régulier SNTS + ORAC + BOAB aux cours actuels. CIE diluée par les apports, pas d'achat." }),
-  planMonth({ m: "M8", month: "nov. 26",  legs: [{ ticker: "SNTS", qty: 1 }, { ticker: "ORAC", qty: 1 }, { ticker: "BOAB", qty: 2 }], logic: "Convergence continue des 4 lignes — SNTS mensuel maintenu malgré le cours élevé." }),
-  planMonth({ m: "M9", month: "déc. 26",  legs: [{ ticker: "ORAC", qty: 1 }, { ticker: "BOAB", qty: 2 }], logic: "Bouclage 2026 : SNTS ×8, ORAC ×10, BOAB ×19, CIEC ×21. SNTS stoppée à 8 (~33%, cap ligne 35%) après le double achat de septembre. Solde non déployé → réserve cash tactique." }),
+  { m: "M6",  month: "sept. 26", main: "SNTS", units: "2 × 37 539",  second: "BOAB", second2: "2 × 10 147", third: "CIEC", third2: "2 × 6 297",  total: 107965,  logic: "Exécuté. SNTS ×2 + BOAB ×2 conformes au plan, plus un écart assumé : 2 CIEC saisies sur repli. Déployé 107 965 F CFA frais inclus (vs ~99 480 F planifiés) — le reliquat prévu pour octobre est consommé." },
+  planMonth({ m: "M7", month: "oct. 26",  legs: [{ ticker: "BOAB", qty: 8 }], logic: "Révision post-rallye SNTS (25/09) : 100% BOAB. Triple convergence — ligne la plus en retard (17,6% vs cible 23%), cours sous le CMP (9 000 vs 9 151, yield brut 6,5%), et seul achat qui ramène SNTS (~34%) sous le cap ligne 35% et les télécoms (~54%) sous le cap 60% par dilution. Aucun SNTS avant le split du 26/10 (rallye spéculatif), aucun ORAC (cap télécoms), aucun CIE (sur cible). Ordre limite 9 000–9 100 F, ~73 080 F avec frais sur budget 75k." }),
+  planMonth({ m: "M8", month: "nov. 26",  legs: [{ ticker: "ORAC", qty: 2 }, { ticker: "BOAB", qty: 2 }], logic: "Tour d'ORAC (en retard ~20% vs cible 25%) une fois les télécoms diluées sous le cap par le M7. SNTS reste gelée à 6 actions (60 post-split) tant qu'elle est au-dessus de sa cible. Revue post-split fin octobre : si correction technique ramène SNTS sous ~32%, possible retour en petites quantités post-split (granularité ~4 200 F/action) à la place d'un ORAC." }),
+  planMonth({ m: "M9", month: "déc. 26",  legs: [{ ticker: "ORAC", qty: 1 }, { ticker: "BOAB", qty: 2 }], logic: "Bouclage 2026 : SNTS ×6 (×60 post-split), ORAC ×10, BOAB ×25, CIEC ×23. SNTS stoppée à 6 (le rallye pré-split a fait le rattrapage de poids à sa place). BOAB au-dessus de sa cible 23% — mécanique tant que SNTS gelée domine. Solde non déployé → réserve cash tactique." }),
 ];
 
 // ── Calendrier 2027 (M10→M21) — DCA 100k FCFA/mois, cours de
-// planification du 27/08/2026, re-pricing à la revue de juin 2027.
+// planification du 27/08/2026. Re-pricing AVANCÉ à novembre 2026 :
+// le split Sonatel 1:10 (effet 26/10/2026) rend obsolètes les tailles
+// d'ordres SNTS (10 actions/mois au lieu d'1). Second re-pricing à la
+// revue de juin 2027 comme prévu.
 // Grille cible = CORE_TARGETS normalisée à 100% (Phase 1, zéro satellite) :
 // SNTS 26,7 · ORAC 20 · CIEC 18,7 · BOAB 18,7 · SDCC 16.
 // Achats 2027 : SNTS +7, ORAC +9, CIEC +33, BOAB +17, SDCC +25
@@ -191,8 +204,8 @@ const calendar2027 = [
   planMonth({ m: "M21", month: "déc. 27", legs: [{ ticker: "SNTS", qty: 1 }, { ticker: "ORAC", qty: 1 }, { ticker: "BOAB", qty: 5 }], logic: "Bouclage 2027 : SNTS ×15, ORAC ×19, CIEC ×54, BOAB ×36, SDCC ×25 — grille 5 lignes à ±1pp. Solde + coupons DRIP → réserve tactique (~90k) pour les fenêtres 2028." }),
 ];
 
-// Achats restants M6→M9 — valorisés aux cours marché courants.
-const END_2026_ADDS = { SNTS: 4, ORAC: 3, BOAB: 8, CIEC: 0 };
+// Achats restants M7→M9 — valorisés aux cours marché courants.
+const END_2026_ADDS = { SNTS: 0, ORAC: 3, BOAB: 12, CIEC: 0 };
 const projectedRaw = ["SNTS", "ORAC", "BOAB", "CIEC"].map(ticker => {
   const h = CURRENT_HOLDINGS.find(x => x.ticker === ticker);
   const add = END_2026_ADDS[ticker] || 0;
@@ -238,8 +251,6 @@ function loadChecked() {
     return raw ? JSON.parse(raw) : [];
   } catch { return []; }
 }
-
-const sgbcWatch = WATCHLIST[0];
 
 const MILESTONE_TARGET = 100_000; // F CFA/mois
 const DCA_MONTHLY = 75_000;
@@ -618,19 +629,21 @@ export default function StrategyTab() {
           </table>
         </div>
 
-        {/* Watchlist SGBC */}
-        <div style={{
-          padding: "14px 16px", borderRadius: 10, marginBottom: 14,
-          background: T.bgSubtle, border: `1px solid ${alpha(T.blue, 0.18)}`,
-          display: "flex", alignItems: "flex-start", gap: 12,
-        }}>
-          <Eye size={15} color={T.blue} style={{ flexShrink: 0, marginTop: 2 }} />
-          <div style={{ fontFamily: FONT_SANS, fontSize: 12, color: T.inkMuted, lineHeight: 1.6 }}>
-            <strong style={{ color: T.ink }}>Watchlist — {sgbcWatch.ticker} ({sgbcWatch.name}), {sgbcWatch.targetWeight}% si déclenchée.</strong>{" "}
-            Déclencheur : <strong style={{ color: T.blue }}>{sgbcWatch.trigger}</strong> ({sgbcWatch.triggerPrice}).{" "}
-            {sgbcWatch.note} Le prix vient à toi, pas l'inverse.
+        {/* Watchlist — entrées conditionnelles prix */}
+        {WATCHLIST.map(w => (
+          <div key={w.ticker} style={{
+            padding: "14px 16px", borderRadius: 10, marginBottom: 14,
+            background: T.bgSubtle, border: `1px solid ${alpha(T.blue, 0.18)}`,
+            display: "flex", alignItems: "flex-start", gap: 12,
+          }}>
+            <Eye size={15} color={T.blue} style={{ flexShrink: 0, marginTop: 2 }} />
+            <div style={{ fontFamily: FONT_SANS, fontSize: 12, color: T.inkMuted, lineHeight: 1.6 }}>
+              <strong style={{ color: T.ink }}>Watchlist — {w.ticker} ({w.name}), {w.targetWeight > 0 ? `${w.targetWeight}% si déclenchée` : "candidate satellite (Phase 2)"}.</strong>{" "}
+              Déclencheur : <strong style={{ color: T.blue }}>{w.trigger}</strong> ({w.triggerPrice}).{" "}
+              {w.note} Le prix vient à toi, pas l'inverse.
+            </div>
           </div>
-        </div>
+        ))}
 
         {/* Satellite bets */}
         <div style={{ fontFamily: FONT_SANS, fontSize: 13, fontWeight: 700, color: T.ink, marginBottom: 10 }}>
@@ -693,7 +706,7 @@ export default function StrategyTab() {
       </Card>
 
       {/* --- Card 2: Calendrier Phase 1 DCA (moved up for video flow) --- */}
-      <Card title="Calendrier Phase 1 — DCA 75k juin → décembre 2026" subtitle={`M3–M5 : cours d'exécution · M6–M9 : cours marché ${fmtFCFAfull(marketPrice("SNTS"))} / ${fmtFCFAfull(marketPrice("ORAC"))} / ${fmtFCFAfull(marketPrice("BOAB"))} F (SNTS · ORAC · BOAB) · 28 septembre 2026`} icon={Clock} style={{ marginBottom: 16 }}>
+      <Card title="Calendrier Phase 1 — DCA 75k juin → décembre 2026" subtitle={`M3–M6 : cours d'exécution · M7–M9 : cours marché ${fmtFCFAfull(marketPrice("ORAC"))} / ${fmtFCFAfull(marketPrice("BOAB"))} F (ORAC · BOAB) · 28 septembre 2026 · révisé le 25/09 (split SNTS)`} icon={Clock} style={{ marginBottom: 16 }}>
         <CalendarTable rows={calendar} checked={checked} onToggle={toggleMonth} />
       </Card>
 
@@ -1023,7 +1036,7 @@ export default function StrategyTab() {
         }}>
           <AlertCircle size={14} color={T.blue} style={{ flexShrink: 0, marginTop: 2 }} />
           <div style={{ fontFamily: FONT_SANS, fontSize: 12, color: T.inkMuted, lineHeight: 1.6 }}>
-            Plan aux cours du 27/08/2026 — <strong>portefeuille 4 lignes (SGBC écartée)</strong>. DCA base 75k/mois (99 480 F exceptionnels en septembre) + dividendes DRIP, <strong>frais de courtage ~1,5% intégrés à chaque ordre</strong>. Reconvergence : <strong>aucun achat CIE</strong> (27% vs cible 20%, +104% vs CMP), priorité à <strong>SNTS</strong> (25% vs 32%, doublée en septembre puis stoppée à 8 actions). À fin décembre : SNTS ~33%, ORAC ~25%, BOAB ~24% (tous à ±1,5pp), CIE se dilue vers ~18%. Capital restant à déployer ~284k hors frais (~288k avec frais) sur ~324k de budget sept.–déc. ; le solde + DRIP s'accumulent en réserve cash. Le plan 2027 (M10→M21, DCA 100k + initiation SDCC) prend le relais en janvier.
+            Plan révisé le 25/09/2026 (rallye pré-split SNTS) — <strong>portefeuille 4 lignes (SGBC écartée)</strong>. DCA base 75k/mois + dividendes DRIP, <strong>frais de courtage ~1,5% intégrés à chaque ordre</strong>. Le rallye SNTS (+31% vs CMP) a fait le rattrapage de poids à la place du DCA : <strong>SNTS gelée à 6 actions</strong> (37,8% du direct, au-dessus du cap ligne 35%) et <strong>télécoms au cap 60%</strong> → octobre 100% BOAB (retard 17,6% vs 23%, cours sous CMP, yield brut 6,5%), ORAC reprend en novembre-décembre, <strong>aucun achat CIE</strong> (sur cible). À fin décembre (cours du 28/09) : SNTS ~30%, ORAC ~25%, BOAB ~27%, CIE ~18%. Restant à déployer ~172k hors frais (~174k avec frais) sur ~225k de budget oct.–déc. ; le solde s'accumule en réserve cash. Événements : AGE split Sonatel le 8/10, effet le 26/10 (6 SNTS → 60, re-pricing du plan 2027 en novembre). Le plan 2027 (M10→M21, DCA 100k + initiation SDCC) prend le relais en janvier.
           </div>
         </div>
       </Card>
