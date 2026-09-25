@@ -96,12 +96,22 @@ const journal = [
     text: "Décision stratégique — plan 2027 arrêté. DCA porté de 75k à 100k FCFA/mois à partir de janvier 2027. Initiation SDCC (5e ligne cœur, utility défensive) dès M10 avec front-load H1 — les satellites restent conditionnés au franchissement des 5M (Phase 2), le déclencheur est le capital, pas le calendrier. CIEC réintègre le DCA en H2 2027 (diluée sous sa cible) avec garde-fou valorisation. FCP BAM WURUS maintenu gelé : il reste le benchmark du stock picking direct.",
     color: T.amber,
   },
+  {
+    date: "Septembre 2026 (M6 exécuté)",
+    text: "Budget exceptionnel déployé : 107 965 F CFA frais inclus (vs ~99 480 F planifiés). SNTS ×2 (~37 539 F/action frais inclus, CMP porté à 32 020 F) + BOAB ×2 (~10 147 F/action) conformes au plan, plus un écart assumé : 2 CIEC (~6 297 F/action) saisies sur repli du cours. Portefeuille direct : SNTS ×6, ORAC ×7, BOAB ×13, CIEC ×23.",
+    color: T.green,
+  },
+  {
+    date: "28 septembre 2026 (snapshot courtier)",
+    text: "Relevé titres. Direct : SNTS ×6 (41 950 F CFA, +31%), CIEC ×23 (6 440 F CFA, +76%), ORAC ×7 (21 295 F CFA, +30%), BOAB ×13 (9 000 F CFA, −2%) — investi 510 377 F CFA, valorisation 665 885 F CFA (+155 508 F CFA, +30,5%). FCP BAM WURUS : NAV 22 284 F CFA, valorisation 263 273 F CFA (+63 273, +31,6%). Patrimoine global 929 158 F CFA (+218 781 F CFA, +30,8%). SNTS accélère (+21% sur le mois à 41 950 F) tandis que BOAB repasse sous son CMP après les achats de septembre — le FCP repasse très légèrement devant le direct (+31,6% vs +30,5%).",
+    color: T.chart5,
+  },
 ];
 
 const BADGE_MAP = {
-  SNTS: "✓ Renforcée (M1→M4)",
-  CIEC: "✓ Renforcée (M1→M3)",
-  BOAB: "✓ Renforcée (M2→M5)",
+  SNTS: "✓ Renforcée (M1→M6)",
+  CIEC: "✓ Renforcée (M1→M6)",
+  BOAB: "✓ Renforcée (M2→M6)",
   ORAC: "✓ Renforcée (M2→M5)",
 };
 const NAME_MAP = { SNTS: "Sonatel", CIEC: "CIE", BOAB: "BOA Bénin", ORAC: "Orange CI" };
@@ -221,7 +231,6 @@ const coreRows = Object.entries(CORE_TARGETS).map(([ticker, weight]) => {
   return { ticker, weight, name: s?.name || ticker, sector: s?.sector || "—", yield: s?.yield || 0 };
 });
 const coreTotal = coreRows.reduce((s, r) => s + r.weight, 0);
-const sgbcWatch = WATCHLIST[0];
 
 function loadChecked() {
   try {
@@ -229,6 +238,8 @@ function loadChecked() {
     return raw ? JSON.parse(raw) : [];
   } catch { return []; }
 }
+
+const sgbcWatch = WATCHLIST[0];
 
 const MILESTONE_TARGET = 100_000; // F CFA/mois
 const DCA_MONTHLY = 75_000;
@@ -682,7 +693,7 @@ export default function StrategyTab() {
       </Card>
 
       {/* --- Card 2: Calendrier Phase 1 DCA (moved up for video flow) --- */}
-      <Card title="Calendrier Phase 1 — DCA 75k juin → décembre 2026" subtitle={`M3–M5 : cours d'exécution · M6–M9 : cours marché ${fmtFCFAfull(marketPrice("SNTS"))} / ${fmtFCFAfull(marketPrice("ORAC"))} / ${fmtFCFAfull(marketPrice("BOAB"))} F (SNTS · ORAC · BOAB) · 27 août 2026`} icon={Clock} style={{ marginBottom: 16 }}>
+      <Card title="Calendrier Phase 1 — DCA 75k juin → décembre 2026" subtitle={`M3–M5 : cours d'exécution · M6–M9 : cours marché ${fmtFCFAfull(marketPrice("SNTS"))} / ${fmtFCFAfull(marketPrice("ORAC"))} / ${fmtFCFAfull(marketPrice("BOAB"))} F (SNTS · ORAC · BOAB) · 28 septembre 2026`} icon={Clock} style={{ marginBottom: 16 }}>
         <CalendarTable rows={calendar} checked={checked} onToggle={toggleMonth} />
       </Card>
 
@@ -734,7 +745,7 @@ export default function StrategyTab() {
       </Card>
 
       {/* --- Card 1: Point de situation --- */}
-      <Card title="Point de situation — 27 août 2026" subtitle="État réel du portefeuille · relevé courtier" icon={Briefcase} style={{ marginBottom: 16 }}>
+      <Card title="Point de situation — 28 septembre 2026" subtitle="État réel du portefeuille · relevé courtier" icon={Briefcase} style={{ marginBottom: 16 }}>
         <div style={{
           display: "grid",
           gridTemplateColumns: cols("1fr", "repeat(3, 1fr)", "repeat(5, 1fr)"),
@@ -834,7 +845,7 @@ export default function StrategyTab() {
       </Card>
 
       {/* --- Card 1b: Direct vs FCP performance comparison --- */}
-      <Card title="Direct vs FCP BAM WURUS — Performance comparée" subtitle="Snapshot courtier · 27 août 2026" icon={TrendingUp} style={{ marginBottom: 16 }}>
+      <Card title="Direct vs FCP BAM WURUS — Performance comparée" subtitle="Snapshot courtier · 28 septembre 2026" icon={TrendingUp} style={{ marginBottom: 16 }}>
         <div style={{
           display: "grid",
           gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",

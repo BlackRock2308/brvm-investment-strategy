@@ -92,7 +92,7 @@ export default function OverviewTab() {
   return (
     <div>
       <PageHeader
-        eyebrow="Dashboard · août 2026"
+        eyebrow="Dashboard · septembre 2026"
         title="Votre patrimoine BRVM, piloté avec précision."
         description="Vue d'ensemble de votre portefeuille, allocation Phase 1, et projection DCA."
       />
