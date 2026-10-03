@@ -1,16 +1,16 @@
 // role : "core" (jamais vendu, dilution only) · "watchlist" (entrée conditionnelle prix)
 //        "satellite" (pool opportuniste, critère de sortie écrit) · "horsPlan" (écartée de la v2)
 export const STOCKS = [
-  { ticker: "SNTS",  name: "Sonatel",       sector: "Télécoms",      country: "Sénégal",     flag: "🇸🇳", price: 41950, pe: 9.2,  yield: 4.15, risk: 4, conviction: 25, moat: "Fort",   fcpOverlap: "Complém.", change: 31.0,  phaseEntry: 1, role: "core" },
-  { ticker: "ORAC",  name: "Orange CI",     sector: "Télécoms",      country: "Côte d'Iv.",  flag: "🇨🇮", price: 21295, pe: 12.5, yield: 3.31, risk: 4, conviction: 20, moat: "Fort",   fcpOverlap: "Complém.", change: 29.6,  phaseEntry: 1, role: "core" },
-  { ticker: "CIEC",  name: "CIE",           sector: "Utilities",     country: "Côte d'Iv.",  flag: "🇨🇮", price: 6440,  pe: 13.7, yield: 3.20, risk: 3, conviction: 15, moat: "Fort",   fcpOverlap: "Complém.", change: 75.8,  phaseEntry: 1, role: "core" },
-  { ticker: "SDCC",  name: "SODECI",        sector: "Utilities",     country: "Côte d'Iv.",  flag: "🇨🇮", price: 11900, pe: 10.0, yield: 3.88, risk: 3, conviction: 7,  moat: "Fort",   fcpOverlap: "Complém.", change: 1.4,   phaseEntry: 2, role: "core" },
-  { ticker: "BOAB",  name: "BOA Bénin",     sector: "Banque",        country: "Bénin",       flag: "🇧🇯", price: 9000,  pe: 5.1,  yield: 6.50, risk: 4, conviction: 18, moat: "Modéré", fcpOverlap: "Partiel",  change: -1.7,  phaseEntry: 1, role: "core" },
-  { ticker: "BOAS",  name: "BOA Sénégal",   sector: "Banque",        country: "Sénégal",     flag: "🇸🇳", price: 7290,  pe: 5.5,  yield: 6.17, risk: 5, conviction: 8,  moat: "Modéré", fcpOverlap: "Partiel",  change: 12.4,  phaseEntry: 2, role: "horsPlan", roleNote: "Hors plan v2 — le pilier bancaire du cœur est BOAB ; doublonner une BOA n'apporte pas de diversification réelle." },
-  { ticker: "SGBC",  name: "SGBCI",         sector: "Banque",        country: "Côte d'Iv.",  flag: "🇨🇮", price: 39000, pe: 9.0,  yield: 5.88, risk: 4, conviction: 12, moat: "Modéré", fcpOverlap: "Partiel",  change: 11.3,  phaseEntry: 2, role: "watchlist", roleNote: "Écartée en juillet 2026 à 39 000 F (trop chère). Entrée uniquement si PE ≤ 8 ou yield ≥ 6,5%." },
-  { ticker: "ETIT",  name: "Ecobank ETI",   sector: "Banque pan-AF", country: "Togo",        flag: "🇹🇬", price: 37,    pe: 6.5,  yield: 2.43, risk: 6, conviction: 6,  moat: "Modéré", fcpOverlap: "Partiel",  change: 93.3,  phaseEntry: 4, role: "horsPlan", roleNote: "Écartée de la v2 — yield 2,4%, +93% déjà fait, gouvernance fragile : ne sert ni le rendement ni la qualité." },
-  { ticker: "PALC",  name: "PALMCI",        sector: "Agro",          country: "Côte d'Iv.",  flag: "🇨🇮", price: 8800,  pe: 7.5,  yield: 5.02, risk: 6, conviction: 4,  moat: "Modéré", fcpOverlap: "Non",      change: -3.8,  phaseEntry: 2, role: "satellite" },
-  { ticker: "SPHC",  name: "SAPH",          sector: "Agro",          country: "Côte d'Iv.",  flag: "🇨🇮", price: 7670,  pe: 8.0,  yield: 5.61, risk: 6, conviction: 3,  moat: "Modéré", fcpOverlap: "Non",      change: 4.7,   phaseEntry: 2, role: "satellite" },
+  { ticker: "SNTS",  name: "Sonatel",       sector: "Télécoms",      country: "Sénégal",     flag: "🇸🇳", price: 45000, pe: 9.9,  yield: 3.87, risk: 4, conviction: 25, moat: "Fort",   fcpOverlap: "Complém.", change: 40.5,  phaseEntry: 1, role: "core" },
+  { ticker: "ORAC",  name: "Orange CI",     sector: "Télécoms",      country: "Côte d'Iv.",  flag: "🇨🇮", price: 20250, pe: 11.9, yield: 3.48, risk: 4, conviction: 20, moat: "Fort",   fcpOverlap: "Complém.", change: 23.2,  phaseEntry: 1, role: "core" },
+  { ticker: "CIEC",  name: "CIE",           sector: "Utilities",     country: "Côte d'Iv.",  flag: "🇨🇮", price: 6450,  pe: 13.7, yield: 3.19, risk: 3, conviction: 15, moat: "Fort",   fcpOverlap: "Complém.", change: 76.1,  phaseEntry: 1, role: "core" },
+  { ticker: "SDCC",  name: "SODECI",        sector: "Utilities",     country: "Côte d'Iv.",  flag: "🇨🇮", price: 12985, pe: 10.9, yield: 3.56, risk: 3, conviction: 7,  moat: "Fort",   fcpOverlap: "Complém.", change: 10.6,  phaseEntry: 2, role: "core" },
+  { ticker: "BOAB",  name: "BOA Bénin",     sector: "Banque",        country: "Bénin",       flag: "🇧🇯", price: 9385,  pe: 5.3,  yield: 6.23, risk: 4, conviction: 18, moat: "Modéré", fcpOverlap: "Partiel",  change: -0.9,  phaseEntry: 1, role: "core" },
+  { ticker: "BOAS",  name: "BOA Sénégal",   sector: "Banque",        country: "Sénégal",     flag: "🇸🇳", price: 8175,  pe: 6.2,  yield: 5.50, risk: 5, conviction: 8,  moat: "Modéré", fcpOverlap: "Partiel",  change: 26.0,  phaseEntry: 2, role: "horsPlan", roleNote: "Hors plan v2 — le pilier bancaire du cœur est BOAB ; doublonner une BOA n'apporte pas de diversification réelle." },
+  { ticker: "SGBC",  name: "SGBCI",         sector: "Banque",        country: "Côte d'Iv.",  flag: "🇨🇮", price: 39980, pe: 9.2,  yield: 5.74, risk: 4, conviction: 12, moat: "Modéré", fcpOverlap: "Partiel",  change: 14.1,  phaseEntry: 2, role: "watchlist", roleNote: "Écartée en juillet 2026 à 39 000 F (trop chère). Entrée uniquement si PE ≤ 8 ou yield ≥ 6,5%." },
+  { ticker: "ETIT",  name: "Ecobank ETI",   sector: "Banque pan-AF", country: "Togo",        flag: "🇹🇬", price: 67,    pe: 11.8, yield: 1.34, risk: 6, conviction: 6,  moat: "Modéré", fcpOverlap: "Partiel",  change: 250.0, phaseEntry: 4, role: "horsPlan", roleNote: "Écartée de la v2 — yield désormais 1,3%, rallye spéculatif massif (37 → 67 F), gouvernance fragile : ne sert ni le rendement ni la qualité." },
+  { ticker: "PALC",  name: "PALMCI",        sector: "Agro",          country: "Côte d'Iv.",  flag: "🇨🇮", price: 8300,  pe: 7.1,  yield: 5.32, risk: 6, conviction: 4,  moat: "Modéré", fcpOverlap: "Non",      change: -9.3,  phaseEntry: 2, role: "satellite" },
+  { ticker: "SPHC",  name: "SAPH",          sector: "Agro",          country: "Côte d'Iv.",  flag: "🇨🇮", price: 7890,  pe: 8.2,  yield: 5.45, risk: 6, conviction: 3,  moat: "Modéré", fcpOverlap: "Non",      change: 7.7,   phaseEntry: 2, role: "satellite" },
 ];
 
 // ═══════════════════════════════════════════════════════════════════
@@ -31,13 +31,13 @@ export const WATCHLIST = [
   {
     ticker: "SGBC", name: "SGBCI", targetWeight: 8,
     trigger: "PE ≤ 8 ou yield ≥ 6,5%",
-    triggerPrice: "≈ 30 000 – 33 000 F (vs ~38 900 F fin septembre 2026)",
+    triggerPrice: "≈ 30 000 – 33 000 F (vs ~39 980 F début octobre 2026)",
     note: "Si le déclencheur se produit, SGBC prend 8% en rognant CIEC / BOAB / SDCC de 2-3pp chacun (retour à la grille SNTS 20 · ORAC 15 · CIEC 12 · BOAB 12 · SGBC 8 · SDCC 8). S'il ne se produit jamais, le portefeuille est complet sans elle.",
   },
   {
     ticker: "SDSC", name: "AGL (Africa Global Logistics CI)", targetWeight: 0,
     trigger: "Repli vers ≈ 2 300 – 2 400 F sans dégradation fondamentale",
-    triggerPrice: "≈ 2 300 – 2 400 F (vs 2 900 F fin septembre 2026, +91% YTD)",
+    triggerPrice: "≈ 2 300 – 2 400 F (vs 2 990 F début octobre 2026, toujours en rallye)",
     note: "Ajoutée le 25/09/2026 (revue split Sonatel). Logistique CI décorrélée du cœur, PER historiquement bas, mais +91% YTD et résultats annuels en retrait : la règle « jamais après un rallye » s'applique. Candidate satellite (donc verrouillée avant 5M / Phase 2) — le déclencheur ne fait qu'ouvrir l'analyse, pas l'achat.",
   },
 ];
@@ -66,8 +66,8 @@ export const SATELLITE_BETS = [
     note: "Caoutchouc / huile de palme : acheter en bas de cycle des matières premières, jamais après un rallye.",
     candidates: [
       { ticker: "SOGC", name: "SOGB",   yield: 5.97 },
-      { ticker: "SPHC", name: "SAPH",   yield: 5.61 },
-      { ticker: "PALC", name: "PALMCI", yield: 5.02 },
+      { ticker: "SPHC", name: "SAPH",   yield: 5.45 },
+      { ticker: "PALC", name: "PALMCI", yield: 5.32 },
     ],
   },
   {
@@ -139,13 +139,13 @@ export const MILESTONE_LADDER = [
 export const CURRENT_HOLDINGS = [
   { ticker: "SNTS", qty: 6,  invested: 192120, avgPrice: 32020 },
   { ticker: "CIEC", qty: 23, invested: 84262,  avgPrice: 3663  },
-  { ticker: "BOAB", qty: 13, invested: 118974, avgPrice: 9151  },
+  { ticker: "BOAB", qty: 21, invested: 198933, avgPrice: 9473  },
   { ticker: "ORAC", qty: 7,  invested: 115021, avgPrice: 16431 },
 ];
 
 export const CURRENT_HOLDINGS_TOTAL = CURRENT_HOLDINGS.reduce((s, h) => s + h.invested, 0);
 
-// Espèces : non visibles sur le relevé titres du 28/09/2026.
+// Espèces : non visibles sur le relevé titres du 05/10/2026.
 export const CASH = 0;
 
 // Stable order of sectors → index into the Omaad chart categorical palette
@@ -173,11 +173,11 @@ export const FCP_BENCHMARK = {
   name: "FCP BAM WURUS",
   type: "OPCVM",
   manager: "BAM (Banque Atlantique Asset Management)",
-  shares: 11.81, // le relevé affiche 11 (entier) ; 263 273 / 22 284 ≈ 11,81 parts
+  shares: 11.81, // le relevé affiche 11 (entier) ; 257 293 / 21 778 ≈ 11,81 parts
   costPerShare: 16928,
   invested: 200000,
-  navPerShare: 22284,
-  value: 263273,
-  snapshotDate: "2026-09-28",
+  navPerShare: 21778,
+  value: 257293,
+  snapshotDate: "2026-10-05",
   frozen: true,
 };
